@@ -40,7 +40,7 @@ export default function LoginPage() {
         setError("Invalid email or password")
         setLoading(false)
       } else {
-        router.push("/super-admin")
+        router.push("/dashboard")
         router.refresh()
       }
     } catch (err) {

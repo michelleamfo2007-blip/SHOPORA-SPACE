@@ -52,6 +52,6 @@ export async function createStoreAction(formData: FormData) {
   })
 
   // Redirect to the newly created store dashboard
-  redirect(`/dashboard/${store.id}`)
+  redirect(`/${store.id}`)
 }
 

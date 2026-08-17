@@ -49,7 +49,7 @@ export default function SignupPage() {
           setError("Account created but failed to sign in automatically")
           setLoading(false)
         } else {
-          router.push("/super-admin")
+          router.push("/dashboard")
           router.refresh()
         }
       }
