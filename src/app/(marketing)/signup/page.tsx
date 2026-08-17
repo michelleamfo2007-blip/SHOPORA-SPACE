@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,8 +12,33 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { signUpAction } from "@/server/actions/auth"
+import { useState } from "react"
+import { signIn } from "next-auth/react"
 
 export default function SignUpPage() {
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    const formData = new FormData(e.currentTarget)
+    
+    try {
+      const res = await signUpAction(formData)
+      if (res?.error) {
+        setError(res.error)
+        setLoading(false)
+      }
+      // If successful, the action will redirect, so we don't need to do anything here
+    } catch (err) {
+      setError("An unexpected error occurred")
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-slate-50">
       <Card className="mx-auto max-w-sm w-full">
@@ -22,7 +49,12 @@ export default function SignUpPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={signUpAction} className="grid gap-4">
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            {error && (
+              <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
+                {error}
+              </div>
+            )}
             <div className="grid gap-2">
               <Label htmlFor="name">Full Name</Label>
               <Input
@@ -46,10 +78,10 @@ export default function SignUpPage() {
               <Label htmlFor="password">Password</Label>
               <Input id="password" name="password" type="password" required />
             </div>
-            <Button type="submit" className="w-full">
-              Sign Up
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing up..." : "Sign Up"}
             </Button>
-            <Button variant="outline" className="w-full" type="button">
+            <Button variant="outline" className="w-full" type="button" onClick={() => signIn("google")}>
               Sign Up with Google
             </Button>
           </form>

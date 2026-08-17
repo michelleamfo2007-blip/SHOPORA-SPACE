@@ -10,7 +10,7 @@ export async function signUpAction(formData: FormData) {
   const password = formData.get("password") as string
 
   if (!email || !password || !name) {
-    throw new Error("Missing required fields")
+    return { error: "Missing required fields" }
   }
 
   // Check if user already exists
@@ -19,7 +19,7 @@ export async function signUpAction(formData: FormData) {
   })
 
   if (existingUser) {
-    throw new Error("User with this email already exists")
+    return { error: "User with this email already exists" }
   }
 
   // Hash password
