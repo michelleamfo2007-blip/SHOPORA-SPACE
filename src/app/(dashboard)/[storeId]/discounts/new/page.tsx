@@ -64,9 +64,9 @@ export default async function NewDiscountPage({
             </div>
 
             <div className="flex justify-end gap-4 pt-4 border-t">
-              <Button variant="outline" asChild>
-                <Link href={`/${storeId}/discounts`}>Cancel</Link>
-              </Button>
+              <Link href={`/${storeId}/discounts`}>
+                <Button variant="outline" type="button">Cancel</Button>
+              </Link>
               <Button type="submit">Create Discount</Button>
             </div>
           </form>

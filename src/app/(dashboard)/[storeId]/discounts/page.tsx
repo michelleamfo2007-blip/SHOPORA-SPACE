@@ -16,7 +16,7 @@ export default async function DiscountsPage({
 
   const discounts = await db.discount.findMany({
     where: { storeId },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { startDate: 'desc' }
   })
 
   return (
@@ -26,12 +26,12 @@ export default async function DiscountsPage({
           <h2 className="text-2xl font-bold tracking-tight">Discounts</h2>
           <p className="text-muted-foreground">Manage promotional codes and cart discounts.</p>
         </div>
-        <Button asChild>
-          <Link href={`/${storeId}/discounts/new`}>
+        <Link href={`/${storeId}/discounts/new`}>
+          <Button type="button">
             <Plus className="mr-2 h-4 w-4" />
             Create Discount
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </div>
 
       <Card>
