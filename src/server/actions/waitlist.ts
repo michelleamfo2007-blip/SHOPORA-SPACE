@@ -44,7 +44,7 @@ export async function joinWaitlistAction(formData: FormData) {
 
     // Send the welcome email
     await resend.emails.send({
-      from: 'Shopora <customersupport@shopora.store>',
+      from: 'Shopora <customersupport@shopora.space>',
       to: [email],
       subject: 'Welcome to the Shopora Waitlist',
       html: `

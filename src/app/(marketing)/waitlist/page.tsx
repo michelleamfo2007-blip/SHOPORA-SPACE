@@ -58,7 +58,7 @@ export default function WaitlistPage() {
             <div className="bg-slate-50 p-4 rounded-xl text-left border border-slate-100">
               <h3 className="font-semibold text-slate-900 mb-2">Next Steps:</h3>
               <ol className="list-decimal list-inside space-y-2 text-slate-600">
-                <li>Watch out for a welcome email from <strong>customersupport@shopora.store</strong>.</li>
+                <li>Watch out for a welcome email from <strong>customersupport@shopora.space</strong>.</li>
                 <li>When invited, please email <strong>shoporastore@gmail.com</strong> with your business requirements and brand details.</li>
                 <li>Our team will review your application.</li>
                 <li>Selected vendors will receive full onboarding access to set up their store.</li>
