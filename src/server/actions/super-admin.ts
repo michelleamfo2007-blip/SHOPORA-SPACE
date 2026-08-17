@@ -54,12 +54,19 @@ export async function approveWaitlistAction(entryId: string) {
     const { data, error } = await resend.emails.send({
       from: "Shopora Space <customersupport@shopora.space>",
       to: entry.email,
-      subject: "You've been invited to Shopora Space!",
+      subject: "Your Shopora Space application has been approved 🎉",
       html: `
-        <h1>Welcome to Shopora Space!</h1>
-        <p>Your waitlist application has been approved.</p>
-        <p>You can now sign up and create your store by visiting:</p>
-        <p><a href="https://shopora.space/signup">https://shopora.space/signup</a></p>
+        <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; color: #1e293b; line-height: 1.5;">
+          <p>Hi ${entry.email.split('@')[0]},</p>
+          <p>Great news! 🎉 Your application to join Shopora Space has been approved.</p>
+          <p>You can now create your Shopora account and set up your online store.</p>
+          <div style="background-color: #f8fafc; padding: 24px; border-radius: 8px; margin-top: 24px; margin-bottom: 24px;">
+            <h3 style="margin-top: 0;">Get started:</h3>
+            <p><a href="https://shopora.space/signup" style="color: #2563eb; font-weight: bold; text-decoration: none;">https://shopora.space/signup</a></p>
+          </div>
+          <p>Once you complete signup, you’ll be able to create your store and get your unique Shopora store link.</p>
+          <p style="margin-top: 30px;">Welcome to Shopora Space! 🛍️</p>
+        </div>
       `
     })
 
