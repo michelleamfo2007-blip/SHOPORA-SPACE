@@ -54,7 +54,7 @@ export async function joinWaitlistAction(formData: FormData) {
           <p>We are currently curating our platform to ensure the highest quality experience for our shoppers. When you are selected to proceed, we will invite you.</p>
           <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin-top: 20px;">
             <h3 style="margin-top: 0;">Next Steps</h3>
-            <p>Please reply to this email, or send an email directly to <strong>shoporastore@gmail.com</strong> with your personal and business requirements, including what you plan to sell and your brand details.</p>
+            <p>Please reply to this email, or send an email directly to <strong>shoporaspace@gmail.com</strong> with your personal and business requirements, including what you plan to sell and your brand details.</p>
             <p>Our team will review your submission and manually grant you onboarding access if you are selected.</p>
           </div>
           <p style="margin-top: 30px; font-size: 14px; color: #64748b;">The Shopora Team</p>
