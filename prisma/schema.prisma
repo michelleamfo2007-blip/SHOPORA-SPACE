@@ -11,6 +11,21 @@ enum UserRole {
   SUPER_ADMIN
 }
 
+enum WaitlistStatus {
+  PENDING
+  INVITED
+  ONBOARDED
+  REJECTED
+}
+
+model WaitlistEntry {
+  id        String         @id @default(cuid())
+  email     String         @unique
+  status    WaitlistStatus @default(PENDING)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
 enum StoreMemberRole {
   OWNER
   ADMIN

@@ -33,10 +33,10 @@ export function Navbar() {
           Login
         </Link>
         <Link
-          href="/login" // Or /signup if you have one
+          href="/waitlist"
           className="text-sm font-medium bg-black text-white px-4 py-2 rounded-full hover:bg-gray-800 transition-colors"
         >
-          Start Free Trial
+          Join Waitlist
         </Link>
       </div>
     </motion.header>

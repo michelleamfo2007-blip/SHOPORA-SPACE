@@ -24,10 +24,10 @@ export function Hero() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <Link
-            href="/login"
+            href="/waitlist"
             className="flex items-center gap-2 bg-black text-white px-8 py-4 rounded-full font-medium hover:bg-gray-800 transition-all hover:scale-105 active:scale-95"
           >
-            Start your free trial <ArrowRight className="w-4 h-4" />
+            Join the Waitlist <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
             href="#features"
