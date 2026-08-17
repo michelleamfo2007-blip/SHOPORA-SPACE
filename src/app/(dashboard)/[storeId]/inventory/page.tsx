@@ -73,7 +73,7 @@ export default async function InventoryPage({ params }: { params: Promise<{ stor
                   <TableCell>
                     {variant.optionValues.length > 0 ? (
                       <span className="text-sm text-slate-500">
-                        {variant.optionValues.map(ov => ov.value).join(" / ")}
+                        {variant.optionValues.map((ov: any) => ov.value).join(" / ")}
                       </span>
                     ) : (
                       <span className="text-sm text-slate-400">Default Title</span>
