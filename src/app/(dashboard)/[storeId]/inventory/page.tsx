@@ -27,8 +27,8 @@ export default async function InventoryPage({ params }: { params: Promise<{ stor
   })
 
   // Flatten products into variants for the inventory view
-  const variants = products.flatMap(p => 
-    p.variants.map(v => ({
+  const variants = products.flatMap((p: any) => 
+    (p.variants as any[]).map((v: any) => ({
       ...v,
       productName: p.name,
       status: p.isActive ? "Active" : "Draft"
