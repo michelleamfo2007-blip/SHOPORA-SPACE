@@ -132,6 +132,8 @@ model Store {
   orders       Order[]
   subscription Subscription?
   paymentSetting StorePaymentSetting?
+  discounts    Discount[]
+  shippingZones ShippingZone[]
 }
 
 model StoreMember {
@@ -347,4 +349,41 @@ model WebhookEvent {
   type            String
   status          String   @default("PROCESSED")
   createdAt       DateTime @default(now())
+}
+
+model Discount {
+  id            String   @id @default(cuid())
+  storeId       String
+  code          String
+  type          String   // "PERCENTAGE" or "FIXED"
+  value         Float
+  startDate     DateTime @default(now())
+  endDate       DateTime?
+  isActive      Boolean  @default(true)
+  usageLimit    Int?
+  timesUsed     Int      @default(0)
+  
+  store         Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  @@unique([storeId, code])
+}
+
+model ShippingZone {
+  id            String   @id @default(cuid())
+  storeId       String
+  name          String   // e.g. "Domestic", "International"
+  countries     String[] // Array of country codes
+  
+  store         Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  rates         ShippingRate[]
+}
+
+model ShippingRate {
+  id             String   @id @default(cuid())
+  zoneId         String
+  name           String   // e.g. "Standard Shipping", "Express"
+  price          Float
+  estimatedDays  String?  
+  
+  zone           ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
 }

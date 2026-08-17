@@ -57,10 +57,10 @@ export function DashboardNav({ storeId }: DashboardNavProps) {
       active: pathname === `/${storeId}/customers`,
     },
     {
-      href: `/${storeId}/payments`,
+      href: `/${storeId}/settings/payments`,
       label: "Payments",
       icon: Settings,
-      active: pathname === `/${storeId}/payments`,
+      active: pathname === `/${storeId}/settings/payments`,
     },
     {
       href: `/${storeId}/discounts`,
