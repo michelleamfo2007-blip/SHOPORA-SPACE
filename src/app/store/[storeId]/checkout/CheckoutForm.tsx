@@ -5,11 +5,19 @@ import { processCheckoutAction } from "@/server/actions/checkout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
-export function CheckoutForm({ storeId, currency }: { storeId: string, currency: string }) {
+export function CheckoutForm({ 
+  storeId, 
+  currency, 
+  paymentSetting 
+}: { 
+  storeId: string; 
+  currency: string;
+  paymentSetting: any; 
+}) {
   const { items, getTotalPrice, clearCart } = useCart()
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -29,17 +37,11 @@ export function CheckoutForm({ storeId, currency }: { storeId: string, currency:
       formData.append("storeId", storeId)
       formData.append("cartData", JSON.stringify(items))
       
-      const { orderId, authorizationUrl } = await processCheckoutAction(formData)
+      const { orderId } = await processCheckoutAction(formData)
       
       clearCart()
-      
-      if (authorizationUrl) {
-        // Redirect to Paystack secure checkout
-        window.location.href = authorizationUrl
-      } else {
-        alert("Order placed successfully! Order ID: " + orderId)
-        router.push("/")
-      }
+      alert("Order placed successfully! We will verify your payment shortly. Order ID: " + orderId)
+      router.push("/")
     } catch (error) {
       console.error(error)
       alert("Checkout failed. Please try again.")
@@ -52,7 +54,7 @@ export function CheckoutForm({ storeId, currency }: { storeId: string, currency:
     <div className="grid lg:grid-cols-2 gap-12">
       <div>
         <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
-        <form action={handleSubmit} className="grid gap-6">
+        <form id="checkout-form" action={handleSubmit} className="grid gap-6">
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
@@ -88,13 +90,22 @@ export function CheckoutForm({ storeId, currency }: { storeId: string, currency:
             </div>
           </div>
 
+          <h2 className="text-2xl font-bold mt-8 mb-2">Payment Verification</h2>
+          <p className="text-sm text-slate-500 mb-4">
+            Please make the transfer using the details on the right, and provide your reference number below.
+          </p>
+          <div className="grid gap-2">
+            <Label htmlFor="paymentReference">Transaction ID / Payment Reference</Label>
+            <Input id="paymentReference" name="paymentReference" required placeholder="e.g. 0541234567 or TXN-999" />
+          </div>
+
           <Button type="submit" size="lg" className="w-full mt-6" disabled={isSubmitting}>
             {isSubmitting ? "Processing..." : "Complete Order"}
           </Button>
         </form>
       </div>
 
-      <div>
+      <div className="space-y-8">
         <Card className="bg-slate-50">
           <CardHeader>
             <CardTitle>Order Summary</CardTitle>
@@ -113,10 +124,49 @@ export function CheckoutForm({ storeId, currency }: { storeId: string, currency:
                 </div>
               ))}
               <div className="border-t pt-4 mt-4 flex justify-between items-center font-bold text-lg">
-                <span>Total</span>
-                <span>{currency} {getTotalPrice().toFixed(2)}</span>
+                <span>Total Due</span>
+                <span className="text-blue-600">{currency} {getTotalPrice().toFixed(2)}</span>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-blue-200 bg-blue-50/50">
+          <CardHeader>
+            <CardTitle className="text-blue-900">How to Pay</CardTitle>
+            <CardDescription className="text-blue-700">
+              Transfer exactly <strong>{currency} {getTotalPrice().toFixed(2)}</strong> to the account below.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 text-blue-900">
+            {!paymentSetting ? (
+              <p className="text-sm text-red-600 font-medium">This store has not configured payment details yet.</p>
+            ) : (
+              <>
+                {paymentSetting.bankName && (
+                  <div className="bg-white p-3 rounded-md border border-blue-100 shadow-sm">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-blue-500 mb-1">Bank Transfer</p>
+                    <p className="font-medium">{paymentSetting.bankName}</p>
+                    <p className="text-lg font-bold tracking-tight">{paymentSetting.accountNumber}</p>
+                    <p className="text-sm">{paymentSetting.accountName}</p>
+                  </div>
+                )}
+
+                {paymentSetting.mobileMoneyNumber && (
+                  <div className="bg-white p-3 rounded-md border border-blue-100 shadow-sm">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-blue-500 mb-1">Mobile Money</p>
+                    <p className="text-lg font-bold tracking-tight">{paymentSetting.mobileMoneyNumber}</p>
+                    {paymentSetting.accountName && <p className="text-sm">{paymentSetting.accountName}</p>}
+                  </div>
+                )}
+
+                {paymentSetting.instructions && (
+                  <div className="text-sm bg-blue-100/50 p-3 rounded-md">
+                    <strong>Instructions:</strong> {paymentSetting.instructions}
+                  </div>
+                )}
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

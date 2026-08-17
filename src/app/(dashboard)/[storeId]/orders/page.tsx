@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { OrderRow } from "./OrderRow"
 
 export default async function OrdersPage({ params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params;
@@ -16,7 +17,8 @@ export default async function OrdersPage({ params }: { params: Promise<{ storeId
       orders: {
         include: {
           customer: true,
-          orderItems: true
+          orderItems: true,
+          payments: true
         },
         orderBy: { createdAt: "desc" }
       }
@@ -39,11 +41,11 @@ export default async function OrdersPage({ params }: { params: Promise<{ storeId
           <TableHeader>
             <TableRow>
               <TableHead>Order ID</TableHead>
-              <TableHead>Date</TableHead>
               <TableHead>Customer</TableHead>
-              <TableHead>Fulfillment Status</TableHead>
-              <TableHead>Payment</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Payment Ref</TableHead>
               <TableHead className="text-right">Total</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -55,28 +57,7 @@ export default async function OrdersPage({ params }: { params: Promise<{ storeId
               </TableRow>
             ) : (
               store.orders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium text-blue-600">
-                    #{order.id.slice(0, 8)}
-                  </TableCell>
-                  <TableCell>{order.createdAt.toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    {order.customer.name}
-                  </TableCell>
-                  <TableCell>
-                    <span className="inline-flex items-center rounded-full bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
-                      {order.status}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-800 ring-1 ring-inset ring-slate-500/20">
-                      {order.status}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {store.currency} {order.totalAmount.toFixed(2)}
-                  </TableCell>
-                </TableRow>
+                <OrderRow key={order.id} order={order} store={store} />
               ))
             )}
           </TableBody>

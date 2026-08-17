@@ -10,9 +10,10 @@ export async function processCheckoutAction(formData: FormData) {
   const address = formData.get("address") as string
   const city = formData.get("city") as string
   const country = formData.get("country") as string
+  const reference = formData.get("paymentReference") as string
   const cartDataStr = formData.get("cartData") as string
 
-  if (!storeId || !email || !firstName || !lastName || !cartDataStr) {
+  if (!storeId || !email || !firstName || !lastName || !cartDataStr || !reference) {
     throw new Error("Missing required fields")
   }
 
@@ -47,14 +48,14 @@ export async function processCheckoutAction(formData: FormData) {
     })
   }
 
-  // 2. Create Order and OrderItems
+  // 2. Create Order with PENDING_VERIFICATION status
   const order = await db.order.create({
     data: {
       storeId,
       customerId: customer.id,
       orderNumber: `ORD-${Date.now().toString().slice(-6)}`,
       totalAmount,
-      status: "PENDING", 
+      status: "PENDING_VERIFICATION", 
       shippingAddress: `${address}, ${city}, ${country}`,
       orderItems: {
         create: cartItems.map(item => ({
@@ -62,52 +63,17 @@ export async function processCheckoutAction(formData: FormData) {
           quantity: item.quantity,
           price: item.price
         }))
+      },
+      payments: {
+        create: {
+          provider: "MANUAL_TRANSFER",
+          status: "PENDING_VERIFICATION",
+          amount: totalAmount,
+          reference: reference
+        }
       }
     }
   })
 
-  // 3. Initialize Paystack Transaction
-  // Paystack expects amount in the lowest denomination (e.g. kobo/pesewas), so multiply by 100
-  const amountInKobo = Math.round(totalAmount * 100)
-  
-  // Use a fallback key for development if not provided, but strongly recommend setting it in .env
-  const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY || "sk_test_placeholder"
-  
-  // Note: We use the store's custom domain or subdomain for the callback URL
-  // If NEXT_PUBLIC_ROOT_DOMAIN is not set, we default to localhost:3000 for local dev
-  const protocol = process.env.NODE_ENV === "production" ? "https" : "http"
-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000"
-  const callbackUrl = `${protocol}://${store.slug}.${rootDomain}/checkout/success?orderId=${order.id}`
-
-  const response = await fetch("https://api.paystack.co/transaction/initialize", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${PAYSTACK_SECRET}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      email,
-      amount: amountInKobo,
-      currency: store.currency, // e.g. GHS, NGN
-      reference: order.id, // Use our order ID as the reference
-      callback_url: callbackUrl,
-      metadata: {
-        storeId,
-        orderId: order.id
-      }
-    })
-  })
-
-  const paystackData = await response.json()
-
-  if (!paystackData.status) {
-    console.error("Paystack Initialization Error:", paystackData)
-    throw new Error(paystackData.message || "Failed to initialize payment")
-  }
-
-  // 4. Return the authorization URL so the client can redirect
-  return { 
-    orderId: order.id,
-    authorizationUrl: paystackData.data.authorization_url
-  }
+  return { orderId: order.id }
 }

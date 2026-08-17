@@ -1,31 +1,36 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { encrypt } from "@/lib/encryption";
 import { revalidatePath } from "next/cache";
 
 export async function savePaymentSettings(
   storeId: string,
-  provider: "PAYSTACK" | "STRIPE",
-  publicKey: string,
-  secretKey: string
+  bankName: string,
+  accountName: string,
+  accountNumber: string,
+  mobileMoneyNumber: string,
+  instructions: string
 ) {
   try {
-    const encryptedSecret = encrypt(secretKey);
-
     await db.storePaymentSetting.upsert({
       where: { storeId },
       update: {
-        provider,
-        publicKey,
-        secretKey: encryptedSecret,
-        isActive: true, // Auto activate for now
+        provider: "MANUAL_TRANSFER",
+        bankName,
+        accountName,
+        accountNumber,
+        mobileMoneyNumber,
+        instructions,
+        isActive: true, // Auto activate
       },
       create: {
         storeId,
-        provider,
-        publicKey,
-        secretKey: encryptedSecret,
+        provider: "MANUAL_TRANSFER",
+        bankName,
+        accountName,
+        accountNumber,
+        mobileMoneyNumber,
+        instructions,
         isActive: true,
       },
     });

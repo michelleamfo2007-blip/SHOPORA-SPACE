@@ -46,6 +46,7 @@ enum SubscriptionStatus {
 
 enum OrderStatus {
   PENDING
+  PENDING_VERIFICATION
   PROCESSING
   SHIPPED
   DELIVERED
@@ -57,6 +58,7 @@ enum PaymentProvider {
   PAYSTACK
   STRIPE
   FLUTTERWAVE
+  MANUAL_TRANSFER
 }
 
 model User {
@@ -323,14 +325,17 @@ model Payment {
 }
 
 model StorePaymentSetting {
-  id          String          @id @default(cuid())
-  storeId     String          @unique
-  provider    PaymentProvider
-  publicKey   String?         
-  secretKey   String?         
-  isActive    Boolean         @default(false)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  id                String          @id @default(cuid())
+  storeId           String          @unique
+  provider          PaymentProvider
+  isActive          Boolean         @default(false)
+  bankName          String?
+  accountName       String?
+  accountNumber     String?
+  mobileMoneyNumber String?
+  instructions      String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   store       Store           @relation(fields: [storeId], references: [id], onDelete: Cascade)
 }
