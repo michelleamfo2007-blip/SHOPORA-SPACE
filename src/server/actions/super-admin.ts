@@ -30,6 +30,8 @@ export async function toggleStoreStatusAction(storeId: string, currentStatus: St
   return { success: true, newStatus }
 }
 
+import { resend } from "@/lib/resend"
+
 export async function approveWaitlistAction(entryId: string) {
   const session = await getServerSession(authOptions)
   
@@ -42,10 +44,27 @@ export async function approveWaitlistAction(entryId: string) {
     throw new Error("Unauthorized: Only Super Admins can perform this action.")
   }
 
-  await db.waitlistEntry.update({
+  const entry = await db.waitlistEntry.update({
     where: { id: entryId },
     data: { status: "INVITED" }
   })
+
+  // Send the invite email
+  try {
+    await resend.emails.send({
+      from: "Shopora Space <onboarding@resend.dev>",
+      to: entry.email,
+      subject: "You've been invited to Shopora Space!",
+      html: `
+        <h1>Welcome to Shopora Space!</h1>
+        <p>Your waitlist application has been approved.</p>
+        <p>You can now sign up and create your store by visiting:</p>
+        <p><a href="https://shopora.space/signup">https://shopora.space/signup</a></p>
+      `
+    })
+  } catch (error) {
+    console.error("Failed to send invite email:", error)
+  }
 
   revalidatePath("/super-admin/waitlist")
   return { success: true }
