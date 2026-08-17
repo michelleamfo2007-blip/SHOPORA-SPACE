@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createStoreAction } from "@/server/actions/store"
 import { useState } from "react"
-import { useRouter, isRedirectError } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 export function OnboardingClient() {
   const [error, setError] = useState<string | null>(null)
@@ -23,7 +23,7 @@ export function OnboardingClient() {
     try {
       await createStoreAction(formData)
     } catch (err: any) {
-      if (isRedirectError(err)) {
+      if (err.message === "NEXT_REDIRECT") {
         throw err; // Let Next.js handle the redirect
       }
       setLoading(false)

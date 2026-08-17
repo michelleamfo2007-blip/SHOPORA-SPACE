@@ -28,7 +28,7 @@ export function ProductForm({ storeId }: ProductFormProps) {
   const [options, setOptions] = useState<{ name: string; values: string[] }[]>([])
   
   // Derived Variants based on Options
-  const [variants, setVariants] = useState<{ name: string; price: string; compareAtPrice: string; sku: string; stockCount: number; imageBase64: string }>([
+  const [variants, setVariants] = useState<{ name: string; price: string; compareAtPrice: string; sku: string; stockCount: number; imageBase64: string }[]>([
     { name: "Default", price: "", compareAtPrice: "", sku: "", stockCount: 0, imageBase64: "" }
   ])
 
