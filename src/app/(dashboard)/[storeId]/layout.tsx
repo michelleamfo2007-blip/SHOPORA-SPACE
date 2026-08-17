@@ -46,9 +46,9 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <div className="hidden border-r bg-slate-50/50 lg:block lg:w-64">
+    <div className="flex flex-col lg:flex-row min-h-screen">
+      {/* Sidebar - Desktop */}
+      <div className="hidden lg:block w-64 border-r bg-slate-50/50">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-[60px] items-center border-b px-6">
             <div className="flex items-center gap-2 font-semibold">
@@ -65,20 +65,22 @@ export default async function DashboardLayout({
       </div>
 
       {/* Main Content */}
-      <div className="flex w-full flex-col">
+      <div className="flex flex-1 w-full flex-col min-h-screen">
         {/* Top Header */}
-        <header className="flex h-[60px] items-center gap-4 border-b bg-slate-50/50 px-6">
+        <header className="flex h-[60px] flex-shrink-0 items-center gap-4 border-b bg-slate-50/50 px-4 md:px-6">
           <div className="flex-1">
-            <h1 className="font-semibold text-lg">Dashboard</h1>
+            <h1 className="font-semibold text-lg hidden md:block">Dashboard</h1>
+            <h1 className="font-semibold text-lg md:hidden">{storeMember.store.name}</h1>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-500">{session.user.email}</span>
+            <span className="text-sm text-slate-500 hidden md:block">{session.user.email}</span>
             <div className="h-8 w-8 rounded-full bg-slate-200" />
+            <DashboardNav storeId={storeId} isMobileMenu />
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
           {children}
         </main>
       </div>
