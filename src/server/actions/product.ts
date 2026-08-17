@@ -1,11 +1,12 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { auth } from "@/auth"
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 import { redirect } from "next/navigation"
 
 export async function createProductAction(formData: FormData) {
-  const session = await auth()
+  const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     throw new Error("Unauthorized")
   }
@@ -56,3 +57,4 @@ export async function createProductAction(formData: FormData) {
 
   redirect(`/${storeId}/products`)
 }
+

@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation"
 import { getStoreByHost } from "@/lib/tenant"
+import { db } from "@/lib/db"
 import { CheckoutForm } from "./CheckoutForm"
 
-export default async function CheckoutPage({ params }: { params: { storeId: string } }) {
-  const store = await getStoreByHost(params.storeId)
+export default async function CheckoutPage({ params }: { params: Promise<{ storeId: string }> }) {
+  const { storeId } = await params;
+  const store = await db.store.findUnique({ where: { slug: storeId } })
   if (!store) notFound()
 
   return (

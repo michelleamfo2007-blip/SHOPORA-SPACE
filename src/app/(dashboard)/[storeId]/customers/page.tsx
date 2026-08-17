@@ -8,9 +8,10 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-export default async function CustomersPage({ params }: { params: { storeId: string } }) {
+export default async function CustomersPage({ params }: { params: Promise<{ storeId: string }> }) {
+  const { storeId } = await params;
   const customers = await db.customer.findMany({
-    where: { storeId: params.storeId },
+    where: { storeId },
     include: {
       _count: {
         select: { orders: true }
@@ -49,7 +50,7 @@ export default async function CustomersPage({ params }: { params: { storeId: str
               customers.map((customer) => (
                 <TableRow key={customer.id}>
                   <TableCell className="font-medium">
-                    {customer.firstName} {customer.lastName}
+                    {customer.name}
                   </TableCell>
                   <TableCell>{customer.email}</TableCell>
                   <TableCell>{customer.phone || "-"}</TableCell>

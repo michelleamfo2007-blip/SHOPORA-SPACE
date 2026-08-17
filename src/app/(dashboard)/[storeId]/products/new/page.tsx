@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { createProductAction } from "@/server/actions/product"
 
-export default function NewProductPage({ params }: { params: { storeId: string } }) {
+export default async function NewProductPage({ params }: { params: Promise<{ storeId: string }> }) {
+  const { storeId } = await params;
   return (
     <div className="grid gap-6 max-w-3xl">
       <div className="flex items-center justify-between">
@@ -15,14 +16,14 @@ export default function NewProductPage({ params }: { params: { storeId: string }
           <h2 className="text-3xl font-bold tracking-tight">Add Product</h2>
           <p className="text-slate-500">Create a new product for your store.</p>
         </div>
-        <Link href={`/${params.storeId}/products`}>
+        <Link href={`/${storeId}/products`}>
           <Button variant="outline">Cancel</Button>
         </Link>
       </div>
 
       <form action={createProductAction} className="grid gap-6">
         {/* Hidden input to pass the storeId to the server action */}
-        <input type="hidden" name="storeId" value={params.storeId} />
+        <input type="hidden" name="storeId" value={storeId} />
 
         <Card>
           <CardHeader>

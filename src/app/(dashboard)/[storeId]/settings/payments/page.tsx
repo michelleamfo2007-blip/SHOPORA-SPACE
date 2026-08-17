@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { savePaymentSettings } from "@/server/actions/payment";
 import { useRouter } from "next/navigation";
+import { use } from "react";
 
 export default function PaymentSettingsPage({
   params,
 }: {
-  params: { storeId: string };
+  params: Promise<{ storeId: string }>;
 }) {
+  const { storeId } = use(params);
   const router = useRouter();
   const [provider, setProvider] = useState<"PAYSTACK" | "STRIPE">("PAYSTACK");
   const [publicKey, setPublicKey] = useState("");
@@ -20,7 +22,7 @@ export default function PaymentSettingsPage({
     setLoading(true);
 
     const result = await savePaymentSettings(
-      params.storeId,
+      storeId,
       provider,
       publicKey,
       secretKey

@@ -41,8 +41,7 @@ export async function processCheckoutAction(formData: FormData) {
       data: {
         storeId,
         email,
-        firstName,
-        lastName,
+        name: `${firstName} ${lastName}`,
         phone: formData.get("phone") as string || undefined
       }
     })
@@ -53,11 +52,11 @@ export async function processCheckoutAction(formData: FormData) {
     data: {
       storeId,
       customerId: customer.id,
+      orderNumber: `ORD-${Date.now().toString().slice(-6)}`,
       totalAmount,
       status: "PENDING", 
-      paymentStatus: "UNPAID",
       shippingAddress: `${address}, ${city}, ${country}`,
-      items: {
+      orderItems: {
         create: cartItems.map(item => ({
           variantId: item.variantId,
           quantity: item.quantity,

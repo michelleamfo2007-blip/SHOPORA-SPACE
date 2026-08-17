@@ -1,11 +1,12 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { auth } from "@/auth"
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 import { revalidatePath } from "next/cache"
 
 export async function createCategoryAction(formData: FormData) {
-  const session = await auth()
+  const session = await getServerSession(authOptions)
   if (!session?.user?.id) throw new Error("Unauthorized")
 
   const storeId = formData.get("storeId") as string
@@ -31,3 +32,4 @@ export async function createCategoryAction(formData: FormData) {
 
   revalidatePath(`/${storeId}/categories`)
 }
+

@@ -34,16 +34,15 @@ export async function POST(req: Request) {
       const order = await db.order.update({
         where: { id: orderId },
         data: {
-          paymentStatus: "PAID",
-          status: "PROCESSING" // Now that it's paid, it's ready to be processed/fulfilled
+          status: "PROCESSING"
         },
         include: {
-          items: true
+          orderItems: true
         }
       })
 
       // 2. Deduct Inventory (we skipped this during checkout until payment succeeded)
-      for (const item of order.items) {
+      for (const item of order.orderItems) {
         await db.productVariant.update({
           where: { id: item.variantId },
           data: {

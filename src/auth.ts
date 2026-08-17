@@ -1,11 +1,28 @@
-import NextAuth from "next-auth"
+import NextAuth, { NextAuthOptions } from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { db } from "@/lib/db"
 import { compare } from "bcryptjs"
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(db),
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string
+      name?: string | null
+      email?: string | null
+      image?: string | null
+      platformRole?: string
+    }
+  }
+  interface User {
+    id: string
+    platformRole?: string
+  }
+}
+
+export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
+  adapter: PrismaAdapter(db) as any,
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -55,4 +72,4 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
-})
+}

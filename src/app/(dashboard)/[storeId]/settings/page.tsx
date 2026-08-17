@@ -5,9 +5,10 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-export default async function SettingsPage({ params }: { params: { storeId: string } }) {
+export default async function SettingsPage({ params }: { params: Promise<{ storeId: string }> }) {
+  const { storeId } = await params;
   const store = await db.store.findUnique({
-    where: { id: params.storeId }
+    where: { id: storeId }
   })
 
   if (!store) {

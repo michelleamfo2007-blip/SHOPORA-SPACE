@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
-import { auth } from "@/auth"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
 import { DashboardNav } from "@/components/dashboard/nav"
 import { Store as StoreIcon } from "lucide-react"
@@ -9,9 +10,10 @@ export default async function DashboardLayout({
   params
 }: {
   children: React.ReactNode
-  params: { storeId: string }
+  params: Promise<{ storeId: string }>
 }) {
-  const session = await auth()
+  const { storeId } = await params
+  const session = await getServerSession(authOptions)
 
   if (!session?.user?.id) {
     redirect("/login")
@@ -21,7 +23,7 @@ export default async function DashboardLayout({
   const storeMember = await db.storeMember.findUnique({
     where: {
       storeId_userId: {
-        storeId: params.storeId,
+        storeId,
         userId: session.user.id
       }
     },
@@ -56,7 +58,7 @@ export default async function DashboardLayout({
           </div>
           <div className="flex-1 overflow-auto py-2">
             <div className="grid items-start px-4 text-sm font-medium">
-              <DashboardNav storeId={params.storeId} />
+              <DashboardNav storeId={storeId} />
             </div>
           </div>
         </div>

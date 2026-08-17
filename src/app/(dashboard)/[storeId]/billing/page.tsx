@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle2 } from "lucide-react"
 
-export default async function BillingPage({ params }: { params: { storeId: string } }) {
+export default async function BillingPage({ params }: { params: Promise<{ storeId: string }> }) {
+  const { storeId } = await params;
   const store = await db.store.findUnique({
-    where: { id: params.storeId },
+    where: { id: storeId },
     include: {
       subscription: true
     }
@@ -13,7 +14,7 @@ export default async function BillingPage({ params }: { params: { storeId: strin
 
   if (!store) return null
 
-  const isPro = store.subscription?.plan === "PRO" && store.subscription?.status === "ACTIVE"
+  const isPro = store.subscription?.planId === "PRO" && store.subscription?.status === "ACTIVE"
 
   return (
     <div className="grid gap-6 max-w-5xl">
@@ -26,7 +27,7 @@ export default async function BillingPage({ params }: { params: { storeId: strin
         {/* Free Plan */}
         <Card className={`relative ${!isPro ? "border-2 border-slate-900" : ""}`}>
           {!isPro && (
-            <div className="absolute top-0 right-0 -mt-3 mr-4 bg-slate-900 text-white text-xs px-3 py-1 rounded-full font-medium">
+            <div className="absolute top-4 right-4 bg-slate-900 text-white text-xs px-3 py-1 rounded-full font-medium">
               Current Plan
             </div>
           )}
@@ -63,7 +64,7 @@ export default async function BillingPage({ params }: { params: { storeId: strin
         {/* Pro Plan */}
         <Card className={`relative ${isPro ? "border-2 border-blue-600" : ""}`}>
           {isPro && (
-            <div className="absolute top-0 right-0 -mt-3 mr-4 bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-medium">
+            <div className="absolute top-4 right-4 bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-medium">
               Current Plan
             </div>
           )}

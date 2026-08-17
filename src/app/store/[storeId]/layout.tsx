@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { getStoreByHost } from "@/lib/tenant"
+import { db } from "@/lib/db"
 import { ShoppingCart } from "lucide-react"
 
 export default async function StorefrontLayout({
@@ -8,9 +9,10 @@ export default async function StorefrontLayout({
   params,
 }: {
   children: React.ReactNode
-  params: { storeId: string }
+  params: Promise<{ storeId: string }>
 }) {
-  const store = await getStoreByHost(params.storeId)
+  const { storeId } = await params
+  const store = await db.store.findUnique({ where: { slug: storeId } })
 
   if (!store) {
     notFound()

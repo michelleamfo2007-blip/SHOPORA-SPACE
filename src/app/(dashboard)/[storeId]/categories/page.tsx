@@ -12,9 +12,10 @@ import {
 } from "@/components/ui/table"
 import { createCategoryAction } from "@/server/actions/category"
 
-export default async function CategoriesPage({ params }: { params: { storeId: string } }) {
+export default async function CategoriesPage({ params }: { params: Promise<{ storeId: string }> }) {
+  const { storeId } = await params;
   const categories = await db.category.findMany({
-    where: { storeId: params.storeId },
+    where: { storeId: storeId },
     include: { _count: { select: { products: true } } },
     orderBy: { name: "asc" }
   })
@@ -36,7 +37,7 @@ export default async function CategoriesPage({ params }: { params: { storeId: st
           </CardHeader>
           <CardContent>
             <form action={createCategoryAction} className="grid gap-4">
-              <input type="hidden" name="storeId" value={params.storeId} />
+              <input type="hidden" name="storeId" value={storeId} />
               <div className="grid gap-2">
                 <Input name="name" placeholder="E.g. Men's Clothing" required />
               </div>

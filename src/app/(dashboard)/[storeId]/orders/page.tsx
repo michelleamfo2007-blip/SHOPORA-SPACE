@@ -8,14 +8,15 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-export default async function OrdersPage({ params }: { params: { storeId: string } }) {
+export default async function OrdersPage({ params }: { params: Promise<{ storeId: string }> }) {
+  const { storeId } = await params;
   const store = await db.store.findUnique({
-    where: { id: params.storeId },
+    where: { id: storeId },
     include: {
       orders: {
         include: {
           customer: true,
-          items: true
+          orderItems: true
         },
         orderBy: { createdAt: "desc" }
       }
@@ -60,7 +61,7 @@ export default async function OrdersPage({ params }: { params: { storeId: string
                   </TableCell>
                   <TableCell>{order.createdAt.toLocaleDateString()}</TableCell>
                   <TableCell>
-                    {order.customer.firstName} {order.customer.lastName}
+                    {order.customer.name}
                   </TableCell>
                   <TableCell>
                     <span className="inline-flex items-center rounded-full bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
@@ -69,7 +70,7 @@ export default async function OrdersPage({ params }: { params: { storeId: string
                   </TableCell>
                   <TableCell>
                     <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-800 ring-1 ring-inset ring-slate-500/20">
-                      {order.paymentStatus}
+                      {order.status}
                     </span>
                   </TableCell>
                   <TableCell className="text-right font-medium">

@@ -4,8 +4,9 @@ import { db } from "@/lib/db";
 
 export async function POST(
   req: Request,
-  { params }: { params: { provider: string } }
+  { params }: { params: Promise<{ provider: string }> }
 ) {
+  const { provider } = await params;
   try {
     const bodyText = await req.text();
     const signature = req.headers.get("x-paystack-signature") || ""; // Adapt based on provider later
@@ -35,7 +36,7 @@ export async function POST(
 
     await db.webhookEvent.create({
       data: {
-        provider: params.provider.toUpperCase(),
+        provider: String(provider).toUpperCase(),
         providerEventId: event.providerEventId,
         type: event.type,
       },

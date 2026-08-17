@@ -1,10 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { db } from "@/lib/db"
 
-export default async function DashboardOverview({ params }: { params: { storeId: string } }) {
+export default async function DashboardOverview({ params }: { params: Promise<{ storeId: string }> }) {
+  const { storeId } = await params
   // Fetch overview stats (mocked for now, will connect to real data in Phase 3/5)
   const store = await db.store.findUnique({
-    where: { id: params.storeId },
+    where: { id: storeId },
   })
 
   return (

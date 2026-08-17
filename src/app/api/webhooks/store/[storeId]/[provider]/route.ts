@@ -4,10 +4,10 @@ import { db } from "@/lib/db";
 
 export async function POST(
   req: Request,
-  { params }: { params: { storeId: string; provider: string } }
+  { params }: { params: Promise<{ storeId: string; provider: string }> }
 ) {
   try {
-    const { storeId } = params;
+    const { storeId, provider: providerName } = await params;
     
     // 1. Get Seller's Payment Provider
     const provider = await getPaymentProvider(storeId);
@@ -45,7 +45,7 @@ export async function POST(
 
     await db.webhookEvent.create({
       data: {
-        provider: params.provider.toUpperCase(),
+        provider: providerName.toUpperCase(),
         providerEventId: event.providerEventId,
         type: event.type,
       },
@@ -66,7 +66,7 @@ export async function POST(
         await db.payment.create({
           data: {
             orderId,
-            provider: params.provider.toUpperCase() as any, // "PAYSTACK"
+            provider: providerName.toUpperCase() as any, // "PAYSTACK"
             status: "SUCCESS",
             reference: event.data.reference,
             amount: event.data.amount / 100, // Convert back from kobo/pesewas

@@ -4,11 +4,12 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createStoreAction } from "@/server/actions/store"
-import { auth } from "@/auth"
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/auth";
 import { redirect } from "next/navigation"
 
 export default async function OnboardingPage() {
-  const session = await auth()
+  const session = await getServerSession(authOptions)
   
   if (!session) {
     redirect("/login")
@@ -95,3 +96,4 @@ export default async function OnboardingPage() {
     </div>
   )
 }
+

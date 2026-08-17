@@ -17,10 +17,11 @@ import { createVariantAction } from "@/server/actions/variant"
 export default async function ProductEditPage({ 
   params 
 }: { 
-  params: { storeId: string; productId: string } 
+  params: Promise<{ storeId: string; productId: string }> 
 }) {
+  const { storeId, productId } = await params;
   const product = await db.product.findUnique({
-    where: { id: params.productId, storeId: params.storeId },
+    where: { id: productId, storeId: storeId },
     include: { variants: true }
   })
 
@@ -33,7 +34,7 @@ export default async function ProductEditPage({
           <h2 className="text-3xl font-bold tracking-tight">Edit Product</h2>
           <p className="text-slate-500">{product.name}</p>
         </div>
-        <Link href={`/${params.storeId}/products`}>
+        <Link href={`/${storeId}/products`}>
           <Button variant="outline">Back to Products</Button>
         </Link>
       </div>
@@ -72,7 +73,7 @@ export default async function ProductEditPage({
                 <h3 className="font-semibold mb-4">Add Variant</h3>
                 <form action={createVariantAction} className="grid gap-4">
                   <input type="hidden" name="productId" value={product.id} />
-                  <input type="hidden" name="storeId" value={params.storeId} />
+                  <input type="hidden" name="storeId" value={storeId} />
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -9,8 +11,44 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { signIn } from "next-auth/react"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get("email") as string
+    const password = formData.get("password") as string
+
+    try {
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (res?.error) {
+        setError("Invalid email or password")
+        setLoading(false)
+      } else {
+        router.push("/super-admin")
+        router.refresh()
+      }
+    } catch (err) {
+      setError("An unexpected error occurred")
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-slate-50">
       <Card className="mx-auto max-w-sm w-full">
@@ -21,7 +59,12 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-4">
+          <form className="grid gap-4" onSubmit={handleSubmit}>
+            {error && (
+              <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
+                {error}
+              </div>
+            )}
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -41,10 +84,10 @@ export default function LoginPage() {
               </div>
               <Input id="password" name="password" type="password" required />
             </div>
-            <Button type="submit" className="w-full">
-              Login
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Logging in..." : "Login"}
             </Button>
-            <Button variant="outline" className="w-full" type="button">
+            <Button variant="outline" className="w-full" type="button" onClick={() => signIn("google")}>
               Login with Google
             </Button>
           </form>

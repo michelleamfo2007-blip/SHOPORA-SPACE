@@ -10,9 +10,10 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-export default async function ProductsPage({ params }: { params: { storeId: string } }) {
+export default async function ProductsPage({ params }: { params: Promise<{ storeId: string }> }) {
+  const { storeId } = await params;
   const store = await db.store.findUnique({
-    where: { id: params.storeId },
+    where: { id: storeId },
     include: {
       products: {
         include: {

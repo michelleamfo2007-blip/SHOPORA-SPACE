@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Twitter, Github, Linkedin } from "lucide-react";
 
 export function Footer() {
   return (
@@ -15,17 +14,6 @@ export function Footer() {
             <p className="text-gray-500 max-w-sm mb-6">
               The modern e-commerce platform that puts merchants first. Build your store, connect your gateway, and keep your revenue.
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="text-gray-400 hover:text-black transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-black transition-colors">
-                <Github className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-black transition-colors">
-                <Linkedin className="w-5 h-5" />
-              </a>
-            </div>
           </div>
           
           <div>
