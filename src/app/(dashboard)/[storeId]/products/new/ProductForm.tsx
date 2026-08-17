@@ -28,8 +28,8 @@ export function ProductForm({ storeId }: ProductFormProps) {
   const [options, setOptions] = useState<{ name: string; values: string[] }[]>([])
   
   // Derived Variants based on Options
-  const [variants, setVariants] = useState<{ name: string; price: string; sku: string; stockCount: number }[]>([
-    { name: "Default", price: "", sku: "", stockCount: 0 }
+  const [variants, setVariants] = useState<{ name: string; price: string; compareAtPrice: string; sku: string; stockCount: number; imageBase64: string }>([
+    { name: "Default", price: "", compareAtPrice: "", sku: "", stockCount: 0, imageBase64: "" }
   ])
 
   const addOption = () => {
@@ -57,7 +57,7 @@ export function ProductForm({ storeId }: ProductFormProps) {
 
   const generateVariants = (currentOptions: { name: string; values: string[] }[]) => {
     if (currentOptions.length === 0 || currentOptions.every(o => o.values.length === 0)) {
-      setVariants([{ name: "Default", price: basePrice, sku: "", stockCount: 0 }])
+      setVariants([{ name: "Default", price: basePrice, compareAtPrice: "", sku: "", stockCount: 0, imageBase64: "" }])
       return
     }
 
@@ -71,8 +71,10 @@ export function ProductForm({ storeId }: ProductFormProps) {
     const newVariants = combinations.map(combo => ({
       name: combo.join(" / "),
       price: basePrice,
+      compareAtPrice: "",
       sku: "",
-      stockCount: 0
+      stockCount: 0,
+      imageBase64: ""
     }))
     
     setVariants(newVariants)
@@ -82,6 +84,17 @@ export function ProductForm({ storeId }: ProductFormProps) {
     const newVariants = [...variants]
     newVariants[index] = { ...newVariants[index], [field]: value }
     setVariants(newVariants)
+  }
+
+  const handleImageUpload = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        updateVariant(index, "imageBase64", reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
   }
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -100,6 +113,7 @@ export function ProductForm({ storeId }: ProductFormProps) {
           variants: variants.map(v => ({
             ...v,
             price: parseFloat(v.price) || 0,
+            compareAtPrice: v.compareAtPrice ? parseFloat(v.compareAtPrice) : null,
             stockCount: parseInt(v.stockCount.toString()) || 0
           }))
         })
@@ -171,7 +185,7 @@ export function ProductForm({ storeId }: ProductFormProps) {
             <div key={index} className="grid grid-cols-12 gap-4 items-start border p-4 rounded-md bg-slate-50">
               <div className="col-span-4 grid gap-2">
                 <Label>Option Name</Label>
-                <Input placeholder="E.g. Size or Flavor" value={option.name} onChange={e => updateOptionName(index, e.target.value)} />
+                <Input placeholder="E.g. Size or Color" value={option.name} onChange={e => updateOptionName(index, e.target.value)} />
               </div>
               <div className="col-span-7 grid gap-2">
                 <Label>Values (comma separated)</Label>
@@ -186,26 +200,34 @@ export function ProductForm({ storeId }: ProductFormProps) {
           ))}
 
           {variants.length > 0 && (
-            <div className="mt-4">
+            <div className="mt-4 overflow-x-auto">
               <h3 className="font-semibold mb-4">Generated Variants ({variants.length})</h3>
-              <div className="grid gap-4">
+              <div className="grid gap-4 min-w-[800px]">
                 {variants.map((variant, index) => (
-                  <div key={index} className="grid grid-cols-4 gap-4 items-end border-b pb-4">
+                  <div key={index} className="grid grid-cols-6 gap-4 items-end border-b pb-4">
                     <div className="col-span-1">
                       <Label className="text-slate-500 text-xs">Variant</Label>
                       <div className="font-medium pt-2">{variant.name}</div>
+                    </div>
+                    <div>
+                      <Label>Image</Label>
+                      <Input type="file" accept="image/*" onChange={(e) => handleImageUpload(index, e)} className="text-xs" />
                     </div>
                     <div>
                       <Label>Price</Label>
                       <Input type="number" step="0.01" value={variant.price} onChange={e => updateVariant(index, "price", e.target.value)} required />
                     </div>
                     <div>
+                      <Label>Compare At (Discount)</Label>
+                      <Input type="number" step="0.01" value={variant.compareAtPrice} onChange={e => updateVariant(index, "compareAtPrice", e.target.value)} placeholder="0.00" />
+                    </div>
+                    <div>
                       <Label>Stock</Label>
                       <Input type="number" value={variant.stockCount} onChange={e => updateVariant(index, "stockCount", e.target.value)} required />
                     </div>
                     <div>
-                      <Label>SKU</Label>
-                      <Input value={variant.sku} onChange={e => updateVariant(index, "sku", e.target.value)} />
+                      <Label>SKU (Auto-gen if empty)</Label>
+                      <Input value={variant.sku} onChange={e => updateVariant(index, "sku", e.target.value)} placeholder="Leave blank to auto-generate" />
                     </div>
                   </div>
                 ))}

@@ -76,13 +76,17 @@ export async function POST(
           optionValueIds.push({ id: matchedVal.id })
         }
       })
+      
+      const generatedSku = `${name.substring(0,3).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`
 
       return {
         productId: product.id,
         name: v.name,
         price: v.price,
-        sku: v.sku || null,
+        compareAtPrice: v.compareAtPrice ? parseFloat(v.compareAtPrice) : null,
+        sku: v.sku || generatedSku,
         stockCount: v.stockCount,
+        imageUrl: v.imageBase64 || null,
         optionValues: optionValueIds.length > 0 ? { connect: optionValueIds } : undefined
       }
     })
