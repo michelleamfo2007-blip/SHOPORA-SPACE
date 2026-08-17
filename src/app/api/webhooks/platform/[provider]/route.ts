@@ -6,20 +6,20 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ provider: string }> }
 ) {
-  const { provider } = await params;
+  const { provider: providerName } = await params;
   try {
     const bodyText = await req.text();
     const signature = req.headers.get("x-paystack-signature") || ""; // Adapt based on provider later
 
-    const provider = getPlatformProvider();
+    const paymentProvider = getPlatformProvider();
     
     // 1. Verify Signature
-    if (!provider.validateWebhookSignature(bodyText, signature)) {
+    if (!paymentProvider.validateWebhookSignature(bodyText, signature)) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
     const payload = JSON.parse(bodyText);
-    const event = provider.parseWebhookEvent(payload);
+    const event = paymentProvider.parseWebhookEvent(payload);
 
     if (!event) {
       return NextResponse.json({ received: true });
@@ -36,7 +36,7 @@ export async function POST(
 
     await db.webhookEvent.create({
       data: {
-        provider: String(provider).toUpperCase(),
+        provider: String(providerName).toUpperCase(),
         providerEventId: event.providerEventId,
         type: event.type,
       },
