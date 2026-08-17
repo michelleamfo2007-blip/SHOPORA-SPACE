@@ -134,6 +134,8 @@ model Store {
   paymentSetting StorePaymentSetting?
   discounts    Discount[]
   shippingZones ShippingZone[]
+  reviews      Review[]
+  supportTickets SupportTicket[]
 }
 
 model StoreMember {
@@ -197,6 +199,7 @@ model Product {
   variants    ProductVariant[]
   options     ProductOption[]
   categories  Category[]     @relation("ProductToCategory")
+  reviews     Review[]
 }
 
 model ProductOption {
@@ -280,6 +283,8 @@ model Customer {
 
   store      Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
   orders     Order[]
+  reviews    Review[]
+  supportTickets SupportTicket[]
 
   @@unique([storeId, email])
 }
@@ -386,4 +391,32 @@ model ShippingRate {
   estimatedDays  String?  
   
   zone           ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  storeId   String
+  productId String
+  customerId String?
+  rating    Int      
+  comment   String?
+  status    String   @default("PUBLISHED") 
+  createdAt DateTime @default(now())
+
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customer  Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+}
+
+model SupportTicket {
+  id          String   @id @default(cuid())
+  storeId     String
+  customerId  String
+  subject     String
+  message     String
+  status      String   @default("OPEN") 
+  createdAt   DateTime @default(now())
+
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
