@@ -15,9 +15,12 @@ import { signUpAction } from "@/server/actions/auth"
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 
+import { useRouter } from "next/navigation"
+
 export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -31,9 +34,12 @@ export default function SignUpPage() {
       if (res?.error) {
         setError(res.error)
         setLoading(false)
+      } else if (res?.success) {
+        // Redirect manually since we prevented NEXT_REDIRECT errors
+        router.push("/login")
       }
-      // If successful, the action will redirect, so we don't need to do anything here
     } catch (err) {
+      console.error(err)
       setError("An unexpected error occurred")
       setLoading(false)
     }

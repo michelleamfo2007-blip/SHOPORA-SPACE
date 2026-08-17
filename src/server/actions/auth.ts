@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db"
 import { hash } from "bcryptjs"
-import { redirect } from "next/navigation"
+
 
 export async function signUpAction(formData: FormData) {
   const name = formData.get("name") as string
@@ -34,6 +34,5 @@ export async function signUpAction(formData: FormData) {
     }
   })
 
-  // Redirect to login page after successful registration
-  redirect("/login")
+  return { success: true }
 }
