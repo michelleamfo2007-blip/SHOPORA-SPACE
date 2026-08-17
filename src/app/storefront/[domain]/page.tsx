@@ -28,63 +28,92 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
   })
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Hero Section */}
-      <div className="rounded-2xl bg-slate-900 text-white p-8 md:p-16 mb-16 text-center">
-        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
-          Welcome to {store.name}
-        </h1>
-        <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-8">
-          {store.description || "Discover our curated collection of amazing products."}
-        </p>
-        <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100">
-          Shop Now
-        </Button>
+    <div className="min-h-screen bg-slate-50">
+      {/* Premium Hero Section */}
+      <div className="relative overflow-hidden bg-slate-900 text-white">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20" />
+        <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 text-center">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-300">
+            {store.name}
+          </h1>
+          <p className="text-xl md:text-2xl text-slate-300 max-w-2xl mx-auto mb-10 font-light">
+            {store.description || "Discover our curated collection of amazing products."}
+          </p>
+          <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 rounded-full px-8 py-6 text-lg font-medium shadow-xl transition-transform hover:scale-105">
+            Shop Collection
+          </Button>
+        </div>
       </div>
 
-      {/* Featured Products */}
-      <div className="mb-8 flex items-center justify-between">
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900">Featured Products</h2>
-        <Link href="/products" className="text-sm font-medium text-slate-600 hover:text-slate-900">
-          View all →
-        </Link>
-      </div>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        {/* Featured Products */}
+        <div className="mb-10 flex items-center justify-between">
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Featured Products</h2>
+          <Link href="/products" className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors flex items-center">
+            View all <span className="ml-1">→</span>
+          </Link>
+        </div>
 
-      {products.length === 0 ? (
-        <div className="text-center py-24 bg-white rounded-lg border border-slate-200 border-dashed">
-          <p className="text-slate-500">No products available at the moment. Check back soon!</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map((product) => {
-            const price = product.variants[0]?.price || 0
-            
-            return (
-              <Link key={product.id} href={`/product/${product.id}`}>
-                <Card className="h-full overflow-hidden hover:shadow-lg transition-all duration-200 border-transparent bg-white group cursor-pointer">
-                  <div className="aspect-square bg-slate-100 relative w-full overflow-hidden">
-                    {/* Placeholder for Product Image */}
-                    <div className="absolute inset-0 flex items-center justify-center text-slate-400">
-                      No Image
+        {products.length === 0 ? (
+          <div className="text-center py-32 bg-white rounded-2xl shadow-sm border border-slate-100">
+            <p className="text-slate-500 text-lg">No products available at the moment. Check back soon!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            {products.map((product) => {
+              const variant = product.variants[0]
+              const price = variant?.price || 0
+              const compareAtPrice = variant?.compareAtPrice
+              const imageUrl = variant?.imageUrl
+              
+              return (
+                <Link key={product.id} href={`/product/${product.id}`}>
+                  <Card className="h-full overflow-hidden hover:shadow-xl transition-all duration-300 border-slate-100 bg-white group cursor-pointer rounded-2xl">
+                    <div className="aspect-[4/5] bg-slate-100 relative w-full overflow-hidden">
+                      {imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img 
+                          src={imageUrl} 
+                          alt={product.name} 
+                          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center text-slate-400 bg-slate-50">
+                          <span className="text-sm font-medium">No Image</span>
+                        </div>
+                      )}
+                      
+                      {compareAtPrice && compareAtPrice > price && (
+                        <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                          SALE
+                        </div>
+                      )}
                     </div>
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
-                      {product.name}
-                    </h3>
-                    <p className="text-sm text-slate-500 mb-2 truncate">
-                      {product.categories.map(c => c.name).join(", ")}
-                    </p>
-                    <div className="font-medium text-slate-900">
-                      {store.currency} {price.toFixed(2)}
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            )
-          })}
-        </div>
-      )}
+                    <CardContent className="p-6">
+                      <p className="text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">
+                        {product.categories.map(c => c.name).join(", ") || "Uncategorized"}
+                      </p>
+                      <h3 className="font-semibold text-lg text-slate-900 truncate group-hover:text-blue-600 transition-colors mb-3">
+                        {product.name}
+                      </h3>
+                      <div className="flex items-center gap-3">
+                        <span className="font-bold text-lg text-slate-900">
+                          {store.currency} {price.toFixed(2)}
+                        </span>
+                        {compareAtPrice && compareAtPrice > price && (
+                          <span className="text-sm text-slate-400 line-through font-medium">
+                            {store.currency} {compareAtPrice.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

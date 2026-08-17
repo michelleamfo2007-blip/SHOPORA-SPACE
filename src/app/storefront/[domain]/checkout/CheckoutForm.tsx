@@ -22,11 +22,19 @@ export function CheckoutForm({
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const getHomeUrl = () => {
+    if (typeof window !== "undefined" && window.location.pathname.startsWith('/storefront/')) {
+      const parts = window.location.pathname.split('/')
+      return `/storefront/${parts[2]}`
+    }
+    return "/"
+  }
+
   if (items.length === 0) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
-        <Button onClick={() => router.push("/")}>Continue Shopping</Button>
+      <div className="text-center py-16 bg-white rounded-2xl shadow-sm border border-slate-100">
+        <h2 className="text-2xl font-bold mb-4 text-slate-800">Your cart is empty</h2>
+        <Button size="lg" onClick={() => router.push(getHomeUrl())}>Continue Shopping</Button>
       </div>
     )
   }
@@ -41,7 +49,7 @@ export function CheckoutForm({
       
       clearCart()
       alert("Order placed successfully! We will verify your payment shortly. Order ID: " + orderId)
-      router.push("/")
+      router.push(getHomeUrl())
     } catch (error) {
       console.error(error)
       alert("Checkout failed. Please try again.")
