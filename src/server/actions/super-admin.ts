@@ -51,7 +51,7 @@ export async function approveWaitlistAction(entryId: string) {
 
   // Send the invite email
   try {
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: "Shopora Space <onboarding@resend.dev>",
       to: entry.email,
       subject: "You've been invited to Shopora Space!",
@@ -62,6 +62,10 @@ export async function approveWaitlistAction(entryId: string) {
         <p><a href="https://shopora.space/signup">https://shopora.space/signup</a></p>
       `
     })
+
+    if (error) {
+      console.error("Resend API Error:", error)
+    }
   } catch (error) {
     console.error("Failed to send invite email:", error)
   }
