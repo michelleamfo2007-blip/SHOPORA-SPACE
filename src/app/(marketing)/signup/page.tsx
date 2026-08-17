@@ -38,9 +38,9 @@ export default function SignUpPage() {
         // Redirect manually since we prevented NEXT_REDIRECT errors
         router.push("/login")
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
-      setError("An unexpected error occurred")
+      setError(`Client catch block: ${err.message || String(err)}`)
       setLoading(false)
     }
   }
