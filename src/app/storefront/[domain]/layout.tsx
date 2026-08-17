@@ -9,10 +9,10 @@ export default async function StorefrontLayout({
   params,
 }: {
   children: React.ReactNode
-  params: Promise<{ storeId: string }>
+  params: Promise<{ domain: string }>
 }) {
-  const { storeId } = await params
-  const store = await db.store.findUnique({ where: { slug: storeId } })
+  const { domain } = await params
+  const store = await getStoreByHost(domain)
 
   if (!store) {
     notFound()

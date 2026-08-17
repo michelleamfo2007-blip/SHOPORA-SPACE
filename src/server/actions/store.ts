@@ -20,6 +20,12 @@ export async function createStoreAction(formData: FormData) {
     throw new Error("Missing required fields")
   }
 
+  // Prevent reserved subdomain names
+  const reservedSlugs = ["www", "api", "app", "admin", "super-admin", "mail", "ftp", "blog", "shop", "store", "checkout"]
+  if (reservedSlugs.includes(slug.toLowerCase())) {
+    throw new Error("This store URL is reserved and cannot be used")
+  }
+
   // Check if slug is taken
   const existingStore = await db.store.findUnique({
     where: { slug }

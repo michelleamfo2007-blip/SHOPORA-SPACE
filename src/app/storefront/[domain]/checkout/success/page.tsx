@@ -7,10 +7,12 @@ export default async function CheckoutSuccessPage({
   params,
   searchParams 
 }: { 
-  params: { storeId: string },
-  searchParams: { orderId?: string }
+  params: Promise<{ domain: string }>,
+  searchParams: Promise<{ orderId?: string }>
 }) {
-  const store = await getStoreByHost(params.storeId)
+  const resolvedParams = await params
+  const resolvedSearchParams = await searchParams
+  const store = await getStoreByHost(resolvedParams.domain)
   if (!store) notFound()
 
   return (
@@ -26,10 +28,10 @@ export default async function CheckoutSuccessPage({
           Thank you for shopping at {store.name}. Your payment is being processed and your order will be shipped soon.
         </p>
         
-        {searchParams.orderId && (
+        {resolvedSearchParams.orderId && (
           <div className="bg-slate-50 rounded-lg p-4 mb-6">
             <p className="text-sm text-slate-500 font-medium">Order Reference</p>
-            <p className="font-mono text-slate-900">{searchParams.orderId}</p>
+            <p className="font-mono text-slate-900">{resolvedSearchParams.orderId}</p>
           </div>
         )}
 

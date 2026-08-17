@@ -6,9 +6,9 @@ import { db } from "@/lib/db"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
-export default async function StorefrontHomePage({ params }: { params: Promise<{ storeId: string }> }) {
-  const { storeId } = await params;
-  const store = await db.store.findUnique({ where: { slug: storeId } })
+export default async function StorefrontHomePage({ params }: { params: Promise<{ domain: string }> }) {
+  const { domain } = await params;
+  const store = await getStoreByHost(domain)
   if (!store) notFound()
 
   // Fetch active products for this store

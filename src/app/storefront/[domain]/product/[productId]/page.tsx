@@ -3,17 +3,18 @@ import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
 import { Button } from "@/components/ui/button"
 
-export default async function StorefrontProductPage({ 
+export default async function ProductPage({ 
   params 
 }: { 
-  params: { storeId: string; productId: string } 
+  params: Promise<{ domain: string; productId: string }> 
 }) {
-  const store = await getStoreByHost(params.storeId)
+  const { domain, productId } = await params;
+  const store = await getStoreByHost(domain)
   if (!store) notFound()
 
   const product = await db.product.findUnique({
     where: { 
-      id: params.productId,
+      id: productId,
       storeId: store.id,
       isActive: true
     },

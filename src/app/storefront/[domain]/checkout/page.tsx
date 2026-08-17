@@ -1,14 +1,17 @@
 import { notFound } from "next/navigation"
+import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
 import { CheckoutForm } from "./CheckoutForm"
 
-export default async function CheckoutPage({ params }: { params: Promise<{ storeId: string }> }) {
-  const { storeId } = await params;
-  const store = await db.store.findUnique({ 
-    where: { slug: storeId },
-    include: { paymentSetting: true }
-  })
+export default async function CheckoutPage({ params }: { params: Promise<{ domain: string }> }) {
+  const { domain } = await params;
+  const store = await getStoreByHost(domain)
+  
   if (!store) notFound()
+
+  const paymentSetting = await db.storePaymentSetting.findUnique({
+    where: { storeId: store.id }
+  })
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -19,7 +22,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ store
         <CheckoutForm 
           storeId={store.id} 
           currency={store.currency} 
-          paymentSetting={store.paymentSetting} 
+          paymentSetting={paymentSetting} 
         />
       </div>
     </div>
