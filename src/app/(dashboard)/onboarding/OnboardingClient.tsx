@@ -7,9 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createStoreAction } from "@/server/actions/store"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-
-import { isRedirectError } from "next/dist/client/components/redirect"
+import { useRouter, isRedirectError } from "next/navigation"
 
 export function OnboardingClient() {
   const [error, setError] = useState<string | null>(null)
