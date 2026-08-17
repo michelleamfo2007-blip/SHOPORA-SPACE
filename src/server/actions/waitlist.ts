@@ -48,16 +48,23 @@ export async function joinWaitlistAction(formData: FormData) {
       to: [email],
       subject: 'Welcome to the Shopora Waitlist',
       html: `
-        <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto;">
-          <h2>You're on the list!</h2>
-          <p>Thank you for your interest in selling on Shopora.</p>
-          <p>We are currently curating our platform to ensure the highest quality experience for our shoppers. When you are selected to proceed, we will invite you.</p>
-          <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin-top: 20px;">
+        <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; color: #1e293b; line-height: 1.5;">
+          <h2>You’re on the list!</h2>
+          <p>Thank you for your interest in becoming a vendor on Shopora Space.</p>
+          <p>We’re currently carefully curating our vendor community to create a high-quality shopping experience for our customers. When applications open and your business is selected to proceed, we’ll be in touch with the next steps.</p>
+          <div style="background-color: #f8fafc; padding: 24px; border-radius: 8px; margin-top: 24px; margin-bottom: 24px;">
             <h3 style="margin-top: 0;">Next Steps</h3>
-            <p>Please reply to this email, or send an email directly to <strong>shoporaspace@gmail.com</strong> with your personal and business requirements, including what you plan to sell and your brand details.</p>
-            <p>Our team will review your submission and manually grant you onboarding access if you are selected.</p>
+            <p>If you’d like to be considered, simply reply to this email or contact us at <strong>shoporaspace@gmail.com</strong> with:</p>
+            <ul>
+              <li>Your name</li>
+              <li>Your business/brand name</li>
+              <li>What you sell</li>
+              <li>Your social media or website</li>
+              <li>A brief description of your brand</li>
+            </ul>
           </div>
-          <p style="margin-top: 30px; font-size: 14px; color: #64748b;">The Shopora Team</p>
+          <p>Our team will review your submission and, if selected, you’ll receive an invitation to begin your Shopora onboarding.</p>
+          <p style="margin-top: 30px;">The Shopora Team</p>
         </div>
       `,
     });
