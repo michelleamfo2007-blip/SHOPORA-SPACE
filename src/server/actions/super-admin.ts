@@ -9,7 +9,12 @@ import { StoreStatus } from "@prisma/client"
 export async function toggleStoreStatusAction(storeId: string, currentStatus: StoreStatus) {
   const session = await getServerSession(authOptions)
   
-  if (!session?.user?.id || session.user.platformRole !== "SUPER_ADMIN") {
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  const user = await db.user.findUnique({ where: { id: session.user.id } })
+  if (user?.platformRole !== "SUPER_ADMIN") {
     throw new Error("Unauthorized: Only Super Admins can perform this action.")
   }
 
@@ -28,7 +33,12 @@ export async function toggleStoreStatusAction(storeId: string, currentStatus: St
 export async function approveWaitlistAction(entryId: string) {
   const session = await getServerSession(authOptions)
   
-  if (!session?.user?.id || session.user.platformRole !== "SUPER_ADMIN") {
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  const user = await db.user.findUnique({ where: { id: session.user.id } })
+  if (user?.platformRole !== "SUPER_ADMIN") {
     throw new Error("Unauthorized: Only Super Admins can perform this action.")
   }
 
