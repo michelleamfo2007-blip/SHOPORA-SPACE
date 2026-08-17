@@ -26,7 +26,8 @@ export default function proxy(req: NextRequest) {
   const isPlatformDomain =
     hostname === "localhost:3000" ||
     hostname === process.env.NEXT_PUBLIC_ROOT_DOMAIN ||
-    hostname === "shopora.space"
+    hostname === "shopora.space" ||
+    hostname === "www.shopora.space"
 
   const path = url.pathname
 

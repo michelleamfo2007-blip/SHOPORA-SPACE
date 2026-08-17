@@ -33,10 +33,22 @@ export function DashboardNav({ storeId }: DashboardNavProps) {
       active: pathname === `/${storeId}/categories`,
     },
     {
+      href: `/${storeId}/inventory`,
+      label: "Inventory",
+      icon: Package,
+      active: pathname === `/${storeId}/inventory`,
+    },
+    {
       href: `/${storeId}/orders`,
       label: "Orders",
       icon: ShoppingCart,
       active: pathname === `/${storeId}/orders`,
+    },
+    {
+      href: `/${storeId}/shipping`,
+      label: "Shipping",
+      icon: Package,
+      active: pathname === `/${storeId}/shipping`,
     },
     {
       href: `/${storeId}/customers`,
@@ -45,16 +57,40 @@ export function DashboardNav({ storeId }: DashboardNavProps) {
       active: pathname === `/${storeId}/customers`,
     },
     {
+      href: `/${storeId}/payments`,
+      label: "Payments",
+      icon: Settings,
+      active: pathname === `/${storeId}/payments`,
+    },
+    {
+      href: `/${storeId}/discounts`,
+      label: "Discounts",
+      icon: Settings,
+      active: pathname === `/${storeId}/discounts`,
+    },
+    {
+      href: `/${storeId}/analytics`,
+      label: "Analytics",
+      icon: LayoutDashboard,
+      active: pathname === `/${storeId}/analytics`,
+    },
+    {
+      href: `/${storeId}/reviews`,
+      label: "Reviews",
+      icon: Users,
+      active: pathname === `/${storeId}/reviews`,
+    },
+    {
+      href: `/${storeId}/support`,
+      label: "Support",
+      icon: Users,
+      active: pathname === `/${storeId}/support`,
+    },
+    {
       href: `/${storeId}/settings`,
       label: "Settings",
       icon: Settings,
       active: pathname === `/${storeId}/settings`,
-    },
-    {
-      href: `/${storeId}/billing`,
-      label: "Billing",
-      icon: Settings,
-      active: pathname === `/${storeId}/billing`,
     },
   ]
 
