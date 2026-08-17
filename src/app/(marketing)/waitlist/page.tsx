@@ -53,17 +53,11 @@ export default function WaitlistPage() {
           <h2 className="text-2xl font-bold text-slate-900">You're on the list!</h2>
           <div className="text-slate-600 space-y-4 text-sm leading-relaxed">
             <p>
-              Thank you for your interest in selling on Shopora. We are currently curating our platform to ensure the highest quality experience for our shoppers.
+              Thank you for your interest in selling on Shopora. 
             </p>
-            <div className="bg-slate-50 p-4 rounded-xl text-left border border-slate-100">
-              <h3 className="font-semibold text-slate-900 mb-2">Next Steps:</h3>
-              <ol className="list-decimal list-inside space-y-2 text-slate-600">
-                <li>Watch out for a welcome email from <strong>customersupport@shopora.space</strong>.</li>
-                <li>When invited, please email <strong>shoporaspace@gmail.com</strong> with your business requirements and brand details.</li>
-                <li>Our team will review your application.</li>
-                <li>Selected vendors will receive full onboarding access to set up their store.</li>
-              </ol>
-            </div>
+            <p className="font-medium text-slate-900 bg-slate-50 p-4 rounded-xl border border-slate-100">
+              We've just sent you an email with your next steps. Please check your inbox (and spam folder) for an email from <strong>customersupport@shopora.space</strong>.
+            </p>
           </div>
           <div className="pt-4">
             <Link href="/">
