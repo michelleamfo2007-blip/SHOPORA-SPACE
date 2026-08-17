@@ -52,7 +52,7 @@ export async function approveWaitlistAction(entryId: string) {
   // Send the invite email
   try {
     const { data, error } = await resend.emails.send({
-      from: "Shopora Space <onboarding@resend.dev>",
+      from: "Shopora Space <customersupport@shopora.space>",
       to: entry.email,
       subject: "You've been invited to Shopora Space!",
       html: `
