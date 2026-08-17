@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ApproveButton } from "./WaitlistClient";
 
 export default async function SuperAdminWaitlistPage() {
   const entries = await db.waitlistEntry.findMany({
@@ -61,9 +61,7 @@ export default async function SuperAdminWaitlistPage() {
                   </TableCell>
                   <TableCell className="text-right space-x-2">
                     {entry.status === "PENDING" && (
-                      <Button variant="outline" size="sm">
-                        Approve & Invite
-                      </Button>
+                      <ApproveButton entryId={entry.id} />
                     )}
                   </TableCell>
                 </TableRow>

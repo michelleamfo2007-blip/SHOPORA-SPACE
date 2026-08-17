@@ -24,3 +24,19 @@ export async function toggleStoreStatusAction(storeId: string, currentStatus: St
   
   return { success: true, newStatus }
 }
+
+export async function approveWaitlistAction(entryId: string) {
+  const session = await getServerSession(authOptions)
+  
+  if (!session?.user?.id || session.user.platformRole !== "SUPER_ADMIN") {
+    throw new Error("Unauthorized: Only Super Admins can perform this action.")
+  }
+
+  await db.waitlistEntry.update({
+    where: { id: entryId },
+    data: { status: "INVITED" }
+  })
+
+  revalidatePath("/super-admin/waitlist")
+  return { success: true }
+}
