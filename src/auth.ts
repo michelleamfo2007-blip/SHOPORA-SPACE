@@ -21,7 +21,7 @@ declare module "next-auth" {
 }
 
 export const authOptions: NextAuthOptions = {
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || "fallback_secret_for_development_only_12345",
   adapter: PrismaAdapter(db) as any,
   providers: [
     CredentialsProvider({
