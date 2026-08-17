@@ -19,9 +19,9 @@ export default async function SuperAdminLayout({
     where: { id: session.user.id },
   });
 
-  // if (user?.platformRole !== "SUPER_ADMIN") {
-  //   redirect("/"); // Redirect unauthorized users away
-  // }
+  if (user?.platformRole !== "SUPER_ADMIN") {
+    redirect("/"); // Redirect unauthorized users away
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-50">

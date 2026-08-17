@@ -5,12 +5,12 @@ import { Store, Users, ShoppingCart, DollarSign, AlertCircle, Clock } from "luci
 export default async function SuperAdminOverview() {
   // We'll fetch basic metrics here. In a production app with huge data,
   // these should be cached or aggregated in a separate table.
-  const [totalStores, totalUsers, totalOrders] = await Promise.all([
+  const [totalStores, totalUsers, totalOrders, pendingApprovals] = await Promise.all([
     db.store.count(),
     db.user.count(),
     db.order.count(),
+    db.waitlistEntry.count({ where: { status: "PENDING" } })
   ]);
-  const pendingStores = 0; // We'll add a 'status' field to the Store schema later
 
   return (
     <div className="max-w-6xl space-y-8">
@@ -70,7 +70,7 @@ export default async function SuperAdminOverview() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{0}</div>
+            <div className="text-2xl font-bold">{pendingApprovals}</div>
             <p className="text-xs text-muted-foreground">Stores waiting for review</p>
           </CardContent>
         </Card>
