@@ -1,6 +1,7 @@
 "use server"
 
 import { db } from "@/lib/db"
+import { resend } from "@/lib/resend"
 
 export async function joinWaitlistAction(formData: FormData) {
   try {
@@ -40,6 +41,26 @@ export async function joinWaitlistAction(formData: FormData) {
         email,
       }
     })
+
+    // Send the welcome email
+    await resend.emails.send({
+      from: 'Shopora <customersupport@shopora.store>',
+      to: [email],
+      subject: 'Welcome to the Shopora Waitlist',
+      html: `
+        <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto;">
+          <h2>You're on the list!</h2>
+          <p>Thank you for your interest in selling on Shopora.</p>
+          <p>We are currently curating our platform to ensure the highest quality experience for our shoppers. When you are selected to proceed, we will invite you.</p>
+          <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin-top: 20px;">
+            <h3 style="margin-top: 0;">Next Steps</h3>
+            <p>Please reply to this email, or send an email directly to <strong>shoporastore@gmail.com</strong> with your personal and business requirements, including what you plan to sell and your brand details.</p>
+            <p>Our team will review your submission and manually grant you onboarding access if you are selected.</p>
+          </div>
+          <p style="margin-top: 30px; font-size: 14px; color: #64748b;">The Shopora Team</p>
+        </div>
+      `,
+    });
 
     return { success: true }
   } catch (error: any) {
