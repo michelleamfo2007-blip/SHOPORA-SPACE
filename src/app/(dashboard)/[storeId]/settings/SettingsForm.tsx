@@ -89,6 +89,75 @@ export function SettingsForm({ store }: { store: any }) {
         </div>
       </div>
 
+      <div className="pt-4 border-t">
+        <h3 className="text-lg font-semibold mb-4">Storefront Hero Section</h3>
+        <div className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="heroHeadline">Hero Headline</Label>
+            <Input 
+              id="heroHeadline" 
+              name="heroHeadline" 
+              defaultValue={store.heroHeadline || ""} 
+              placeholder="Your Hair. Your Confidence. Your Look." 
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="heroSubtext">Hero Subtext</Label>
+            <Input 
+              id="heroSubtext" 
+              name="heroSubtext" 
+              defaultValue={store.heroSubtext || ""} 
+              placeholder="Premium wigs made to elevate your everyday look." 
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="heroImage">Hero Background Image URL</Label>
+            <Input 
+              id="heroImage" 
+              name="heroImage" 
+              defaultValue={store.heroImage || ""} 
+              placeholder="https://example.com/hero.jpg" 
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-4 border-t">
+        <h3 className="text-lg font-semibold mb-4">About & Social</h3>
+        <div className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="aboutText">About The Seller</Label>
+            <Textarea 
+              id="aboutText" 
+              name="aboutText" 
+              defaultValue={store.aboutText || ""} 
+              placeholder="Meet Chelle Wigs. Quality hair. Beautiful looks. Confidence that lasts." 
+              className="resize-none h-24"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="instagramHandle">Instagram Handle</Label>
+              <Input 
+                id="instagramHandle" 
+                name="instagramHandle" 
+                defaultValue={store.instagramHandle || ""} 
+                placeholder="@chellewigs" 
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="whatsappNumber">WhatsApp Number</Label>
+              <Input 
+                id="whatsappNumber" 
+                name="whatsappNumber" 
+                defaultValue={store.whatsappNumber || ""} 
+                placeholder="+233..." 
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       <Button type="submit" className="w-fit" disabled={loading}>
         {loading ? "Saving..." : "Save Changes"}
       </Button>

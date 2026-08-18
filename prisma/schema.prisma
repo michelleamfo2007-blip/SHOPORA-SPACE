@@ -121,6 +121,14 @@ model Store {
   description    String?
   logoUrl        String?
   primaryColor   String?     @default("#2563eb")
+  
+  heroHeadline   String?
+  heroSubtext    String?
+  heroImage      String?
+  aboutText      String?
+  instagramHandle String?
+  whatsappNumber String?
+
   status         StoreStatus @default(ACTIVE)
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -173,6 +181,20 @@ model Subscription {
 
   store            Store              @relation(fields: [storeId], references: [id], onDelete: Cascade)
   plan             SubscriptionPlan   @relation(fields: [planId], references: [id])
+  payments         SubscriptionPayment[]
+}
+
+model SubscriptionPayment {
+  id              String   @id @default(cuid())
+  subscriptionId  String
+  amount          Float
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  paymentMethod   String   // BANK_TRANSFER, MOMO
+  reference       String   // Transaction ID
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 }
 
 model SubscriptionPlan {

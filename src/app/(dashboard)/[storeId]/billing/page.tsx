@@ -1,107 +1,157 @@
 import { db } from "@/lib/db"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle2 } from "lucide-react"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/auth"
+import { redirect } from "next/navigation"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { BillingClient } from "./BillingClient"
 
-export default async function BillingPage({ params }: { params: Promise<{ storeId: string }> }) {
-  const { storeId } = await params;
+export default async function BillingPage({ params }: { params: { storeId: string } }) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) redirect("/login")
+
   const store = await db.store.findUnique({
-    where: { id: storeId },
+    where: { id: params.storeId },
     include: {
-      subscription: true
+      subscription: {
+        include: { plan: true, payments: { orderBy: { createdAt: "desc" }, take: 1 } }
+      }
     }
   })
 
-  if (!store) return null
+  if (!store || !store.subscription) {
+    return (
+      <div className="p-6 max-w-4xl mx-auto mt-10">
+        <Card>
+          <CardHeader>
+            <CardTitle>Billing & Subscription</CardTitle>
+            <CardDescription>No active subscription found for this store.</CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    )
+  }
 
-  const isPro = store.subscription?.planId === "PRO" && store.subscription?.status === "ACTIVE"
+  const { subscription } = store
+  const { plan, payments } = subscription
+  const latestPayment = payments[0]
+
+  const isTrial = subscription.status === "TRIAL"
+  const isPastDue = subscription.status === "PAST_DUE"
+  const isActive = subscription.status === "ACTIVE"
+  
+  const trialEndsAt = subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd) : null
+  const trialEnded = trialEndsAt && trialEndsAt < new Date()
 
   return (
-    <div className="grid gap-6 max-w-5xl">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Billing & Subscriptions</h2>
-        <p className="text-slate-500">Manage your Shopora subscription plan and billing details.</p>
+    <div className="p-6 max-w-4xl mx-auto space-y-6">
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Billing & Subscription</h1>
+          <p className="text-slate-500 mt-2">Manage your subscription and payments to keep your store active.</p>
+        </div>
+        <Badge variant={isActive ? "default" : isPastDue ? "destructive" : "secondary"} className="text-sm px-4 py-1">
+          {subscription.status}
+        </Badge>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8 mt-6">
-        {/* Free Plan */}
-        <Card className={`relative ${!isPro ? "border-2 border-slate-900" : ""}`}>
-          {!isPro && (
-            <div className="absolute top-4 right-4 bg-slate-900 text-white text-xs px-3 py-1 rounded-full font-medium">
-              Current Plan
-            </div>
-          )}
+      <div className="grid md:grid-cols-2 gap-6">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Basic</CardTitle>
-            <CardDescription>Perfect for getting started</CardDescription>
-            <div className="mt-4 flex items-baseline text-4xl font-extrabold">
-              Free
-            </div>
+            <CardTitle>Current Plan</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4">
-            <ul className="space-y-3 text-sm text-slate-600">
-              <li className="flex items-center gap-3">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                Up to 50 Products
-              </li>
-              <li className="flex items-center gap-3">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                Standard Storefront
-              </li>
-              <li className="flex items-center gap-3">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                .shopora.space subdomain
-              </li>
-            </ul>
+          <CardContent className="space-y-4">
+            <div className="flex justify-between border-b pb-2">
+              <span className="text-slate-500">Package</span>
+              <span className="font-semibold">{plan.name}</span>
+            </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="text-slate-500">Price</span>
+              <span className="font-semibold">{plan.currency} {plan.price.toFixed(2)} / {plan.interval}</span>
+            </div>
+            {trialEndsAt && (
+              <div className="flex justify-between pb-2">
+                <span className="text-slate-500">Trial Ends</span>
+                <span className={`font-semibold ${trialEnded ? "text-red-500" : "text-green-600"}`}>
+                  {trialEndsAt.toLocaleDateString()}
+                </span>
+              </div>
+            )}
           </CardContent>
-          <CardFooter>
-            <Button className="w-full" variant={!isPro ? "outline" : "default"} disabled={!isPro}>
-              {!isPro ? "Active" : "Downgrade to Basic"}
-            </Button>
-          </CardFooter>
         </Card>
 
-        {/* Pro Plan */}
-        <Card className={`relative ${isPro ? "border-2 border-blue-600" : ""}`}>
-          {isPro && (
-            <div className="absolute top-4 right-4 bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-medium">
-              Current Plan
-            </div>
-          )}
-          <CardHeader>
-            <CardTitle className="text-2xl">Pro Shop</CardTitle>
-            <CardDescription>For growing businesses</CardDescription>
-            <div className="mt-4 flex items-baseline text-4xl font-extrabold">
-              $29<span className="ml-1 text-xl font-medium text-slate-500">/mo</span>
-            </div>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <ul className="space-y-3 text-sm text-slate-600">
-              <li className="flex items-center gap-3">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                Unlimited Products
-              </li>
-              <li className="flex items-center gap-3">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                Custom Domains
-              </li>
-              <li className="flex items-center gap-3">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                Advanced Analytics
-              </li>
-              <li className="flex items-center gap-3">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                Priority Support
-              </li>
-            </ul>
-          </CardContent>
-          <CardFooter>
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={isPro}>
-              {isPro ? "Active" : "Upgrade to Pro"}
-            </Button>
-          </CardFooter>
-        </Card>
+        {latestPayment && latestPayment.status === "PENDING" ? (
+          <Card className="border-blue-200 bg-blue-50">
+            <CardHeader>
+              <CardTitle className="text-blue-700">Payment Pending Verification</CardTitle>
+              <CardDescription className="text-blue-600">
+                You submitted a payment reference on {latestPayment.createdAt.toLocaleDateString()}. 
+                Our team is currently verifying it. Once verified, your subscription will be activated.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        ) : (
+          <Card className={isPastDue ? "border-red-200" : ""}>
+            <CardHeader>
+              <CardTitle>Manual Payment</CardTitle>
+              <CardDescription>
+                {isTrial && !trialEnded && "Your trial is active! You can pay now to ensure uninterrupted service."}
+                {(isPastDue || trialEnded) && "Your trial has ended. Please make a payment to restore access to your store."}
+                {isActive && "Your subscription is active. Make a payment to renew for the next period."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <BillingClient storeId={store.id} amount={plan.price} />
+            </CardContent>
+          </Card>
+        )}
       </div>
+
+      {(!latestPayment || latestPayment.status !== "PENDING") && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Payment Instructions</CardTitle>
+            <CardDescription>Send your payment via one of the methods below.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg flex items-center gap-2">
+                <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                Bank Transfer
+              </h3>
+              <div className="bg-slate-50 p-4 rounded-md border text-sm space-y-3">
+                <div>
+                  <div className="text-slate-500 mb-1">Fidelity Bank</div>
+                  <div className="font-mono font-medium">2100377615010</div>
+                  <div className="text-xs mt-1 text-slate-600">Name: MICHELLE AMFO</div>
+                </div>
+                <div className="border-t pt-3">
+                  <div className="text-slate-500 mb-1">GCB Bank</div>
+                  <div className="font-mono font-medium">1741250000618</div>
+                  <div className="text-xs mt-1 text-slate-600">Name: MICHELLE AMFO</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg flex items-center gap-2">
+                <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                Mobile Money
+              </h3>
+              <div className="bg-slate-50 p-4 rounded-md border text-sm space-y-3">
+                <div>
+                  <div className="text-slate-500 mb-1">MTN / Telecel / AT (All Networks)</div>
+                  <div className="font-mono font-medium text-lg tracking-wider text-green-600">0549789315</div>
+                  <div className="text-xs mt-1 text-slate-600">Name: MICHELLE AMFO</div>
+                </div>
+                <p className="text-xs text-slate-500 italic mt-4">
+                  Please include your Store URL as the reference when making the transfer if possible.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

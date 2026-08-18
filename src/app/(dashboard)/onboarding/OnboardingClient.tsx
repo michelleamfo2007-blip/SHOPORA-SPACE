@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createStoreAction } from "@/server/actions/store"
+import { completeSetupAction } from "@/server/actions/store"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
@@ -21,7 +21,7 @@ export function OnboardingClient() {
     
     const formData = new FormData(e.currentTarget)
     try {
-      await createStoreAction(formData)
+      await completeSetupAction(formData)
     } catch (err: any) {
       if (err.message === "NEXT_REDIRECT") {
         throw err; // Let Next.js handle the redirect
@@ -35,9 +35,9 @@ export function OnboardingClient() {
     <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4">
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle className="text-2xl">Create your store</CardTitle>
+          <CardTitle className="text-2xl">Complete your store setup</CardTitle>
           <CardDescription>
-            Let's get started by creating your online store. You can change these details later.
+            You're almost there! Tell us the details of your store.
           </CardDescription>
         </CardHeader>
         <CardContent>

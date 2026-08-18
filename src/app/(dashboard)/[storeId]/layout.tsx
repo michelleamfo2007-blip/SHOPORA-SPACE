@@ -4,6 +4,7 @@ import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
 import { DashboardNav } from "@/components/dashboard/nav"
 import { Store as StoreIcon, ExternalLink } from "lucide-react"
+import { SubscriptionGuard } from "@/components/dashboard/SubscriptionGuard"
 
 export default async function DashboardLayout({
   children,
@@ -28,7 +29,9 @@ export default async function DashboardLayout({
       }
     },
     include: {
-      store: true
+      store: {
+        include: { subscription: true }
+      }
     }
   })
 
@@ -99,7 +102,13 @@ export default async function DashboardLayout({
 
         {/* Page Content */}
         <main className="flex-1 p-4 md:p-6 overflow-y-auto">
-          {children}
+          <SubscriptionGuard
+            storeId={storeId}
+            status={storeMember.store.subscription?.status || "TRIAL"}
+            trialEndDate={storeMember.store.subscription?.currentPeriodEnd?.toISOString() || null}
+          >
+            {children}
+          </SubscriptionGuard>
         </main>
       </div>
     </div>

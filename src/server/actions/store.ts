@@ -73,15 +73,85 @@ export async function updateStoreBrandingAction(storeId: string, formData: FormD
   const description = formData.get("description") as string | null
   const logoUrl = formData.get("logoUrl") as string | null
   const primaryColor = formData.get("primaryColor") as string | null
+  
+  const heroHeadline = formData.get("heroHeadline") as string | null
+  const heroSubtext = formData.get("heroSubtext") as string | null
+  const heroImage = formData.get("heroImage") as string | null
+  const aboutText = formData.get("aboutText") as string | null
+  const instagramHandle = formData.get("instagramHandle") as string | null
+  const whatsappNumber = formData.get("whatsappNumber") as string | null
 
   await db.store.update({
     where: { id: storeId },
     data: {
       description,
       logoUrl,
-      primaryColor: primaryColor || "#2563eb"
+      primaryColor: primaryColor || "#2563eb",
+      heroHeadline,
+      heroSubtext,
+      heroImage,
+      aboutText,
+      instagramHandle,
+      whatsappNumber
     }
   })
 
   return { success: true }
+}
+
+export async function completeSetupAction(formData: FormData) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  const name = formData.get("name") as string
+  const slug = formData.get("slug") as string
+  const country = formData.get("country") as string
+  const currency = formData.get("currency") as string
+
+  if (!name || !slug || !country || !currency) {
+    throw new Error("Missing required fields")
+  }
+
+  const reservedSlugs = ["www", "api", "app", "admin", "super-admin", "mail", "ftp", "blog", "shop", "store", "checkout"]
+  if (reservedSlugs.includes(slug.toLowerCase())) {
+    throw new Error("This store URL is reserved and cannot be used")
+  }
+
+  // Check if slug is taken by someone else
+  const existingStore = await db.store.findUnique({
+    where: { slug }
+  })
+
+  if (existingStore) {
+    throw new Error("Store URL is already taken")
+  }
+
+  // Find the draft store for this user
+  const membership = await db.storeMember.findFirst({
+    where: { 
+      userId: session.user.id,
+      store: { slug: { startsWith: "draft-" } }
+    },
+    include: { store: true }
+  })
+
+  if (!membership || !membership.store) {
+    throw new Error("No draft store found. Please select a package first.")
+  }
+
+  const storeId = membership.store.id
+
+  await db.store.update({
+    where: { id: storeId },
+    data: {
+      name,
+      slug,
+      country,
+      currency
+    }
+  })
+
+  redirect(`/${storeId}`)
 }
