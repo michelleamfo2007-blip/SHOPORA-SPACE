@@ -15,6 +15,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Shopora",
   description: "The premier e-commerce platform for curated vendors.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+  },
 };
 
 import { CookieBanner } from "@/components/marketing/CookieBanner";
