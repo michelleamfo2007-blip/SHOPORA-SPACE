@@ -52,7 +52,7 @@ export async function joinWaitlistAction(formData: FormData) {
         <p>You’re on the list! Thank you for your interest in becoming a vendor on Shopora Space.</p>
         <p>We’re currently carefully curating our vendor community to create a high-quality shopping experience for our customers. When applications open and your business is selected to proceed, we’ll be in touch with the next steps.</p>
         <p>If you’d like to be considered, simply reply to this email or contact us at shoporaspace@gmail.com with:</p>
-        <p>- Your name<br>- Your business/brand name<br>- What you sell<br>- Your social media or website<br>- A brief description of your brand</p>
+        <p>- Your name<br>- Your business/brand name<br>- What you sell<br>- Your social media<br>- A brief description of your brand</p>
         <p>We look forward to seeing what you’re building!</p>
         <p>Best,<br>Michelle from Shopora</p>
       `,
