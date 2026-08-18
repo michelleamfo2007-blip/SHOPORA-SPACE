@@ -75,7 +75,7 @@ export async function startTrialAction(planName: string) {
   // 4. Send Email Notification
   try {
     await resend.emails.send({
-      from: "Shopora <customersupport@customersupport.shopora.space>",
+      from: "Shopora <billing@shopora.space>",
       to: user.email,
       subject: "Your Shopora 7-day free trial has started 🎉",
       html: `
