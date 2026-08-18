@@ -2,6 +2,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { getStoreByHost } from "@/lib/tenant"
 import { notFound } from "next/navigation"
+import { db } from "@/lib/db"
+import { StorefrontReviewForm } from "./StorefrontReviewForm"
 
 export default async function CheckoutSuccessPage({ 
   params,
@@ -14,6 +16,21 @@ export default async function CheckoutSuccessPage({
   const resolvedSearchParams = await searchParams
   const store = await getStoreByHost(resolvedParams.domain)
   if (!store) notFound()
+
+  let order = null;
+  if (resolvedSearchParams.orderId) {
+    order = await db.order.findFirst({
+      where: { 
+        storeId: store.id,
+        orderNumber: resolvedSearchParams.orderId
+      },
+      include: {
+        orderItems: {
+          include: { variant: true }
+        }
+      }
+    })
+  }
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
@@ -32,6 +49,12 @@ export default async function CheckoutSuccessPage({
           <div className="bg-slate-50 rounded-lg p-4 mb-6">
             <p className="text-sm text-slate-500 font-medium">Order Reference</p>
             <p className="font-mono text-slate-900">{resolvedSearchParams.orderId}</p>
+          </div>
+        )}
+        
+        {order && order.orderItems.length > 0 && (
+          <div className="mt-8 mb-6 pt-8 border-t border-slate-100">
+            <StorefrontReviewForm domain={resolvedParams.domain} productId={order.orderItems[0].variant.productId} />
           </div>
         )}
 

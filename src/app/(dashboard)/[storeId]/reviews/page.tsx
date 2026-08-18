@@ -2,7 +2,7 @@ import { db } from "@/lib/db"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Star } from "lucide-react"
-import { ReviewVisibilityToggle, DeleteReviewButton } from "./ReviewsClient"
+import { ReviewVisibilityToggle, DeleteReviewButton, AddManualReviewModal } from "./ReviewsClient"
 
 export default async function ReviewsPage({
   params
@@ -19,9 +19,12 @@ export default async function ReviewsPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Product Reviews</h2>
-        <p className="text-muted-foreground">Monitor and manage customer feedback.</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Product Reviews</h2>
+          <p className="text-muted-foreground">Monitor and manage customer feedback.</p>
+        </div>
+        <AddManualReviewModal storeId={storeId} />
       </div>
 
       <Card>
