@@ -5,28 +5,30 @@ import { db } from "@/lib/db"
 import { Card, CardContent } from "@/components/ui/card"
 
 export default async function StorefrontHomePage({ params }: { params: Promise<{ domain: string }> }) {
-  const { domain } = await params;
-  const store = await getStoreByHost(domain)
-  
-  if (!store) {
-    notFound()
-  }
+  try {
+    const { domain } = await params;
+    const store = await getStoreByHost(domain)
+    
+    if (!store) {
+      notFound()
+    }
 
-  // Fetch active products for this store
-  const products = await db.product.findMany({
-    where: { 
-      storeId: store.id,
-      isActive: true
-    },
-    include: {
-      variants: {
-        take: 1
+    // Fetch active products for this store
+    const products = await db.product.findMany({
+      where: { 
+        storeId: store.id,
+        isActive: true
       },
-      categories: true
-    },
-    orderBy: { createdAt: "desc" },
-    take: 12
-  })
+      include: {
+        variants: {
+          take: 1
+        },
+        categories: true
+      },
+      orderBy: { createdAt: "desc" },
+      take: 12
+    })
+
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -120,4 +122,13 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       </div>
     </div>
   )
+  } catch (error: any) {
+    return (
+      <div className="p-10 text-red-500">
+        <h1 className="text-2xl font-bold">Storefront Error</h1>
+        <pre className="mt-4 p-4 bg-gray-100 rounded text-sm text-black">{error.message}</pre>
+        <pre className="mt-4 p-4 bg-gray-100 rounded text-sm text-black">{error.stack}</pre>
+      </div>
+    )
+  }
 }

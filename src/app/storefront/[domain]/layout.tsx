@@ -11,12 +11,14 @@ export default async function StorefrontLayout({
   children: React.ReactNode
   params: Promise<{ domain: string }>
 }) {
-  const { domain } = await params
-  const store = await getStoreByHost(domain)
+  try {
+    const { domain } = await params
+    const store = await getStoreByHost(domain)
 
-  if (!store) {
-    notFound()
-  }
+    if (!store) {
+      notFound()
+    }
+
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -90,4 +92,17 @@ export default async function StorefrontLayout({
       </footer>
     </div>
   )
+  } catch (error: any) {
+    return (
+      <html lang="en">
+        <body>
+          <div className="p-10 text-red-500">
+            <h1 className="text-2xl font-bold">Storefront Layout Error</h1>
+            <pre className="mt-4 p-4 bg-gray-100 rounded text-sm text-black">{error.message}</pre>
+            <pre className="mt-4 p-4 bg-gray-100 rounded text-sm text-black">{error.stack}</pre>
+          </div>
+        </body>
+      </html>
+    )
+  }
 }
