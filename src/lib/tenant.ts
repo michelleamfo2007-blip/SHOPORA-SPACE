@@ -16,44 +16,23 @@ export function getSubdomain(host: string | null): string | null {
 }
 
 /**
- * Resolves the store ID based on the hostname.
- * It checks if it's a subdomain first, if not, it checks the custom domain.
- * Falls back to treating host as a raw slug (for /storefront/[slug] direct routes).
+ * Resolves the store based on hostname or slug.
+ * Checks subdomain first, then falls back to treating host as a raw slug
+ * (for /storefront/[slug] routes via vercel.app or direct access).
  */
 export async function getStoreByHost(host: string | null) {
   if (!host) return null;
 
   const subdomain = getSubdomain(host);
 
-  if (subdomain) {
-    // It's a shopora.space subdomain
-    return db.store.findUnique({
-      where: { slug: subdomain },
-      include: {
-        subscription: true,
-      }
-    });
-  }
+  // If it's a recognized subdomain, look up by slug
+  const slug = subdomain || host;
 
-  // Check if it's a custom domain (e.g., www.mystore.com)
-  const domain = await db.domain.findUnique({
-    where: { domainName: host },
-    include: {
-      store: {
-        include: {
-          subscription: true
-        }
-      }
-    },
-  });
-
-  if (domain?.store) return domain.store;
-
-  // Fallback: treat as a raw slug (handles /storefront/[slug] via vercel.app)
   return db.store.findUnique({
-    where: { slug: host },
+    where: { slug },
     include: {
       subscription: true,
     }
   });
 }
+
