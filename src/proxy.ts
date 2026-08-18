@@ -32,7 +32,8 @@ export default function proxy(req: NextRequest) {
     hostname === "localhost" ||
     hostname === process.env.NEXT_PUBLIC_ROOT_DOMAIN ||
     hostname === "shopora.space" ||
-    hostname === "www.shopora.space"
+    hostname === "www.shopora.space" ||
+    hostname.endsWith(".vercel.app") // Vercel preview/production domains pass through
 
   const path = url.pathname
 
