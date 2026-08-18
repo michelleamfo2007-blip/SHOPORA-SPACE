@@ -13,7 +13,8 @@ export function OrderRow({ order, store }: { order: any, store: any }) {
 
   const payment = order.payments?.[0]
 
-  async function onVerify() {
+  async function onVerify(e: React.MouseEvent) {
+    e.stopPropagation()
     if (!confirm("Are you sure you want to verify this payment? Ensure you have actually received the funds in your account.")) return
     
     setLoading(true)
@@ -27,8 +28,24 @@ export function OrderRow({ order, store }: { order: any, store: any }) {
     }
   }
 
+  function getStatusColor(status: string) {
+    switch (status) {
+      case "PENDING":
+      case "PENDING_VERIFICATION": return "bg-yellow-100 text-yellow-800"
+      case "PROCESSING": return "bg-blue-100 text-blue-800"
+      case "SHIPPED": return "bg-indigo-100 text-indigo-800"
+      case "DELIVERED": return "bg-green-100 text-green-800"
+      case "CANCELLED":
+      case "REFUNDED": return "bg-red-100 text-red-800"
+      default: return "bg-slate-100 text-slate-800"
+    }
+  }
+
   return (
-    <TableRow>
+    <TableRow 
+      className="cursor-pointer hover:bg-slate-50 transition-colors"
+      onClick={() => router.push(`/${store.id}/orders/${order.id}`)}
+    >
       <TableCell className="font-medium text-blue-600">
         #{order.orderNumber}
         <div className="text-xs text-slate-400 font-normal mt-1">{new Date(order.createdAt).toLocaleDateString()}</div>
@@ -37,9 +54,9 @@ export function OrderRow({ order, store }: { order: any, store: any }) {
         {order.customer.name}
       </TableCell>
       <TableCell>
-        <Badge variant={order.status === "PENDING_VERIFICATION" ? "secondary" : "default"}>
+        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
           {order.status.replace("_", " ")}
-        </Badge>
+        </span>
       </TableCell>
       <TableCell>
         {payment?.reference ? (

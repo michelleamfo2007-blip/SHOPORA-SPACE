@@ -8,13 +8,27 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { OrderRow } from "./OrderRow"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { OrderStatus } from "@prisma/client"
 
-export default async function OrdersPage({ params }: { params: Promise<{ storeId: string }> }) {
+export default async function OrdersPage({ 
+  params,
+  searchParams 
+}: { 
+  params: Promise<{ storeId: string }>,
+  searchParams: Promise<{ status?: string }>
+}) {
   const { storeId } = await params;
+  const { status } = await searchParams;
+
+  const validStatus = status && Object.keys(OrderStatus).includes(status) ? (status as OrderStatus) : undefined
+
   const store = await db.store.findUnique({
     where: { id: storeId },
     include: {
       orders: {
+        where: validStatus ? { status: validStatus } : undefined,
         include: {
           customer: true,
           orderItems: true,
@@ -27,12 +41,36 @@ export default async function OrdersPage({ params }: { params: Promise<{ storeId
 
   if (!store) return null
 
+  const ORDER_STATUSES = [
+    "ALL",
+    "PENDING",
+    "PENDING_VERIFICATION",
+    "PROCESSING",
+    "SHIPPED",
+    "DELIVERED",
+    "CANCELLED",
+    "REFUNDED"
+  ]
+
   return (
     <div className="grid gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Orders</h2>
           <p className="text-slate-500">Manage and fulfill your store's orders.</p>
+        </div>
+        
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
+          {ORDER_STATUSES.map((s) => {
+            const isActive = (s === "ALL" && !validStatus) || s === validStatus
+            return (
+              <Link key={s} href={`/${storeId}/orders${s === "ALL" ? "" : `?status=${s}`}`}>
+                <Button variant={isActive ? "default" : "outline"} size="sm" className="whitespace-nowrap">
+                  {s.replace("_", " ")}
+                </Button>
+              </Link>
+            )
+          })}
         </div>
       </div>
 
@@ -52,7 +90,7 @@ export default async function OrdersPage({ params }: { params: Promise<{ storeId
             {store.orders.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center text-slate-500">
-                  No orders yet.
+                  No orders found.
                 </TableCell>
               </TableRow>
             ) : (
