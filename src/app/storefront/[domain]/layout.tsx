@@ -3,6 +3,7 @@ import Link from "next/link"
 import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
 import { ShoppingCart } from "lucide-react"
+import { AIAssistant } from "@/components/storefront/AIAssistant"
 
 import { headers } from "next/headers"
 
@@ -97,19 +98,23 @@ export default async function StorefrontLayout({
               <h4 className="text-lg font-semibold mb-6">Quick Links</h4>
               <ul className="space-y-3 text-white/70">
                 <li><Link href={`${basePath}/`} className="hover:text-white transition-colors">Home</Link></li>
-                <li><Link href={`${basePath}/products`} className="hover:text-white transition-colors">Shop</Link></li>
-                <li><Link href={`${basePath}/categories`} className="hover:text-white transition-colors">Categories</Link></li>
-                <li><Link href="#about" className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href={`${basePath}/#shop`} className="hover:text-white transition-colors">Shop</Link></li>
+                <li><Link href={`${basePath}/#categories`} className="hover:text-white transition-colors">Categories</Link></li>
+                <li><Link href={`${basePath}/#about`} className="hover:text-white transition-colors">About Us</Link></li>
               </ul>
             </div>
             
             <div>
               <h4 className="text-lg font-semibold mb-6">Customer Support</h4>
               <ul className="space-y-3 text-white/70">
-                <li><Link href={`${basePath}/contact`} className="hover:text-white transition-colors">Contact</Link></li>
-                <li><Link href={`${basePath}/faqs`} className="hover:text-white transition-colors">FAQs</Link></li>
-                <li><Link href={`${basePath}/shipping`} className="hover:text-white transition-colors">Shipping Policy</Link></li>
-                <li><Link href={`${basePath}/refunds`} className="hover:text-white transition-colors">Returns Policy</Link></li>
+                {store.whatsappNumber ? (
+                  <li><a href={`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Contact Us</a></li>
+                ) : (
+                  <li><Link href={`${basePath}/#contact`} className="hover:text-white transition-colors">Contact</Link></li>
+                )}
+                <li><Link href={`${basePath}/#faqs`} className="hover:text-white transition-colors">FAQs</Link></li>
+                <li><Link href={`${basePath}/#shipping`} className="hover:text-white transition-colors">Shipping Policy</Link></li>
+                <li><Link href={`${basePath}/#refunds`} className="hover:text-white transition-colors">Returns Policy</Link></li>
               </ul>
             </div>
             
@@ -132,6 +137,7 @@ export default async function StorefrontLayout({
           </div>
         </div>
       </footer>
+      <AIAssistant domain={domain} storeId={store.id} primaryColor={store.primaryColor || undefined} />
     </div>
   )
 }

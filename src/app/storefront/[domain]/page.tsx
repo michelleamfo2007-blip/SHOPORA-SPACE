@@ -41,6 +41,13 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       take: 8
     })
 
+    const reviews = await db.review.findMany({
+      where: { storeId: store.id, status: "PUBLISHED" },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      include: { customer: true }
+    })
+
     const heroHeadline = store.heroHeadline || `Welcome to ${store.name}`
     const heroSubtext = store.heroSubtext || "Discover our premium collections today."
     const heroImage = store.heroImage || "https://images.unsplash.com/photo-1519725515250-9512f67664c1?q=80&w=2000&auto=format&fit=crop"
@@ -116,7 +123,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       </section>
 
       {/* 3. Featured Collection */}
-      <section className="py-20 bg-slate-50">
+      <section id="shop" className="py-20 bg-slate-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-end mb-12">
             <div>
@@ -189,7 +196,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
 
       {/* 4. Seller Introduction */}
       {store.aboutText && (
-        <section className="py-24 bg-white overflow-hidden">
+        <section id="about" className="py-24 bg-white overflow-hidden">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-6">
@@ -283,30 +290,38 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       </section>
 
       {/* 7. Reviews */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-12">What Our Customers Say</h2>
-          <div className="max-w-2xl mx-auto bg-slate-50 p-10 rounded-2xl shadow-sm border border-slate-100">
-            <div className="flex justify-center gap-1 text-yellow-400 mb-6">
-              {[1, 2, 3, 4, 5].map(i => (
-                <svg key={i} className="w-6 h-6 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+      {reviews.length > 0 && (
+        <section className="py-20 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-12">What Our Customers Say</h2>
+            <div className="grid md:grid-cols-3 gap-8">
+              {reviews.map(review => (
+                <div key={review.id} className="bg-slate-50 p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-full">
+                  <div className="flex justify-center gap-1 text-yellow-400 mb-6">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <svg key={i} className={`w-5 h-5 ${i < review.rating ? 'fill-current' : 'text-slate-200 fill-current'}`} viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                      </svg>
+                    ))}
+                  </div>
+                  <p className="text-lg font-medium text-slate-900 italic mb-8 flex-1">
+                    "{review.comment}"
+                  </p>
+                  <div className="flex items-center justify-center gap-4 mt-auto">
+                    <div className="w-10 h-10 bg-slate-300 rounded-full overflow-hidden flex items-center justify-center text-slate-600 font-bold">
+                      {review.customer?.name?.[0]?.toUpperCase() || "C"}
+                    </div>
+                    <div className="text-left">
+                      <div className="font-bold text-slate-900">{review.customer?.name || "Verified Customer"}</div>
+                      <div className="text-sm text-slate-500">Verified Buyer</div>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
-            <p className="text-2xl font-medium text-slate-900 italic mb-8">
-              "The quality is amazing and exactly as shown! I've received so many compliments and it's by far the best purchase I've made."
-            </p>
-            <div className="flex items-center justify-center gap-4">
-              <div className="w-12 h-12 bg-slate-300 rounded-full overflow-hidden">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=happy&backgroundColor=b6e3f4" alt="Customer" className="w-full h-full object-cover" />
-              </div>
-              <div className="text-left">
-                <div className="font-bold text-slate-900">Happy Customer</div>
-                <div className="text-sm text-slate-500">Verified Buyer</div>
-              </div>
-            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 8 & 9. Social & Newsletter/WhatsApp */}
       <section className="py-20 bg-slate-50 border-t border-slate-100">
