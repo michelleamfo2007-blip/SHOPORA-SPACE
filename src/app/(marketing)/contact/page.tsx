@@ -16,11 +16,7 @@ export default function ContactPage() {
             </div>
             <div>
               <h3 className="font-semibold text-slate-900">Sales Inquiries</h3>
-              <p className="text-slate-600">sales@shopora.space</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-900">Office</h3>
-              <p className="text-slate-600">123 Commerce Blvd, Tech City, TC 10101</p>
+              <p className="text-slate-600">shoporaspace@gmail.com</p>
             </div>
           </div>
         </div>
