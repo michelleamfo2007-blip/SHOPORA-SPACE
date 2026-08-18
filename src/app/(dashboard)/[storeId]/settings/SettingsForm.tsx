@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { updateStoreBrandingAction } from "@/server/actions/store"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { HeroImageUploader } from "@/components/dashboard/HeroImageUploader"
 
 export function SettingsForm({ store }: { store: any }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [heroImageUrl, setHeroImageUrl] = useState<string>(store.heroImage || "")
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -111,13 +112,14 @@ export function SettingsForm({ store }: { store: any }) {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="heroImage">Hero Background Image URL</Label>
-            <Input 
-              id="heroImage" 
-              name="heroImage" 
-              defaultValue={store.heroImage || ""} 
-              placeholder="https://example.com/hero.jpg" 
+            <Label>Hero Background Image</Label>
+            <HeroImageUploader
+              storeId={store.id}
+              currentImage={heroImageUrl || store.heroImage}
+              onUploaded={url => setHeroImageUrl(url)}
             />
+            {/* Hidden input carries the URL into the FormData */}
+            <input type="hidden" name="heroImage" value={heroImageUrl} />
           </div>
         </div>
       </div>
