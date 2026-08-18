@@ -4,6 +4,8 @@ import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
 import { Card, CardContent } from "@/components/ui/card"
 
+import { headers } from "next/headers"
+
 export default async function StorefrontHomePage({ params }: { params: Promise<{ domain: string }> }) {
   try {
     const { domain } = await params;
@@ -12,6 +14,11 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
     if (!store) {
       notFound()
     }
+
+    const headersList = await headers()
+    const host = headersList.get("host") || ""
+    const isPreview = host.includes("vercel.app") || host.includes("localhost:3000")
+    const basePath = isPreview && !host.startsWith(domain) ? `/storefront/${domain}` : ""
 
     // Fetch active products for this store
     const products = await db.product.findMany({
@@ -55,7 +62,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
         {/* Featured Products */}
         <div className="mb-10 flex items-center justify-between">
           <h2 className="text-3xl font-bold tracking-tight text-slate-900">Featured Products</h2>
-          <Link href="/products" className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors flex items-center">
+          <Link href={`${basePath}/products`} className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors flex items-center">
             View all <span className="ml-1">→</span>
           </Link>
         </div>
@@ -73,7 +80,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
               const imageUrl = variant?.imageUrl ?? null
               
               return (
-                <Link key={product.id} href={`/product/${product.id}`}>
+                <Link key={product.id} href={`${basePath}/product/${product.id}`}>
                   <Card className="h-full overflow-hidden hover:shadow-xl transition-all duration-300 border-slate-100 bg-white group cursor-pointer rounded-2xl">
                     <div className="aspect-[4/5] bg-slate-100 relative w-full overflow-hidden">
                       {imageUrl ? (

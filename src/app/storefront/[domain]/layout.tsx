@@ -4,6 +4,8 @@ import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
 import { ShoppingCart } from "lucide-react"
 
+import { headers } from "next/headers"
+
 export default async function StorefrontLayout({
   children,
   params,
@@ -19,6 +21,12 @@ export default async function StorefrontLayout({
       notFound()
     }
 
+    const headersList = await headers()
+    const host = headersList.get("host") || ""
+    const isPreview = host.includes("vercel.app") || host.includes("localhost:3000")
+    // If testing via Vercel preview or localhost, the base path is /storefront/[domain]
+    // Otherwise on the actual custom domain, the base path is just /
+    const basePath = isPreview && !host.startsWith(domain) ? `/storefront/${domain}` : ""
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -27,19 +35,19 @@ export default async function StorefrontLayout({
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href="/" className="text-xl font-bold tracking-tight text-slate-900">
+              <Link href={`${basePath}/`} className="text-xl font-bold tracking-tight text-slate-900">
                 {store.name}
               </Link>
             </div>
             
             <nav className="hidden md:flex gap-6">
-              <Link href="/" className="text-sm font-medium hover:text-slate-900 text-slate-600 transition-colors">
+              <Link href={`${basePath}/`} className="text-sm font-medium hover:text-slate-900 text-slate-600 transition-colors">
                 Home
               </Link>
-              <Link href="/products" className="text-sm font-medium hover:text-slate-900 text-slate-600 transition-colors">
+              <Link href={`${basePath}/products`} className="text-sm font-medium hover:text-slate-900 text-slate-600 transition-colors">
                 All Products
               </Link>
-              <Link href="/categories" className="text-sm font-medium hover:text-slate-900 text-slate-600 transition-colors">
+              <Link href={`${basePath}/categories`} className="text-sm font-medium hover:text-slate-900 text-slate-600 transition-colors">
                 Categories
               </Link>
             </nav>
@@ -72,16 +80,16 @@ export default async function StorefrontLayout({
             <div>
               <h4 className="font-semibold mb-4">Shop</h4>
               <ul className="space-y-2 text-sm text-slate-500">
-                <li><Link href="/products">All Products</Link></li>
-                <li><Link href="/categories">Categories</Link></li>
+                <li><Link href={`${basePath}/products`}>All Products</Link></li>
+                <li><Link href={`${basePath}/categories`}>Categories</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Support</h4>
               <ul className="space-y-2 text-sm text-slate-500">
-                <li><Link href="#">Contact Us</Link></li>
-                <li><Link href="#">Shipping Policy</Link></li>
-                <li><Link href="#">Refund Policy</Link></li>
+                <li><Link href={`${basePath}/contact`}>Contact Us</Link></li>
+                <li><Link href={`${basePath}/shipping`}>Shipping Policy</Link></li>
+                <li><Link href={`${basePath}/refunds`}>Refund Policy</Link></li>
               </ul>
             </div>
           </div>
