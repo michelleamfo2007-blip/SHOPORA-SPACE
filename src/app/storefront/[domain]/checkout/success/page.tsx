@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { getStoreByHost } from "@/lib/tenant"
 import { notFound } from "next/navigation"
 import { db } from "@/lib/db"
-import { StorefrontReviewForm } from "./StorefrontReviewForm"
+import { StorefrontReviewForm } from "@/components/storefront/StorefrontReviewForm"
 
 export default async function CheckoutSuccessPage({ 
   params,
