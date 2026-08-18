@@ -17,13 +17,18 @@ export const metadata: Metadata = {
   description: "The premier e-commerce platform for curated vendors.",
 };
 
+import { CookieBanner } from "@/components/marketing/CookieBanner";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <CookieBanner />
+      </body>
     </html>
   );
 }
