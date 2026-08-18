@@ -20,8 +20,8 @@ export function OrderStatusUpdater({ storeId, orderId, initialStatus }: { storeI
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   
-  async function handleStatusChange(newStatus: string) {
-    if (newStatus === initialStatus) return
+  async function handleStatusChange(newStatus: string | null) {
+    if (!newStatus || newStatus === initialStatus) return
     
     setLoading(true)
     const result = await updateOrderStatusAction(storeId, orderId, newStatus)
