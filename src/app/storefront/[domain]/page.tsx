@@ -41,8 +41,8 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       take: 8
     })
 
-    const heroHeadline = store.heroHeadline || "Your Hair. Your Confidence. Your Look."
-    const heroSubtext = store.heroSubtext || "Premium wigs made to elevate your everyday look."
+    const heroHeadline = store.heroHeadline || `Welcome to ${store.name}`
+    const heroSubtext = store.heroSubtext || "Discover our premium collections today."
     const heroImage = store.heroImage || "https://images.unsplash.com/photo-1519725515250-9512f67664c1?q=80&w=2000&auto=format&fit=crop"
 
   return (
@@ -216,7 +216,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
                 <ShieldCheck className="w-8 h-8" />
               </div>
               <h3 className="text-xl font-semibold mb-3">Premium Quality</h3>
-              <p className="text-white/70">Carefully selected hair and wigs built to last.</p>
+              <p className="text-white/70">Carefully selected products built to last.</p>
             </div>
             <div className="flex flex-col items-center">
               <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-6">
@@ -237,31 +237,31 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
                 <HeadphonesIcon className="w-8 h-8" />
               </div>
               <h3 className="text-xl font-semibold mb-3">Customer Support</h3>
-              <p className="text-white/70">We're here to help you choose the right wig.</p>
+              <p className="text-white/70">We're here to help you choose the right products.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 6. Find Your Perfect Wig */}
+      {/* 6. Find Your Perfect Match */}
       <section className="py-24 bg-slate-50 relative overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col lg:flex-row">
             <div className="p-10 md:p-16 flex-1 flex flex-col justify-center">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-6">
-                Find Your Perfect Wig
+                Find Your Perfect Match
               </h2>
               <p className="text-lg text-slate-600 mb-8">
-                Not sure which wig is right for you? Browse by length, style, or budget to find your perfect match.
+                Not sure what to choose? Browse our collections to find exactly what you're looking for.
               </p>
               <div className="space-y-4 mb-8">
                 <div className="flex items-center gap-4">
-                  <div className="font-semibold text-slate-900 w-20">Length:</div>
-                  <div className="text-slate-500">Short / Medium / Long</div>
+                  <div className="font-semibold text-slate-900 w-20">Category:</div>
+                  <div className="text-slate-500">Browse by collection</div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="font-semibold text-slate-900 w-20">Style:</div>
-                  <div className="text-slate-500">Bob / Straight / Curly / Wave</div>
+                  <div className="text-slate-500">Find your unique look</div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="font-semibold text-slate-900 w-20">Budget:</div>
@@ -270,13 +270,13 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
               </div>
               <div>
                 <Link href={`${basePath}/products`} className="inline-flex items-center justify-center bg-slate-900 text-white rounded-full px-8 py-4 font-semibold hover:bg-slate-800 transition-colors" style={{ backgroundColor: store.primaryColor || '#0f172a' }}>
-                  Find My Wig <span className="ml-2">→</span>
+                  Shop Now <span className="ml-2">→</span>
                 </Link>
                 <p className="text-xs text-slate-400 mt-4">* AI recommendations coming soon to Shopora!</p>
               </div>
             </div>
             <div className="lg:w-1/2 bg-slate-200 min-h-[300px] relative">
-              <img src="https://images.unsplash.com/photo-1595426114644-8d93c048bc78?q=80&w=1000&auto=format&fit=crop" alt="Find your wig" className="absolute inset-0 w-full h-full object-cover" />
+              <img src="https://images.unsplash.com/photo-1595426114644-8d93c048bc78?q=80&w=1000&auto=format&fit=crop" alt="Find your perfect match" className="absolute inset-0 w-full h-full object-cover" />
             </div>
           </div>
         </div>
@@ -293,7 +293,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
               ))}
             </div>
             <p className="text-2xl font-medium text-slate-900 italic mb-8">
-              "The hair is beautiful, incredibly soft, and exactly as shown! I've received so many compliments and it's by far the best wig I've ever purchased."
+              "The quality is amazing and exactly as shown! I've received so many compliments and it's by far the best purchase I've made."
             </p>
             <div className="flex items-center justify-center gap-4">
               <div className="w-12 h-12 bg-slate-300 rounded-full overflow-hidden">
