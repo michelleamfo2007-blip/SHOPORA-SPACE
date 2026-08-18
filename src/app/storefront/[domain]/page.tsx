@@ -40,18 +40,22 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Premium Hero Section */}
-      <div className="relative overflow-hidden bg-slate-900 text-white">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20" />
+      <div 
+        className="relative overflow-hidden text-white"
+        style={{ backgroundColor: store.primaryColor || "#0f172a" }}
+      >
+        <div className="absolute inset-0 bg-black/20" />
         <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 text-center">
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-300">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-white drop-shadow-md">
             {store.name}
           </h1>
-          <p className="text-xl md:text-2xl text-slate-300 max-w-2xl mx-auto mb-10 font-light">
+          <p className="text-xl md:text-2xl text-slate-100 max-w-2xl mx-auto mb-10 font-light drop-shadow">
             {store.description || "Discover our curated collection of amazing products."}
           </p>
           <a
             href="#products"
-            className="inline-block bg-white text-slate-900 hover:bg-slate-100 rounded-full px-8 py-4 text-lg font-medium shadow-xl transition-all hover:scale-105"
+            className="inline-block bg-white rounded-full px-8 py-4 text-lg font-medium shadow-xl transition-all hover:scale-105"
+            style={{ color: store.primaryColor || "#0f172a" }}
           >
             Shop Collection
           </a>

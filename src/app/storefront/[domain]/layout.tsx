@@ -35,8 +35,12 @@ export default async function StorefrontLayout({
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href={`${basePath}/`} className="text-xl font-bold tracking-tight text-slate-900">
-                {store.name}
+              <Link href={`${basePath}/`} className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                {store.logoUrl ? (
+                  <img src={store.logoUrl} alt={`${store.name} Logo`} className="h-8 w-auto object-contain" />
+                ) : (
+                  <span>{store.name}</span>
+                )}
               </Link>
             </div>
             

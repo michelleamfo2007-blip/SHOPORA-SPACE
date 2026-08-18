@@ -55,3 +55,33 @@ export async function createStoreAction(formData: FormData) {
   redirect(`/${store.id}`)
 }
 
+export async function updateStoreBrandingAction(storeId: string, formData: FormData) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  // Verify ownership or admin access
+  const membership = await db.storeMember.findUnique({
+    where: { storeId_userId: { storeId, userId: session.user.id } }
+  })
+
+  if (!membership || (membership.role !== "OWNER" && membership.role !== "ADMIN")) {
+    throw new Error("Unauthorized to manage store settings")
+  }
+
+  const description = formData.get("description") as string | null
+  const logoUrl = formData.get("logoUrl") as string | null
+  const primaryColor = formData.get("primaryColor") as string | null
+
+  await db.store.update({
+    where: { id: storeId },
+    data: {
+      description,
+      logoUrl,
+      primaryColor: primaryColor || "#2563eb"
+    }
+  })
+
+  return { success: true }
+}

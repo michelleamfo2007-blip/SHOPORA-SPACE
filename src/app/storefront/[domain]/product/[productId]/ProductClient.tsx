@@ -118,6 +118,7 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
             <Button 
               size="lg" 
               className="w-full mt-auto py-7 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
+              style={{ backgroundColor: store.primaryColor || "#2563eb", color: "#ffffff" }}
               onClick={handleAddToCart}
             >
               Add to Cart & Checkout

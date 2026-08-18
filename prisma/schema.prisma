@@ -117,12 +117,13 @@ model Store {
   name        String
   slug        String      @unique
   country     String
-  currency    String
-  description String?
-  logoUrl     String?
-  status      StoreStatus @default(ACTIVE)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  currency       String
+  description    String?
+  logoUrl        String?
+  primaryColor   String?     @default("#2563eb")
+  status         StoreStatus @default(ACTIVE)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
   members      StoreMember[]
   domains      Domain[]
