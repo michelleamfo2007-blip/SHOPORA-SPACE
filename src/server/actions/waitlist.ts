@@ -44,28 +44,17 @@ export async function joinWaitlistAction(formData: FormData) {
 
     // Send the welcome email
     const { data, error: resendError } = await resend.emails.send({
-      from: 'Shopora <customersupport@shopora.space>',
+      from: 'Michelle from Shopora <customersupport@shopora.space>',
       to: [email],
       subject: 'Welcome to the Shopora Waitlist',
       html: `
-        <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; color: #1e293b; line-height: 1.5;">
-          <h2>You’re on the list!</h2>
-          <p>Thank you for your interest in becoming a vendor on Shopora Space.</p>
-          <p>We’re currently carefully curating our vendor community to create a high-quality shopping experience for our customers. When applications open and your business is selected to proceed, we’ll be in touch with the next steps.</p>
-          <div style="background-color: #f8fafc; padding: 24px; border-radius: 8px; margin-top: 24px; margin-bottom: 24px;">
-            <h3 style="margin-top: 0;">Next Steps</h3>
-            <p>If you’d like to be considered, simply reply to this email or contact us at <strong>shoporaspace@gmail.com</strong> with:</p>
-            <ul>
-              <li>Your name</li>
-              <li>Your business/brand name</li>
-              <li>What you sell</li>
-              <li>Your social media or website</li>
-              <li>A brief description of your brand</li>
-            </ul>
-          </div>
-          <p>Our team will review your submission and, if selected, you’ll receive an invitation to begin your Shopora onboarding.</p>
-          <p style="margin-top: 30px;">The Shopora Team</p>
-        </div>
+        <p>Hi there,</p>
+        <p>You’re on the list! Thank you for your interest in becoming a vendor on Shopora Space.</p>
+        <p>We’re currently carefully curating our vendor community to create a high-quality shopping experience for our customers. When applications open and your business is selected to proceed, we’ll be in touch with the next steps.</p>
+        <p>If you’d like to be considered, simply reply to this email or contact us at shoporaspace@gmail.com with:</p>
+        <p>- Your name<br>- Your business/brand name<br>- What you sell<br>- Your social media or website<br>- A brief description of your brand</p>
+        <p>We look forward to seeing what you’re building!</p>
+        <p>Best,<br>Michelle from Shopora</p>
       `,
     });
 

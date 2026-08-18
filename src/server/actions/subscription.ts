@@ -75,19 +75,16 @@ export async function startTrialAction(planName: string) {
   // 4. Send Email Notification
   try {
     await resend.emails.send({
-      from: "Shopora <billing@shopora.space>",
+      from: "Michelle from Shopora <billing@shopora.space>",
       to: user.email,
       subject: "Your Shopora 7-day free trial has started 🎉",
       html: `
-        <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; color: #1e293b; line-height: 1.5;">
-          <h2>Your Shopora 7-day free trial has started 🎉</h2>
-          <p>Hi ${user.name || user.email.split('@')[0]},</p>
-          <p>You currently have access to the <strong>${planName}</strong> plan.</p>
-          <p>Your trial ends on <strong>${endDate.toLocaleDateString()}</strong>.</p>
-          <p>After your 7-day trial, your subscription will need to be renewed manually to keep your store active.</p>
-          <p>Click below to finish setting up your store:</p>
-          <a href="https://shopora.space/onboarding" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 16px;">Complete Store Setup</a>
-        </div>
+        <p>Hi ${user.name || user.email.split('@')[0]},</p>
+        <p>Your Shopora 7-day free trial has started 🎉</p>
+        <p>You currently have access to the ${planName} plan.</p>
+        <p>Your trial ends on ${endDate.toLocaleDateString()}. After your 7-day trial, your subscription will need to be renewed manually to keep your store active.</p>
+        <p>Click here to finish setting up your store:<br><a href="https://shopora.space/onboarding">https://shopora.space/onboarding</a></p>
+        <p>Best,<br>Michelle</p>
       `
     })
   } catch (err) {
