@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { streamText } from 'ai';
+import { streamText, convertToModelMessages, UIMessage } from 'ai';
 import { db } from '@/lib/db';
 import { getStoreByHost } from '@/lib/tenant';
 
@@ -8,7 +8,10 @@ export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
-    const { messages, storeId, domain } = await req.json();
+    const body = await req.json();
+    // The new AI SDK v4 sends messages as UIMessage[] in the 'messages' field
+    const messages: UIMessage[] = body.messages ?? [];
+    const { storeId, domain } = body;
 
     let store;
     if (domain) {
@@ -23,12 +26,17 @@ export async function POST(req: Request) {
 
     // Fetch store products to provide context to the AI
     const products = await db.product.findMany({
-      where: { storeId: store.id, isArchived: false },
+      where: { storeId: store.id, isActive: true },
       take: 20,
-      select: { name: true, price: true, description: true, category: { select: { name: true } } }
+      select: {
+        name: true,
+        description: true,
+        variants: { select: { price: true }, take: 1 },
+        categories: { select: { name: true } }
+      }
     });
 
-    const productsContext = products.map(p => `- ${p.name} ($${p.price.toString()}): ${p.description || ''} [Category: ${p.category.name}]`).join('\n');
+    const productsContext = products.map(p => `- ${p.name} ($${p.variants[0]?.price || 'N/A'}): ${p.description || ''} [Categories: ${p.categories.map(c => c.name).join(', ')}]`).join('\n');
 
     const systemPrompt = `You are a friendly, helpful AI shopping assistant for a store called "${store.name}".
 Your goal is to help customers find the perfect products for their needs. Be concise, polite, and enthusiastic.
@@ -43,10 +51,10 @@ Keep your responses relatively short and easy to read. Use emojis occasionally.`
     const result = streamText({
       model: openai('gpt-4o-mini'),
       system: systemPrompt,
-      messages,
+      messages: await convertToModelMessages(messages),
     });
 
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error('AI Chat Error:', error);
     return new Response('Error processing chat request', { status: 500 });
