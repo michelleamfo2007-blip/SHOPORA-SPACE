@@ -213,44 +213,6 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
         </section>
       )}
 
-      {/* 5. Why Shop With Us */}
-      <section className="py-20 bg-slate-900 text-white" style={{ backgroundColor: store.primaryColor || '#0f172a' }}>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Why Shop With Us?</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 text-center">
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-6">
-                <ShieldCheck className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Premium Quality</h3>
-              <p className="text-white/70">Carefully selected products built to last.</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-6">
-                <ShieldCheck className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Secure Shopping</h3>
-              <p className="text-white/70">Your information and payments are 100% protected.</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-6">
-                <Truck className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Easy Ordering</h3>
-              <p className="text-white/70">Order your favorite look in just a few clicks.</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-6">
-                <HeadphonesIcon className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Customer Support</h3>
-              <p className="text-white/70">We're here to help you choose the right products.</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
 
       {/* 7. Reviews */}
