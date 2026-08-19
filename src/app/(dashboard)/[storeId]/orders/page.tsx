@@ -61,16 +61,7 @@ export default async function OrdersPage({
         </div>
         
         <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
-          {ORDER_STATUSES.map((s) => {
-            const isActive = (s === "ALL" && !validStatus) || s === validStatus
-            return (
-              <Link key={s} href={`/${storeId}/orders${s === "ALL" ? "" : `?status=${s}`}`}>
-                <Button variant={isActive ? "default" : "outline"} size="sm" className="whitespace-nowrap">
-                  {s.replace("_", " ")}
-                </Button>
-              </Link>
-            )
-          })}
+          {/* Status filters removed by user request */}
         </div>
       </div>
 
