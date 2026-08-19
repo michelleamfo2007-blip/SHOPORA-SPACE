@@ -17,10 +17,8 @@ export function MultiImageUploader({ storeId, images, onImagesChange }: MultiIma
 
   const uploadFiles = useCallback(async (files: FileList | File[]) => {
     const validFiles = Array.from(files).filter(file => {
-      if (!file.type.startsWith("image/")) {
-        toast.error(`${file.name} is not an image file.`);
-        return false;
-      }
+      // Some browsers/OS don't provide a mime type for valid images like .heic or obscure formats
+      // We will rely on the 20MB limit and Supabase backend to validate if needed
       if (file.size > 20 * 1024 * 1024) {
         toast.error(`${file.name} exceeds 20MB limit.`);
         return false;
@@ -49,7 +47,14 @@ export function MultiImageUploader({ storeId, images, onImagesChange }: MultiIma
         fd.append("storeId", storeId);
 
         const res = await fetch("/api/upload", { method: "POST", body: fd });
-        const data = await res.json();
+        let data;
+        try {
+          data = await res.json();
+        } catch (e) {
+          // If response is not JSON, get the text
+          const text = await res.text();
+          throw new Error(text || `Upload failed with status ${res.status}`);
+        }
 
         if (!res.ok || data.error) {
           throw new Error(data.error || "Upload failed");
@@ -70,10 +75,9 @@ export function MultiImageUploader({ storeId, images, onImagesChange }: MultiIma
   }, [storeId, images, onImagesChange]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
+    if (e.target.files && e.target.files.length > 0) {
       uploadFiles(e.target.files);
     }
-    if (inputRef.current) inputRef.current.value = "";
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -123,6 +127,9 @@ export function MultiImageUploader({ storeId, images, onImagesChange }: MultiIma
           multiple
           className="hidden"
           onChange={handleFileChange}
+          onClick={(e) => {
+            (e.target as HTMLInputElement).value = "";
+          }}
         />
       </div>
 
