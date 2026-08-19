@@ -86,27 +86,32 @@ export async function updateStoreBrandingAction(storeId: string, formData: FormD
   const currency = formData.get("currency") as string | null
   const deliveryPolicy = formData.get("deliveryPolicy") as string | null
 
-  await db.store.update({
-    where: { id: storeId },
-    data: {
-      description,
-      logoUrl,
-      primaryColor: primaryColor || "#2563eb",
-      heroHeadline,
-      heroSubtext,
-      heroImage,
-      aboutText,
-      instagramHandle,
-      whatsappNumber,
-      tiktokHandle,
-      snapchatHandle,
-      contactEmail,
-      ...(currency && { currency }),
-      ...(deliveryPolicy !== null && { deliveryPolicy })
-    }
-  })
+  try {
+    await db.store.update({
+      where: { id: storeId },
+      data: {
+        description,
+        logoUrl,
+        primaryColor: primaryColor || "#2563eb",
+        heroHeadline,
+        heroSubtext,
+        heroImage,
+        aboutText,
+        instagramHandle,
+        whatsappNumber,
+        tiktokHandle,
+        snapchatHandle,
+        contactEmail,
+        ...(currency && { currency }),
+        ...(deliveryPolicy !== null && { deliveryPolicy })
+      }
+    })
 
-  return { success: true }
+    return { success: true }
+  } catch (error: any) {
+    console.error("Failed to update store settings:", error)
+    throw new Error(error.message || "Failed to update settings")
+  }
 }
 
 export async function completeSetupAction(formData: FormData) {
@@ -153,15 +158,20 @@ export async function completeSetupAction(formData: FormData) {
 
   const storeId = membership.store.id
 
-  await db.store.update({
-    where: { id: storeId },
-    data: {
-      name,
-      slug,
-      country,
-      currency
-    }
-  })
-
-  return { redirectUrl: `/${storeId}` }
+  try {
+    await db.store.update({
+      where: { id: storeId },
+      data: {
+        name,
+        slug,
+        country,
+        currency
+      }
+    })
+    
+    return { redirectUrl: `/${storeId}` }
+  } catch (error: any) {
+    console.error("Store setup failed:", error)
+    return { error: error.message || "Failed to update store details. Please try again." }
+  }
 }
