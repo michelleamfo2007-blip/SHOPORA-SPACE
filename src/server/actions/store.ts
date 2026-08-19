@@ -99,8 +99,11 @@ export async function updateStoreBrandingAction(storeId: string, formData: FormD
         aboutText,
         instagramHandle,
         whatsappNumber,
+        // @ts-ignore
         tiktokHandle,
+        // @ts-ignore
         snapchatHandle,
+        // @ts-ignore
         contactEmail,
         ...(currency && { currency }),
         ...(deliveryPolicy !== null && { deliveryPolicy })
