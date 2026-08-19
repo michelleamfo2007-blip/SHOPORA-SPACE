@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Package, ShoppingCart, Users, Settings } from "lucide-react"
+import { LayoutDashboard, Package, LayoutGrid, Box, ShoppingCart, Truck, Users, CreditCard, Ticket, BarChart3, Star, LifeBuoy, Settings } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -23,78 +23,91 @@ export function DashboardNav({ storeId, isMobileMenu }: DashboardNavProps) {
       href: `/${storeId}`,
       label: "Overview",
       icon: LayoutDashboard,
+      color: "text-blue-500",
       active: pathname === `/${storeId}`,
     },
     {
       href: `/${storeId}/products`,
       label: "Products",
       icon: Package,
+      color: "text-emerald-500",
       active: pathname === `/${storeId}/products`,
     },
     {
       href: `/${storeId}/categories`,
       label: "Categories",
-      icon: Package,
+      icon: LayoutGrid,
+      color: "text-pink-500",
       active: pathname === `/${storeId}/categories`,
     },
     {
       href: `/${storeId}/inventory`,
       label: "Inventory",
-      icon: Package,
+      icon: Box,
+      color: "text-indigo-500",
       active: pathname === `/${storeId}/inventory`,
     },
     {
       href: `/${storeId}/orders`,
       label: "Orders",
       icon: ShoppingCart,
+      color: "text-amber-500",
       active: pathname === `/${storeId}/orders`,
     },
     {
       href: `/${storeId}/shipping`,
       label: "Delivery",
-      icon: Package,
+      icon: Truck,
+      color: "text-teal-500",
       active: pathname === `/${storeId}/shipping`,
     },
     {
       href: `/${storeId}/customers`,
       label: "Customers",
       icon: Users,
+      color: "text-purple-500",
       active: pathname === `/${storeId}/customers`,
     },
     {
       href: `/${storeId}/settings/payments`,
       label: "Payments",
-      icon: Settings,
+      icon: CreditCard,
+      color: "text-green-500",
       active: pathname === `/${storeId}/settings/payments`,
     },
     {
       href: `/${storeId}/discounts`,
       label: "Discounts",
-      icon: Settings,
+      icon: Ticket,
+      color: "text-rose-500",
       active: pathname === `/${storeId}/discounts`,
     },
     {
       href: `/${storeId}/analytics`,
       label: "Analytics",
-      icon: LayoutDashboard,
+      icon: BarChart3,
+      color: "text-cyan-500",
       active: pathname === `/${storeId}/analytics`,
     },
     {
       href: `/${storeId}/reviews`,
       label: "Reviews",
-      icon: Users,
+      icon: Star,
+      color: "text-amber-500",
       active: pathname === `/${storeId}/reviews`,
     },
     {
       href: `/${storeId}/support`,
       label: "Support",
-      icon: Users,
+      icon: LifeBuoy,
+      color: "text-indigo-500",
       active: pathname === `/${storeId}/support`,
     },
     {
       href: `/${storeId}/settings`,
       label: "Settings",
       icon: Settings,
+      color: "text-slate-500",
       active: pathname === `/${storeId}/settings`,
     },
   ]
@@ -118,7 +131,7 @@ export function DashboardNav({ storeId, isMobileMenu }: DashboardNavProps) {
                     route.active ? "bg-slate-100 text-slate-900" : "text-slate-500"
                   )}
                 >
-                  <route.icon className="h-4 w-4" />
+                  <route.icon className={cn("h-4 w-4", route.color)} />
                   {route.label}
                 </Link>
               ))}
@@ -140,7 +153,7 @@ export function DashboardNav({ storeId, isMobileMenu }: DashboardNavProps) {
             route.active ? "bg-slate-100 text-slate-900" : "text-slate-500"
           )}
         >
-          <route.icon className="h-4 w-4" />
+          <route.icon className={cn("h-4 w-4", route.color)} />
           {route.label}
         </Link>
       ))}
