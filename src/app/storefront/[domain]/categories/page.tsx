@@ -19,7 +19,7 @@ export default async function CategoriesPage({ params }: { params: Promise<{ dom
 
   const categories = await db.category.findMany({
     where: { storeId: store.id },
-    orderBy: { createdAt: "desc" }
+    orderBy: { name: "asc" }
   });
 
   return (
