@@ -12,7 +12,17 @@ import { useRouter } from "next/navigation"
 export function OnboardingClient() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [slug, setSlug] = useState("")
   const router = useRouter()
+
+  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value
+      .toLowerCase()
+      .replace(/[^a-z0-9-\s]/g, "") // remove special chars except spaces/hyphens
+      .replace(/\s+/g, "-")         // replace spaces with hyphens
+      .replace(/-+/g, "-")          // replace multiple hyphens
+    setSlug(val)
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -20,6 +30,8 @@ export function OnboardingClient() {
     setError(null)
     
     const formData = new FormData(e.currentTarget)
+    // Ensure the sanitized slug is used in submission
+    formData.set("slug", slug)
     try {
       const result = await completeSetupAction(formData)
       if (result?.error) {
@@ -68,6 +80,8 @@ export function OnboardingClient() {
                   name="slug"
                   placeholder="myawesomeshop"
                   className="flex-1"
+                  value={slug}
+                  onChange={handleSlugChange}
                   required
                 />
                 <span className="text-sm text-slate-500 font-medium">.shopora.space</span>

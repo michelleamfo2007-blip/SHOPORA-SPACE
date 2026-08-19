@@ -124,12 +124,25 @@ export async function completeSetupAction(formData: FormData) {
   }
 
   const name = formData.get("name") as string
-  const slug = formData.get("slug") as string
+  const rawSlug = formData.get("slug") as string
   const country = formData.get("country") as string
   const currency = formData.get("currency") as string
 
-  if (!name || !slug || !country || !currency) {
+  if (!name || !rawSlug || !country || !currency) {
     return { error: "Missing required fields" }
+  }
+
+  // Sanitize slug: lowercase, replace spaces with hyphens, remove non-alphanumeric
+  const slug = rawSlug
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9-\s]/g, "") // remove special characters except spaces/hyphens
+    .replace(/\s+/g, "-")         // replace spaces with hyphens
+    .replace(/-+/g, "-")          // replace multiple hyphens with single hyphen
+    .replace(/^-+|-+$/g, "")      // trim hyphens
+
+  if (!slug) {
+    return { error: "Please enter a valid store URL containing only letters and numbers" }
   }
 
   const reservedSlugs = ["www", "api", "app", "admin", "super-admin", "mail", "ftp", "blog", "shop", "store", "checkout"]
