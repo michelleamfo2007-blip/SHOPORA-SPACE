@@ -345,6 +345,9 @@ export function CheckoutForm({
                 <span>Total Due</span>
                 <span className="text-blue-600">{currency} {getTotalPrice().toFixed(2)}</span>
               </div>
+              <div className="mt-2 text-sm text-slate-500 bg-slate-100 p-3 rounded-md italic border border-slate-200">
+                <strong>Note:</strong> Delivery fee is not included in this total. You will pay the delivery rider directly upon arrival.
+              </div>
             </div>
           </CardContent>
         </Card>
