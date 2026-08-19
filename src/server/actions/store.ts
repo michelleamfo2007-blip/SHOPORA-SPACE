@@ -106,7 +106,7 @@ export async function updateStoreBrandingAction(storeId: string, formData: FormD
 export async function completeSetupAction(formData: FormData) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
-    throw new Error("Unauthorized")
+    return { error: "Unauthorized" }
   }
 
   const name = formData.get("name") as string
@@ -115,12 +115,12 @@ export async function completeSetupAction(formData: FormData) {
   const currency = formData.get("currency") as string
 
   if (!name || !slug || !country || !currency) {
-    throw new Error("Missing required fields")
+    return { error: "Missing required fields" }
   }
 
   const reservedSlugs = ["www", "api", "app", "admin", "super-admin", "mail", "ftp", "blog", "shop", "store", "checkout"]
   if (reservedSlugs.includes(slug.toLowerCase())) {
-    throw new Error("This store URL is reserved and cannot be used")
+    return { error: "This store URL is reserved and cannot be used" }
   }
 
   // Check if slug is taken by someone else
@@ -129,7 +129,7 @@ export async function completeSetupAction(formData: FormData) {
   })
 
   if (existingStore) {
-    throw new Error("Store URL is already taken")
+    return { error: "Store URL is already taken" }
   }
 
   // Find the draft store for this user
@@ -142,7 +142,7 @@ export async function completeSetupAction(formData: FormData) {
   })
 
   if (!membership || !membership.store) {
-    throw new Error("No draft store found. Please select a package first.")
+    return { error: "No draft store found. Please select a package first." }
   }
 
   const storeId = membership.store.id
@@ -157,5 +157,5 @@ export async function completeSetupAction(formData: FormData) {
     }
   })
 
-  redirect(`/${storeId}`)
+  return { redirectUrl: `/${storeId}` }
 }

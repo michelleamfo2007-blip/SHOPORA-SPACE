@@ -21,11 +21,14 @@ export function OnboardingClient() {
     
     const formData = new FormData(e.currentTarget)
     try {
-      await completeSetupAction(formData)
-    } catch (err: any) {
-      if (err.message === "NEXT_REDIRECT") {
-        throw err; // Let Next.js handle the redirect
+      const result = await completeSetupAction(formData)
+      if (result?.error) {
+        setLoading(false)
+        setError(result.error)
+      } else if (result?.redirectUrl) {
+        router.push(result.redirectUrl)
       }
+    } catch (err: any) {
       setLoading(false)
       setError(err.message || "An unexpected error occurred.")
     }
