@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -35,8 +35,7 @@ export function SettingsForm({ store }: { store: any }) {
       formData.append("heroImage", heroImageUrl)
       formData.append("primaryColor", primaryColor)
       
-      const result = await updateStoreBrandingAction(formData)
-      if (result?.error) throw new Error(result.error)
+      await updateStoreBrandingAction(store.id, formData)
       
       toast.success("Settings updated successfully")
       router.refresh()
