@@ -47,7 +47,7 @@ export async function POST(req: Request) {
 
     if (error) {
       console.error("Supabase upload error:", error);
-      return Response.json({ error: "Upload failed" }, { status: 500 });
+      return Response.json({ error: `Supabase error: ${error.message}` }, { status: 500 });
     }
 
     // Get public URL
@@ -56,8 +56,8 @@ export async function POST(req: Request) {
       .getPublicUrl(fileName);
 
     return Response.json({ url: urlData.publicUrl });
-  } catch (err) {
+  } catch (err: any) {
     console.error("Upload error:", err);
-    return Response.json({ error: "Internal server error" }, { status: 500 });
+    return Response.json({ error: err.message || "Internal server error" }, { status: 500 });
   }
 }
