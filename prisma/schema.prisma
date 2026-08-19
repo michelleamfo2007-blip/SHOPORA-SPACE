@@ -209,13 +209,47 @@ model SubscriptionPlan {
   subscriptions Subscription[]
 }
 
+enum ProductStatus {
+  ACTIVE
+  DRAFT
+  ARCHIVED
+}
+
+enum ProductVisibility {
+  VISIBLE
+  HIDDEN
+}
+
 model Product {
   id          String   @id @default(cuid())
   storeId     String
   name        String
   description String?
-  isActive    Boolean  @default(true)
+  isActive    Boolean  @default(true) // Legacy, but keeping for compatibility
+  status      ProductStatus @default(ACTIVE)
+  visibility  ProductVisibility @default(VISIBLE)
   isFeatured  Boolean  @default(false)
+  
+  // Pricing & Inventory (Global)
+  price       Float?
+  compareAtPrice Float?
+  sku         String?
+  stockCount  Int      @default(0)
+  lowStockThreshold Int @default(5)
+
+  // Media
+  images      String[] // Array of image URLs
+  sizeGuideUrl String?
+  videoUrl    String?
+
+  // Simple Variants (Comma separated strings)
+  availableSizes String?
+  availableColors String?
+
+  // SEO
+  seoTitle       String?
+  seoDescription String?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

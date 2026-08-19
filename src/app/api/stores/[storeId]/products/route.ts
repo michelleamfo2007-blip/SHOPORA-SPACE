@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
+import { ProductStatus, ProductVisibility } from "@prisma/client"
 
 export async function POST(
   req: Request,
@@ -15,9 +16,15 @@ export async function POST(
 
     const { storeId } = await params;
     const body = await req.json()
-    const { name, description, isActive, options, variants } = body
+    const { 
+      name, description, status, visibility,
+      price, compareAtPrice, sku, stockCount, lowStockThreshold,
+      images, sizeGuideUrl, videoUrl,
+      seoTitle, seoDescription,
+      options, variants 
+    } = body
 
-    if (!name || !variants || variants.length === 0) {
+    if (!name) {
       return new NextResponse("Missing required fields", { status: 400 })
     }
 
@@ -36,21 +43,32 @@ export async function POST(
     }
 
     // Process Option mapping
-    const optionData = options.map((opt: any, index: number) => ({
+    const optionData = options?.map((opt: any, index: number) => ({
       name: opt.name,
       position: index + 1,
       values: {
         create: opt.values.map((val: string) => ({ value: val }))
       }
-    }))
+    })) || []
 
-    // Create the product first (without variants to easily link option values)
+    // Create the product
     const product = await db.product.create({
       data: {
         storeId,
         name,
         description,
-        isActive,
+        status: status as ProductStatus,
+        visibility: visibility as ProductVisibility,
+        price,
+        compareAtPrice,
+        sku,
+        stockCount,
+        lowStockThreshold,
+        images,
+        sizeGuideUrl,
+        videoUrl,
+        seoTitle,
+        seoDescription,
         options: {
           create: optionData
         }
@@ -62,40 +80,39 @@ export async function POST(
       }
     })
 
-    // Prepare variants payload, linking the right OptionValues based on the variant name
-    // Variant names are "Value1 / Value2" matching the options
-    const variantData = variants.map((v: any) => {
-      const variantValues = v.name.split(" / ")
-      const optionValueIds: { id: string }[] = []
+    // If variants exist, create them
+    if (variants && variants.length > 0) {
+      const variantData = variants.map((v: any) => {
+        const variantValues = v.name.split(" / ")
+        const optionValueIds: { id: string }[] = []
 
-      // Find the corresponding OptionValue IDs for this variant
-      product.options.forEach((opt, optIndex) => {
-        const valName = variantValues[optIndex]
-        const matchedVal = opt.values.find(ov => ov.value === valName)
-        if (matchedVal) {
-          optionValueIds.push({ id: matchedVal.id })
+        product.options.forEach((opt, optIndex) => {
+          const valName = variantValues[optIndex]
+          const matchedVal = opt.values.find(ov => ov.value === valName)
+          if (matchedVal) {
+            optionValueIds.push({ id: matchedVal.id })
+          }
+        })
+        
+        const generatedSku = \\-\\
+
+        return {
+          productId: product.id,
+          name: v.name,
+          price: v.price,
+          compareAtPrice: v.compareAtPrice ? parseFloat(v.compareAtPrice) : null,
+          sku: v.sku || generatedSku,
+          stockCount: v.stockCount,
+          imageUrl: v.imageBase64 || null,
+          optionValues: optionValueIds.length > 0 ? { connect: optionValueIds } : undefined
         }
       })
-      
-      const generatedSku = `${name.substring(0,3).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`
 
-      return {
-        productId: product.id,
-        name: v.name,
-        price: v.price,
-        compareAtPrice: v.compareAtPrice ? parseFloat(v.compareAtPrice) : null,
-        sku: v.sku || generatedSku,
-        stockCount: v.stockCount,
-        imageUrl: v.imageBase64 || null,
-        optionValues: optionValueIds.length > 0 ? { connect: optionValueIds } : undefined
+      for (const vData of variantData) {
+        await db.productVariant.create({
+          data: vData
+        })
       }
-    })
-
-    // Create all variants
-    for (const vData of variantData) {
-      await db.productVariant.create({
-        data: vData
-      })
     }
 
     return NextResponse.json({ success: true, product })
