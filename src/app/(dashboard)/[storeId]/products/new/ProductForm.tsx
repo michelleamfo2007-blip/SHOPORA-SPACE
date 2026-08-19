@@ -109,7 +109,7 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
         name: vName,
         price: price,
         compareAtPrice: compareAtPrice,
-        sku: ${sku ? sku + '-' : ''},
+        sku: `${sku ? sku + '-' : ''}${combo.map(c => c.substring(0,3).toUpperCase()).join('-')}`,
         stockCount: 0,
         imageBase64: ""
       }
