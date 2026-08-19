@@ -12,11 +12,13 @@ import { useRouter } from "next/navigation"
 export function CheckoutForm({ 
   storeId, 
   currency, 
-  paymentSetting 
+  paymentSetting,
+  deliveryPolicy
 }: { 
   storeId: string; 
   currency: string;
   paymentSetting: any; 
+  deliveryPolicy?: string | null;
 }) {
   const { items, getTotalPrice, clearCart } = useCart()
   const router = useRouter()
@@ -75,6 +77,11 @@ export function CheckoutForm({
           </div>
           
           <h2 className="text-2xl font-bold mt-4 mb-2">Delivery Details</h2>
+          {deliveryPolicy && (
+            <div className="bg-blue-50 border border-blue-200 text-blue-900 p-4 rounded-lg text-sm mb-4">
+              <strong>Delivery Info:</strong> {deliveryPolicy}
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="firstName">First Name</Label>

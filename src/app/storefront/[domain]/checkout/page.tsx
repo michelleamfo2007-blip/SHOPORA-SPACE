@@ -23,6 +23,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ domai
           storeId={store.id} 
           currency={store.currency} 
           paymentSetting={paymentSetting} 
+          deliveryPolicy={store.deliveryPolicy}
         />
       </div>
     </div>

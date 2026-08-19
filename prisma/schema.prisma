@@ -128,6 +128,7 @@ model Store {
   aboutText      String?
   instagramHandle String?
   whatsappNumber String?
+  deliveryPolicy String?
 
   status         StoreStatus @default(ACTIVE)
   createdAt      DateTime    @default(now())
