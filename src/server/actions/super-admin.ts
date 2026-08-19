@@ -68,9 +68,21 @@ export async function approveWaitlistAction(entryId: string) {
 
     if (error) {
       console.error("Resend API Error:", error)
+      // Rollback the status if email failed
+      await db.waitlistEntry.update({
+        where: { id: entryId },
+        data: { status: "PENDING" }
+      })
+      return { success: false, error: error.message }
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to send invite email:", error)
+    // Rollback the status if email failed
+    await db.waitlistEntry.update({
+      where: { id: entryId },
+      data: { status: "PENDING" }
+    })
+    return { success: false, error: error.message || "Failed to send email" }
   }
 
   revalidatePath("/super-admin/waitlist")

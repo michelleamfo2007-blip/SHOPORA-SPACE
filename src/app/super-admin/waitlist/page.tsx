@@ -60,7 +60,7 @@ export default async function SuperAdminWaitlistPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    {entry.status === "PENDING" && (
+                    {(entry.status === "PENDING" || entry.status === "INVITED") && (
                       <ApproveButton entryId={entry.id} />
                     )}
                   </TableCell>
