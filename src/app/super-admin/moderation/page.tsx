@@ -1,13 +1,6 @@
 import { db } from "@/lib/db"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ShieldAlert } from "lucide-react"
 import { ModerationStatusToggle } from "./ModerationClient"
 
 export default async function ModerationPage() {
@@ -23,60 +16,63 @@ export default async function ModerationPage() {
   })
 
   return (
-    <div className="max-w-6xl space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Platform Moderation</h1>
-        <p className="text-slate-500 mt-2">Manage all merchant stores, enforce guidelines, and handle suspensions.</p>
+    <div className="space-y-8 pb-10">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+            <ShieldAlert className="w-8 h-8 text-rose-500" />
+            Platform Moderation
+          </h2>
+          <p className="text-slate-500 mt-1">Manage all merchant stores, enforce guidelines, and handle suspensions.</p>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Stores</CardTitle>
-          <CardDescription>
-            {stores.length} total stores registered on the platform.
-          </CardDescription>
+      <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
+        <CardHeader className="px-6 py-5 border-b border-slate-100 bg-slate-50/30">
+          <CardTitle className="text-lg font-bold text-slate-900">All Stores</CardTitle>
+          <p className="text-sm text-slate-500 mt-1">{stores.length} total stores registered on the platform.</p>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Store Details</TableHead>
-                  <TableHead>Country</TableHead>
-                  <TableHead className="text-right">Products</TableHead>
-                  <TableHead className="text-right">Orders</TableHead>
-                  <TableHead className="text-right">Moderation Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs font-bold text-slate-400 bg-slate-50/50 uppercase tracking-wider">
+                <tr>
+                  <th className="px-6 py-4">Store Details</th>
+                  <th className="px-6 py-4">Country</th>
+                  <th className="px-6 py-4 text-right">Products</th>
+                  <th className="px-6 py-4 text-right">Orders</th>
+                  <th className="px-6 py-4 text-right">Moderation Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
                 {stores.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center text-slate-500">
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-medium">
                       No stores have been created yet.
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ) : (
                   stores.map((store) => (
-                    <TableRow key={store.id}>
-                      <TableCell>
+                    <tr key={store.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <span className="font-medium text-slate-900">{store.name}</span>
-                          <span className="text-xs text-slate-500">{store.slug}.shopora.space</span>
+                          <span className="font-bold text-slate-900">{store.name}</span>
+                          <span className="text-xs font-medium text-slate-500 mt-0.5">{store.slug}.shopora.space</span>
                         </div>
-                      </TableCell>
-                      <TableCell>{store.country}</TableCell>
-                      <TableCell className="text-right">{store._count.products}</TableCell>
-                      <TableCell className="text-right">{store._count.orders}</TableCell>
-                      <TableCell className="text-right">
+                      </td>
+                      <td className="px-6 py-4 font-medium text-slate-700">{store.country}</td>
+                      <td className="px-6 py-4 text-right font-medium text-slate-500">{store._count.products}</td>
+                      <td className="px-6 py-4 text-right font-medium text-emerald-600">{store._count.orders.toLocaleString()}</td>
+                      <td className="px-6 py-4 text-right">
                         <div className="flex justify-end">
                           <ModerationStatusToggle storeId={store.id} status={store.status} />
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ))
                 )}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
         </CardContent>
       </Card>

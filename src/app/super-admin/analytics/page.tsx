@@ -1,7 +1,6 @@
 import { db } from "@/lib/db"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Store, ShoppingCart, Users, Package, Trophy } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Store, ShoppingCart, Users, Package, Trophy, BarChart3 } from "lucide-react"
 
 export default async function AnalyticsPage() {
   // Aggregate totals
@@ -26,109 +25,112 @@ export default async function AnalyticsPage() {
   })
 
   return (
-    <div className="max-w-6xl space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Platform Analytics</h1>
-        <p className="text-slate-500 mt-2">Global metrics and top-performing merchants across Shopora Space.</p>
+    <div className="space-y-8 pb-10">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+            <BarChart3 className="w-8 h-8 text-cyan-500" />
+            Platform Analytics
+          </h2>
+          <p className="text-slate-500 mt-1">Global metrics and top-performing merchants across Shopora Space.</p>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Stores</CardTitle>
+        <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
+            <CardTitle className="text-sm font-medium text-slate-500">Total Stores</CardTitle>
             <Store className="h-4 w-4 text-blue-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalStores.toLocaleString()}</div>
-            <p className="text-xs text-slate-500">Active merchant storefronts</p>
+          <CardContent className="px-6 pb-6">
+            <div className="text-3xl font-extrabold text-slate-900">{totalStores.toLocaleString()}</div>
+            <p className="text-xs font-medium text-slate-500 mt-1">Active merchant storefronts</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+        <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
+            <CardTitle className="text-sm font-medium text-slate-500">Total Orders</CardTitle>
             <ShoppingCart className="h-4 w-4 text-emerald-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalOrders.toLocaleString()}</div>
-            <p className="text-xs text-slate-500">Processed across all stores</p>
+          <CardContent className="px-6 pb-6">
+            <div className="text-3xl font-extrabold text-slate-900">{totalOrders.toLocaleString()}</div>
+            <p className="text-xs font-medium text-slate-500 mt-1">Processed across all stores</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
+        <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
+            <CardTitle className="text-sm font-medium text-slate-500">Total Customers</CardTitle>
             <Users className="h-4 w-4 text-indigo-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalCustomers.toLocaleString()}</div>
-            <p className="text-xs text-slate-500">Unique buyers platform-wide</p>
+          <CardContent className="px-6 pb-6">
+            <div className="text-3xl font-extrabold text-slate-900">{totalCustomers.toLocaleString()}</div>
+            <p className="text-xs font-medium text-slate-500 mt-1">Unique buyers platform-wide</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+        <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
+            <CardTitle className="text-sm font-medium text-slate-500">Total Products</CardTitle>
             <Package className="h-4 w-4 text-amber-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalProducts.toLocaleString()}</div>
-            <p className="text-xs text-slate-500">Items listed for sale</p>
+          <CardContent className="px-6 pb-6">
+            <div className="text-3xl font-extrabold text-slate-900">{totalProducts.toLocaleString()}</div>
+            <p className="text-xs font-medium text-slate-500 mt-1">Items listed for sale</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
+        <CardHeader className="px-6 py-5 border-b border-slate-100 bg-slate-50/30">
+          <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
             <Trophy className="h-5 w-5 text-amber-500" /> 
             Top Performing Stores
           </CardTitle>
-          <CardDescription>
-            The top 10 most active merchants on the platform based on order volume.
-          </CardDescription>
+          <p className="text-sm text-slate-500 mt-1">The top 10 most active merchants on the platform based on order volume.</p>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Rank</TableHead>
-                  <TableHead>Store Details</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead className="text-right">Products</TableHead>
-                  <TableHead className="text-right">Total Orders</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs font-bold text-slate-400 bg-slate-50/50 uppercase tracking-wider">
+                <tr>
+                  <th className="px-6 py-4">Rank</th>
+                  <th className="px-6 py-4">Store Details</th>
+                  <th className="px-6 py-4">Location</th>
+                  <th className="px-6 py-4 text-right">Products</th>
+                  <th className="px-6 py-4 text-right">Total Orders</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
                 {topStores.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center text-slate-500">
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-medium">
                       Not enough data to display top stores.
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ) : (
                   topStores.map((store, index) => (
-                    <TableRow key={store.id}>
-                      <TableCell className="font-medium text-slate-500">
+                    <tr key={store.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-6 py-4 font-bold text-slate-400">
                         #{index + 1}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-medium text-slate-900">{store.name}</span>
-                          <span className="text-xs text-slate-500">{store.slug}.shopora.space</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{store.country}</TableCell>
-                      <TableCell className="text-right font-mono">{store._count.products}</TableCell>
-                      <TableCell className="text-right font-medium text-emerald-600">
-                        {store._count.orders.toLocaleString()}
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-slate-900">{store.name}</div>
+                        <div className="text-xs font-medium text-slate-500 mt-0.5">{store.slug}.shopora.space</div>
+                      </td>
+                      <td className="px-6 py-4 font-medium text-slate-700">{store.country}</td>
+                      <td className="px-6 py-4 text-right font-medium text-slate-500">{store._count.products}</td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-sm font-bold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                          {store._count.orders.toLocaleString()}
+                        </span>
+                      </td>
+                    </tr>
                   ))
                 )}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
         </CardContent>
       </Card>
