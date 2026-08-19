@@ -17,7 +17,9 @@ export default async function ProductPage({
     where: { 
       id: productId,
       storeId: store.id,
-      isActive: true
+      status: {
+        notIn: ["DRAFT", "ARCHIVED"]
+      }
     },
     include: {
       variants: true,

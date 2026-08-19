@@ -26,7 +26,8 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
     const products = await db.product.findMany({
       where: { 
         storeId: store.id,
-        isActive: true
+        status: "ACTIVE",
+        visibility: "VISIBLE"
       },
       include: {
         variants: {

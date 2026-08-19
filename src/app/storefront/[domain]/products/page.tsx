@@ -20,7 +20,8 @@ export default async function ProductsPage({ params }: { params: Promise<{ domai
   const products = await db.product.findMany({
     where: { 
       storeId: store.id,
-      isActive: true
+      status: "ACTIVE",
+      visibility: "VISIBLE"
     },
     include: {
       variants: {

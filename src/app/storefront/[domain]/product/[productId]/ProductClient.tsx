@@ -127,6 +127,23 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
             </div>
           </div>
         </div>
+
+        {/* Product Video */}
+        {product.videoUrl && (
+          <div className="mt-16 pt-16 border-t border-slate-100">
+            <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">Product Video</h3>
+            <div className="max-w-3xl mx-auto rounded-2xl overflow-hidden shadow-lg bg-black">
+              <video 
+                src={product.videoUrl} 
+                controls 
+                className="w-full h-auto aspect-video object-contain"
+                preload="metadata"
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

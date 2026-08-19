@@ -37,7 +37,8 @@ export default async function CategoryProductsPage({
   const products = await db.product.findMany({
     where: { 
       storeId: store.id,
-      isActive: true,
+      status: "ACTIVE",
+      visibility: "VISIBLE",
       categories: {
         some: {
           id: category.id
