@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { resend } from "@/lib/resend"
 
-export async function startTrialAction(planName: string) {
+export async function startTrialAction(planName: string, interval: string = "month") {
   const session = await getServerSession(authOptions)
   
   if (!session?.user?.id) {
@@ -23,20 +23,22 @@ export async function startTrialAction(planName: string) {
 
   // 1. Find or create the plan
   let plan = await db.subscriptionPlan.findFirst({
-    where: { name: planName }
+    where: { name: planName, interval: interval === "year" ? "year" : "month" }
   })
 
   if (!plan) {
-    // create placeholder plan if it doesn't exist
-    const defaultPrices: Record<string, number> = {
-      Starter: 29.99,
-      Professional: 79.99,
-      Business: 199.99
+    const defaultPrices: Record<string, Record<string, number>> = {
+      Starter: { month: 150, year: 1650 },
+      Professional: { month: 250, year: 2750 },
+      Business: { month: 350, year: 3850 }
     }
+    const safeInterval = interval === "year" ? "year" : "month"
+    
     plan = await db.subscriptionPlan.create({
       data: {
         name: planName,
-        price: defaultPrices[planName] || 0,
+        price: defaultPrices[planName]?.[safeInterval] || 0,
+        interval: safeInterval,
       }
     })
   }
