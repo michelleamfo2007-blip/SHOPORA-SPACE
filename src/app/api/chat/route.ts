@@ -26,17 +26,20 @@ export async function POST(req: Request) {
 
     // Fetch store products to provide context to the AI
     const products = await db.product.findMany({
-      where: { storeId: store.id, isActive: true },
+      where: { storeId: store.id, status: 'ACTIVE', visibility: 'VISIBLE' },
       take: 20,
       select: {
         name: true,
         description: true,
+        price: true,
         variants: { select: { price: true }, take: 1 },
         categories: { select: { name: true } }
       }
     });
 
-    const productsContext = products.map(p => `- ${p.name} ($${p.variants[0]?.price || 'N/A'}): ${p.description || ''} [Categories: ${p.categories.map(c => c.name).join(', ')}]`).join('\n');
+    const productsContext = products.length > 0
+      ? products.map(p => `- ${p.name} ($${p.variants[0]?.price ?? p.price ?? 'N/A'}): ${p.description || 'No description'} [Categories: ${p.categories.map(c => c.name).join(', ') || 'Uncategorized'}]`).join('\n')
+      : 'No products currently available.';
 
     const systemPrompt = `You are a friendly, helpful AI shopping assistant for a store called "${store.name}".
 Your goal is to help customers find the perfect products for their needs. Be concise, polite, and enthusiastic.
@@ -51,10 +54,10 @@ Keep your responses relatively short and easy to read. Use emojis occasionally.`
     const result = streamText({
       model: openai('gpt-4o-mini'),
       system: systemPrompt,
-      messages: await convertToModelMessages(messages),
+      messages: convertToModelMessages(messages),
     });
 
-    return result.toTextStreamResponse();
+    return result.toDataStreamResponse();
   } catch (error) {
     console.error('AI Chat Error:', error);
     return new Response('Error processing chat request', { status: 500 });
