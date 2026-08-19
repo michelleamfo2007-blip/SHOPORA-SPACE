@@ -13,7 +13,7 @@ export default async function ProductPage({
   const store = await getStoreByHost(domain)
   if (!store) notFound()
 
-  const product = await db.product.findUnique({
+  const product = await db.product.findFirst({
     where: { 
       id: productId,
       storeId: store.id,
