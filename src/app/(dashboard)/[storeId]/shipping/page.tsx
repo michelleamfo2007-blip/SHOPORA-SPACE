@@ -25,15 +25,15 @@ export default async function ShippingPage({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Shipping</h2>
-        <p className="text-muted-foreground">Manage shipping zones and delivery rates for your customers.</p>
+        <h2 className="text-2xl font-bold tracking-tight">Delivery</h2>
+        <p className="text-muted-foreground">Manage delivery zones and delivery rates for your customers.</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Create Shipping Zone</CardTitle>
+          <CardTitle>Create Delivery Zone</CardTitle>
           <CardDescription>
-            Zones group countries or regions that share the same shipping rates.
+            Zones group countries or regions that share the same delivery rates.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -54,8 +54,8 @@ export default async function ShippingPage({
         {zones.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center h-40 text-muted-foreground">
-              <p>No shipping zones configured.</p>
-              <p className="text-sm">Create a zone above to start adding shipping rates.</p>
+              <p>No delivery zones configured.</p>
+              <p className="text-sm">Create a zone above to start adding delivery rates.</p>
             </CardContent>
           </Card>
         ) : (

@@ -51,7 +51,7 @@ export function DashboardNav({ storeId, isMobileMenu }: DashboardNavProps) {
     },
     {
       href: `/${storeId}/shipping`,
-      label: "Shipping",
+      label: "Delivery",
       icon: Package,
       active: pathname === `/${storeId}/shipping`,
     },

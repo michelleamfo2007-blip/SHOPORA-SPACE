@@ -94,7 +94,7 @@ export default async function OrderDetailsPage({
                     <span>{store.currency} {(order.totalAmount - order.taxAmount - order.shippingAmount).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Shipping</span>
+                    <span className="text-slate-500">Delivery</span>
                     <span>{store.currency} {order.shippingAmount.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
