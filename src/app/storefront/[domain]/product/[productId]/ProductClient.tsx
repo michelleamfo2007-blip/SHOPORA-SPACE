@@ -8,10 +8,25 @@ import { useCart } from "@/lib/cart"
 export function ProductClient({ product, store }: { product: any, store: any }) {
   const router = useRouter()
   const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0])
+  const [activeImageUrl, setActiveImageUrl] = useState<string | null>(
+    product.variants?.[0]?.imageUrl || product.images?.[0] || null
+  )
 
   const price = selectedVariant?.price ?? product.price ?? 0
   const compareAtPrice = selectedVariant?.compareAtPrice ?? product.compareAtPrice
-  const imageUrl = selectedVariant?.imageUrl ?? product.images?.[0]
+
+  // Collect all unique images for the gallery
+  const allImages = Array.from(new Set([
+    ...(product.images || []),
+    ...(product.variants?.map((v: any) => v.imageUrl).filter(Boolean) || [])
+  ])) as string[]
+
+  const handleVariantSelect = (variant: any) => {
+    setSelectedVariant(variant)
+    if (variant.imageUrl) {
+      setActiveImageUrl(variant.imageUrl)
+    }
+  }
 
   const cart = useCart()
 
@@ -22,7 +37,7 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
       name: selectedVariant ? `${product.name} - ${selectedVariant.name}` : product.name,
       price: price,
       quantity: 1,
-      imageUrl: imageUrl,
+      imageUrl: activeImageUrl || product.images?.[0],
     })
     
     // Instead of redirecting to checkout immediately, we can open the cart or notify the user
@@ -37,16 +52,36 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
           
           {/* Product Image Gallery */}
-          <div className="aspect-[4/5] bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 w-full overflow-hidden relative">
-            {imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={imageUrl} alt={product.name} className="object-cover w-full h-full" />
-            ) : (
-              <span>No Image Available</span>
-            )}
-            {compareAtPrice && compareAtPrice > price && (
-              <div className="absolute top-6 right-6 bg-red-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
-                SALE
+          <div className="flex flex-col gap-4">
+            <div className="aspect-[4/5] bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 w-full overflow-hidden relative">
+              {activeImageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={activeImageUrl} alt={product.name} className="object-cover w-full h-full" />
+              ) : (
+                <span>No Image Available</span>
+              )}
+              {compareAtPrice && compareAtPrice > price && (
+                <div className="absolute top-6 right-6 bg-red-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
+                  SALE
+                </div>
+              )}
+            </div>
+
+            {/* Thumbnails */}
+            {allImages.length > 1 && (
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                {allImages.map((img, idx) => (
+                  <button 
+                    key={idx}
+                    onClick={() => setActiveImageUrl(img)}
+                    className={`relative w-20 h-24 shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
+                      activeImageUrl === img ? 'border-blue-600 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img} alt={`${product.name} - image ${idx + 1}`} className="object-cover w-full h-full bg-slate-100" />
+                  </button>
+                ))}
               </div>
             )}
           </div>
@@ -84,7 +119,7 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
                   {product.variants.map((variant: any) => (
                     <button 
                       key={variant.id}
-                      onClick={() => setSelectedVariant(variant)}
+                      onClick={() => handleVariantSelect(variant)}
                       className={`px-6 py-3 border-2 rounded-xl text-sm font-medium transition-all ${
                         selectedVariant.id === variant.id 
                         ? 'border-blue-600 bg-blue-50 text-blue-700' 
