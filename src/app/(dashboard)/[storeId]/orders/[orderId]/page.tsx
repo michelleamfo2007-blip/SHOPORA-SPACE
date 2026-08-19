@@ -40,12 +40,7 @@ export default async function OrderDetailsPage({
   if (!order) notFound()
 
   const payment = order.payments?.[0]
-  let shippingAddress: any = null
-  try {
-    if (order.shippingAddress) {
-      shippingAddress = JSON.parse(order.shippingAddress)
-    }
-  } catch (e) {}
+
 
   return (
     <div className="grid gap-6">
@@ -132,19 +127,17 @@ export default async function OrderDetailsPage({
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg font-bold">Shipping Address</CardTitle>
+              <CardTitle className="text-lg font-bold">Delivery Details</CardTitle>
             </CardHeader>
             <CardContent>
-              {shippingAddress ? (
-                <div className="space-y-1 text-sm text-slate-600">
-                  <p>{shippingAddress.firstName} {shippingAddress.lastName}</p>
-                  <p>{shippingAddress.address1}</p>
-                  {shippingAddress.address2 && <p>{shippingAddress.address2}</p>}
-                  <p>{shippingAddress.city}, {shippingAddress.state} {shippingAddress.zip}</p>
-                  <p>{shippingAddress.country}</p>
+              {order.shippingAddress ? (
+                <div className="space-y-1 text-sm text-slate-600 font-medium">
+                  {order.shippingAddress.split(', ').map((line, i) => (
+                    <p key={i}>{line}</p>
+                  ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-500 italic">No shipping address provided</p>
+                <p className="text-sm text-slate-500 italic">No delivery details provided</p>
               )}
             </CardContent>
           </Card>
