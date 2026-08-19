@@ -5,15 +5,16 @@ import { db } from "@/lib/db"
 export async function processCheckoutAction(formData: FormData) {
   const storeId = formData.get("storeId") as string
   const email = formData.get("email") as string
+  const phone = formData.get("phone") as string
   const firstName = formData.get("firstName") as string
   const lastName = formData.get("lastName") as string
-  const address = formData.get("address") as string
+  const exactLocation = formData.get("exactLocation") as string
   const city = formData.get("city") as string
   const country = formData.get("country") as string
   const reference = formData.get("paymentReference") as string
   const cartDataStr = formData.get("cartData") as string
 
-  if (!storeId || !email || !firstName || !lastName || !cartDataStr || !reference) {
+  if (!storeId || !email || !phone || !firstName || !lastName || !exactLocation || !cartDataStr || !reference) {
     throw new Error("Missing required fields")
   }
 
@@ -43,7 +44,7 @@ export async function processCheckoutAction(formData: FormData) {
         storeId,
         email,
         name: `${firstName} ${lastName}`,
-        phone: formData.get("phone") as string || undefined
+        phone: phone
       }
     })
   }
@@ -56,7 +57,7 @@ export async function processCheckoutAction(formData: FormData) {
       orderNumber: `ORD-${Date.now().toString().slice(-6)}`,
       totalAmount,
       status: "PENDING_VERIFICATION", 
-      shippingAddress: `${address}, ${city}, ${country}`,
+      shippingAddress: `${exactLocation}, ${city}, ${country}`,
       orderItems: {
         create: cartItems.map(item => ({
           variantId: item.variantId,

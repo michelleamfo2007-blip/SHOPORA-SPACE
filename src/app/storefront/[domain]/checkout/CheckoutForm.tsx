@@ -68,9 +68,13 @@ export function CheckoutForm({
               <Label htmlFor="email">Email</Label>
               <Input id="email" name="email" type="email" required />
             </div>
+            <div className="grid gap-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input id="phone" name="phone" type="tel" required />
+            </div>
           </div>
           
-          <h2 className="text-2xl font-bold mt-4 mb-2">Shipping Address</h2>
+          <h2 className="text-2xl font-bold mt-4 mb-2">Delivery Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="firstName">First Name</Label>
@@ -83,8 +87,8 @@ export function CheckoutForm({
           </div>
           
           <div className="grid gap-2">
-            <Label htmlFor="address">Address</Label>
-            <Input id="address" name="address" required />
+            <Label htmlFor="exactLocation">Exact Location</Label>
+            <Input id="exactLocation" name="exactLocation" required />
           </div>
           
           <div className="grid grid-cols-2 gap-4">
