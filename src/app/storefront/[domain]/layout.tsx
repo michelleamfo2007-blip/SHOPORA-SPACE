@@ -27,7 +27,7 @@ export default async function StorefrontLayout({
     const isPreview = host.includes("vercel.app") || host.includes("localhost:3000") || host === "shopora.space" || host === "www.shopora.space"
     // If testing via Vercel preview or localhost, the base path is /storefront/[domain]
     // Otherwise on the actual custom domain, the base path is just /
-    const basePath = isPreview && !host.startsWith(domain) ? `/storefront/${domain}` : ""
+    const basePath = isPreview ? `/storefront/${domain}` : ""
 
   return (
     <div className="flex min-h-screen flex-col">

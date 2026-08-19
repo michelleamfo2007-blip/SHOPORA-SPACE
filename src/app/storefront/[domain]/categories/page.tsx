@@ -15,7 +15,7 @@ export default async function CategoriesPage({ params }: { params: Promise<{ dom
   const headersList = await headers();
   const host = headersList.get("host") || "";
   const isPreview = host.includes("vercel.app") || host.includes("localhost:3000") || host === "shopora.space" || host === "www.shopora.space";
-  const basePath = isPreview && !host.startsWith(domain) ? `/storefront/${domain}` : "";
+  const basePath = isPreview ? `/storefront/${domain}` : "";
 
   const categories = await db.category.findMany({
     where: { storeId: store.id },

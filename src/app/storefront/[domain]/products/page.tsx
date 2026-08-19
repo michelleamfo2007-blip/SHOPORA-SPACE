@@ -15,7 +15,7 @@ export default async function ProductsPage({ params }: { params: Promise<{ domai
   const headersList = await headers();
   const host = headersList.get("host") || "";
   const isPreview = host.includes("vercel.app") || host.includes("localhost:3000") || host === "shopora.space" || host === "www.shopora.space";
-  const basePath = isPreview && !host.startsWith(domain) ? `/storefront/${domain}` : "";
+  const basePath = isPreview ? `/storefront/${domain}` : "";
 
   const products = await db.product.findMany({
     where: { 

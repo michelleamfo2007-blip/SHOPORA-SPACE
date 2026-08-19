@@ -20,7 +20,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
     const isPreview = host.includes("vercel.app") || host.includes("localhost:3000") || host === "shopora.space" || host === "www.shopora.space"
     // If testing via Vercel preview or localhost, the base path is /storefront/[domain]
     // Otherwise on the actual custom domain, the base path is just /
-    const basePath = isPreview && !host.startsWith(domain) ? `/storefront/${domain}` : ""
+    const basePath = isPreview ? `/storefront/${domain}` : ""
 
     // Fetch active products for this store
     const products = await db.product.findMany({
