@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { Upload, Trash2, Star, Loader2, ImagePlus } from "lucide-react";
-import { toast } from "sonner";
+import { useState, useRef } from "react";
+import { Upload, Trash2, Star, Loader2 } from "lucide-react";
 
 interface MultiImageUploaderProps {
   storeId: string;
@@ -12,15 +11,14 @@ interface MultiImageUploaderProps {
 
 export function MultiImageUploader({ storeId, images, onImagesChange }: MultiImageUploaderProps) {
   const [dragging, setDragging] = useState(false);
-  const [uploadingFiles, setUploadingFiles] = useState<{ id: string; file: File; objectUrl: string }[]>([]);
+  const [uploadingCount, setUploadingCount] = useState(0);
+  const [uploadingPreviews, setUploadingPreviews] = useState<{ id: string; objectUrl: string }[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const uploadFiles = useCallback(async (files: FileList | File[]) => {
+  const uploadFiles = async (files: FileList | File[]) => {
     const validFiles = Array.from(files).filter(file => {
-      // Some browsers/OS don't provide a mime type for valid images like .heic or obscure formats
-      // We will rely on the 20MB limit and Supabase backend to validate if needed
       if (file.size > 20 * 1024 * 1024) {
-        toast.error(`${file.name} exceeds 20MB limit.`);
+        alert(`"${file.name}" is too large. Maximum size is 20MB.`);
         return false;
       }
       return true;
@@ -28,51 +26,58 @@ export function MultiImageUploader({ storeId, images, onImagesChange }: MultiIma
 
     if (validFiles.length === 0) return;
 
-    // Create temp uploading states
-    const newUploads = validFiles.map(file => ({
+    // Show previews immediately
+    const previews = validFiles.map(file => ({
       id: Math.random().toString(36).substring(7),
-      file,
       objectUrl: URL.createObjectURL(file)
     }));
+    setUploadingPreviews(prev => [...prev, ...previews]);
+    setUploadingCount(prev => prev + validFiles.length);
 
-    setUploadingFiles(prev => [...prev, ...newUploads]);
-
-    // Upload files concurrently
     const uploadedUrls: string[] = [];
-    
-    await Promise.all(newUploads.map(async (uploadItem) => {
+
+    for (let i = 0; i < validFiles.length; i++) {
+      const file = validFiles[i];
+      const previewId = previews[i].id;
+
       try {
         const fd = new FormData();
-        fd.append("file", uploadItem.file);
+        fd.append("file", file);
         fd.append("storeId", storeId);
 
-        const res = await fetch("/api/upload", { method: "POST", body: fd });
-        let data;
-        try {
-          data = await res.json();
-        } catch (e) {
-          // If response is not JSON, get the text
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: fd,
+          credentials: "include",
+        });
+
+        if (!res.ok) {
           const text = await res.text();
-          throw new Error(text || `Upload failed with status ${res.status}`);
+          console.error("Upload failed:", res.status, text);
+          alert(`Upload failed for "${file.name}": ${text || res.statusText}`);
+          continue;
         }
 
-        if (!res.ok || data.error) {
-          throw new Error(data.error || "Upload failed");
+        const data = await res.json();
+        if (data.error) {
+          alert(`Upload failed for "${file.name}": ${data.error}`);
+          continue;
         }
 
         uploadedUrls.push(data.url);
       } catch (err: any) {
-        toast.error(`Failed to upload ${uploadItem.file.name}: ${err.message}`);
+        console.error("Upload error:", err);
+        alert(`Upload error for "${file.name}": ${err.message}`);
       } finally {
-        setUploadingFiles(prev => prev.filter(u => u.id !== uploadItem.id));
+        setUploadingPreviews(prev => prev.filter(p => p.id !== previewId));
+        setUploadingCount(prev => prev - 1);
       }
-    }));
+    }
 
     if (uploadedUrls.length > 0) {
       onImagesChange([...images, ...uploadedUrls]);
-      toast.success(`${uploadedUrls.length} image(s) uploaded successfully!`);
     }
-  }, [storeId, images, onImagesChange]);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -83,22 +88,21 @@ export function MultiImageUploader({ storeId, images, onImagesChange }: MultiIma
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragging(false);
-    if (e.dataTransfer.files) {
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       uploadFiles(e.dataTransfer.files);
     }
   };
 
   const removeImage = (indexToRemove: number) => {
-    const newImages = images.filter((_, index) => index !== indexToRemove);
+    const newImages = images.filter((_, i) => i !== indexToRemove);
     onImagesChange(newImages);
   };
 
   const setMainImage = (indexToMain: number) => {
-    if (indexToMain === 0) return; // Already main
+    if (indexToMain === 0) return;
     const newImages = [...images];
-    const temp = newImages[0];
-    newImages[0] = newImages[indexToMain];
-    newImages[indexToMain] = temp;
+    const [main] = newImages.splice(indexToMain, 1);
+    newImages.unshift(main);
     onImagesChange(newImages);
   };
 
@@ -114,9 +118,11 @@ export function MultiImageUploader({ storeId, images, onImagesChange }: MultiIma
         onClick={() => inputRef.current?.click()}
       >
         <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-4 text-slate-600">
-          <Upload className="w-5 h-5" />
+          {uploadingCount > 0 ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
         </div>
-        <p className="text-sm font-semibold text-slate-900 mb-1">Drag & drop images here</p>
+        <p className="text-sm font-semibold text-slate-900 mb-1">
+          {uploadingCount > 0 ? `Uploading ${uploadingCount} image(s)...` : "Drag & drop images here"}
+        </p>
         <p className="text-sm text-slate-500">or click to browse files</p>
         <p className="text-xs text-slate-400 mt-4">PNG, JPG or WEBP • Maximum 20MB per image</p>
 
@@ -127,16 +133,14 @@ export function MultiImageUploader({ storeId, images, onImagesChange }: MultiIma
           multiple
           className="hidden"
           onChange={handleFileChange}
-          onClick={(e) => {
-            (e.target as HTMLInputElement).value = "";
-          }}
+          onClick={(e) => { (e.target as HTMLInputElement).value = ""; }}
         />
       </div>
 
-      {(images.length > 0 || uploadingFiles.length > 0) && (
+      {(images.length > 0 || uploadingPreviews.length > 0) && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {images.map((url, index) => (
-            <div key={url} className="relative group rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm flex flex-col">
+            <div key={url} className="relative rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm flex flex-col">
               <div className="relative aspect-[4/3] bg-slate-100">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={url} alt={`Product image ${index + 1}`} className="w-full h-full object-cover" />
@@ -167,17 +171,17 @@ export function MultiImageUploader({ storeId, images, onImagesChange }: MultiIma
             </div>
           ))}
 
-          {uploadingFiles.map((upload) => (
-            <div key={upload.id} className="relative rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm flex flex-col opacity-60">
+          {uploadingPreviews.map((preview) => (
+            <div key={preview.id} className="relative rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm flex flex-col opacity-60">
               <div className="relative aspect-[4/3] bg-slate-100">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={upload.objectUrl} alt="Uploading..." className="w-full h-full object-cover" />
+                <img src={preview.objectUrl} alt="Uploading..." className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                   <Loader2 className="w-6 h-6 text-white animate-spin" />
                 </div>
               </div>
-              <div className="flex items-center justify-between p-2 bg-white invisible">
-                <div className="w-4 h-4"></div>
+              <div className="flex items-center p-2 bg-white">
+                <span className="text-xs text-slate-400">Uploading...</span>
               </div>
             </div>
           ))}

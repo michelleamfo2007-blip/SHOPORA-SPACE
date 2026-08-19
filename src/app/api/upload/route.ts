@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     const membership = await db.storeMember.findUnique({
       where: { storeId_userId: { storeId, userId: session.user.id } },
     });
-    if (!membership || (membership.role !== "OWNER" && membership.role !== "ADMIN")) {
+    if (!membership) {
       return new Response("Forbidden", { status: 403 });
     }
 

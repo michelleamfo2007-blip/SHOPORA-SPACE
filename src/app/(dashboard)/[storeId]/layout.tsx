@@ -5,6 +5,7 @@ import { db } from "@/lib/db"
 import { DashboardNav } from "@/components/dashboard/nav"
 import { Store as StoreIcon, ExternalLink } from "lucide-react"
 import { SubscriptionGuard } from "@/components/dashboard/SubscriptionGuard"
+import { Toaster } from "sonner"
 
 export default async function DashboardLayout({
   children,
@@ -111,6 +112,7 @@ export default async function DashboardLayout({
           </SubscriptionGuard>
         </main>
       </div>
+      <Toaster position="bottom-right" richColors />
     </div>
   )
 }
