@@ -1,4 +1,4 @@
-﻿import Link from "next/link"
+import Link from "next/link"
 import { db } from "@/lib/db"
 import { Button } from "@/components/ui/button"
 import { ProductForm } from "../new/ProductForm"
@@ -28,7 +28,7 @@ export default async function ProductEditPage({
           <h2 className="text-3xl font-bold tracking-tight">Edit Product</h2>
           <p className="text-slate-500">Make changes to {product.name}</p>
         </div>
-        <Link href={//products}>
+        <Link href={`/${storeId}/products`}>
           <Button variant="outline">Back to Products</Button>
         </Link>
       </div>

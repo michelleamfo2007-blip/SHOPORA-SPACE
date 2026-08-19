@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -67,7 +67,7 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
   const generateSku = () => {
     const prefix = name ? name.substring(0, 3).toUpperCase() : "PRD"
     const random = Math.floor(1000 + Math.random() * 9000)
-    setSku($prefix-)
+    setSku(`${prefix}-${random}`)
   }
 
   const addOption = () => setOptions([...options, { name: "", values: [""] }])

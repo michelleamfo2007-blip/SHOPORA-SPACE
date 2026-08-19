@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
@@ -43,7 +43,7 @@ export async function POST(
     }
 
     // Process Option mapping
-    const optionData = options?.map((opt: any, index: number) => ({
+    const optionData = options?.map((opt: { name: string; values: string[] }, index: number) => ({
       name: opt.name,
       position: index + 1,
       values: {
@@ -82,25 +82,25 @@ export async function POST(
 
     // If variants exist, create them
     if (variants && variants.length > 0) {
-      const variantData = variants.map((v: any) => {
+      const variantData = variants.map((v: { name: string; price: number; compareAtPrice?: number | null; sku?: string; stockCount: number; imageBase64?: string }) => {
         const variantValues = v.name.split(" / ")
         const optionValueIds: { id: string }[] = []
 
-        product.options.forEach((opt, optIndex) => {
+        product.options.forEach((opt: any, optIndex: number) => {
           const valName = variantValues[optIndex]
-          const matchedVal = opt.values.find(ov => ov.value === valName)
+          const matchedVal = opt.values.find((ov: any) => ov.value === valName)
           if (matchedVal) {
             optionValueIds.push({ id: matchedVal.id })
           }
         })
         
-        const generatedSku = \\-\\
+        const generatedSku = `${name.substring(0,3).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`
 
         return {
           productId: product.id,
           name: v.name,
           price: v.price,
-          compareAtPrice: v.compareAtPrice ? parseFloat(v.compareAtPrice) : null,
+          compareAtPrice: v.compareAtPrice ? parseFloat(v.compareAtPrice as any) : null,
           sku: v.sku || generatedSku,
           stockCount: v.stockCount,
           imageUrl: v.imageBase64 || null,
