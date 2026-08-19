@@ -80,6 +80,9 @@ export async function updateStoreBrandingAction(storeId: string, formData: FormD
   const aboutText = formData.get("aboutText") as string | null
   const instagramHandle = formData.get("instagramHandle") as string | null
   const whatsappNumber = formData.get("whatsappNumber") as string | null
+  const tiktokHandle = formData.get("tiktokHandle") as string | null
+  const snapchatHandle = formData.get("snapchatHandle") as string | null
+  const contactEmail = formData.get("contactEmail") as string | null
   const currency = formData.get("currency") as string | null
   const deliveryPolicy = formData.get("deliveryPolicy") as string | null
 
@@ -95,6 +98,9 @@ export async function updateStoreBrandingAction(storeId: string, formData: FormD
       aboutText,
       instagramHandle,
       whatsappNumber,
+      tiktokHandle,
+      snapchatHandle,
+      contactEmail,
       ...(currency && { currency }),
       ...(deliveryPolicy !== null && { deliveryPolicy })
     }

@@ -21,6 +21,12 @@ export function SettingsForm({ store }: { store: any }) {
   const [logoUrl, setLogoUrl] = useState(store.logoUrl || "")
   const [heroImageUrl, setHeroImageUrl] = useState(store.heroImage || "")
   const [primaryColor, setPrimaryColor] = useState(store.primaryColor || "#000000")
+  
+  const [instagramHandle, setInstagramHandle] = useState(store.instagramHandle || "")
+  const [whatsappNumber, setWhatsappNumber] = useState(store.whatsappNumber || "")
+  const [tiktokHandle, setTiktokHandle] = useState(store.tiktokHandle || "")
+  const [snapchatHandle, setSnapchatHandle] = useState(store.snapchatHandle || "")
+  const [contactEmail, setContactEmail] = useState(store.contactEmail || "")
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,6 +40,11 @@ export function SettingsForm({ store }: { store: any }) {
       formData.append("logoUrl", logoUrl)
       formData.append("heroImage", heroImageUrl)
       formData.append("primaryColor", primaryColor)
+      formData.append("instagramHandle", instagramHandle)
+      formData.append("whatsappNumber", whatsappNumber)
+      formData.append("tiktokHandle", tiktokHandle)
+      formData.append("snapchatHandle", snapchatHandle)
+      formData.append("contactEmail", contactEmail)
       
       await updateStoreBrandingAction(store.id, formData)
       
@@ -124,6 +135,54 @@ export function SettingsForm({ store }: { store: any }) {
               currentMedia={heroImageUrl} 
               onUploaded={setHeroImageUrl} 
               label="Upload Hero Image"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-6">
+        <h3 className="text-lg font-medium border-b pb-2">Social Media & Contact</h3>
+        
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-2">
+            <Label>Contact Email</Label>
+            <Input 
+              type="email"
+              value={contactEmail} 
+              onChange={e => setContactEmail(e.target.value)} 
+              placeholder="hello@mystore.com"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>WhatsApp Number</Label>
+            <Input 
+              value={whatsappNumber} 
+              onChange={e => setWhatsappNumber(e.target.value)} 
+              placeholder="e.g. +233 24 123 4567"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>Instagram Handle</Label>
+            <Input 
+              value={instagramHandle} 
+              onChange={e => setInstagramHandle(e.target.value)} 
+              placeholder="e.g. @mystore"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>TikTok Handle</Label>
+            <Input 
+              value={tiktokHandle} 
+              onChange={e => setTiktokHandle(e.target.value)} 
+              placeholder="e.g. @mystore"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>Snapchat Handle</Label>
+            <Input 
+              value={snapchatHandle} 
+              onChange={e => setSnapchatHandle(e.target.value)} 
+              placeholder="e.g. @mystore"
             />
           </div>
         </div>
