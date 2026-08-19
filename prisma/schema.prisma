@@ -146,6 +146,7 @@ model Store {
   shippingZones ShippingZone[]
   reviews      Review[]
   supportTickets SupportTicket[]
+  analytics    StoreAnalytics[]
 }
 
 model StoreMember {
@@ -477,4 +478,19 @@ model SupportTicket {
 
   store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
   customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+}
+
+model StoreAnalytics {
+  id          String   @id @default(cuid())
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  date        DateTime
+  pageViews   Int      @default(0)
+  visitors    Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([storeId, date])
+  @@index([storeId])
 }

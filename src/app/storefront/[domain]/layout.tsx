@@ -5,6 +5,7 @@ import { db } from "@/lib/db"
 import { ShoppingCart } from "lucide-react"
 import { AIAssistant } from "@/components/storefront/AIAssistant"
 import { CartDrawer } from "@/components/storefront/CartDrawer"
+import { StoreAnalyticsTracker } from "@/components/storefront/StoreAnalyticsTracker"
 
 import { headers } from "next/headers"
 
@@ -140,6 +141,7 @@ export default async function StorefrontLayout({
         </div>
       </footer>
       <AIAssistant domain={domain} storeId={store.id} primaryColor={store.primaryColor || undefined} />
+      <StoreAnalyticsTracker domain={domain} />
     </div>
   )
 }

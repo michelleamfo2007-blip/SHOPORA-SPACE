@@ -1,7 +1,7 @@
 import { db } from "@/lib/db"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DollarSign, Package, ShoppingCart, Users } from "lucide-react"
+import { DollarSign, Package, ShoppingCart, Users, Eye, UserCheck } from "lucide-react"
 
 export default async function StoreAnalyticsPage({
   params
@@ -11,11 +11,18 @@ export default async function StoreAnalyticsPage({
   const { storeId } = await params
 
   // Fetch aggregate data for this specific store
-  const [totalOrders, totalProducts, totalCustomers] = await Promise.all([
+  const [totalOrders, totalProducts, totalCustomers, storeAnalytics] = await Promise.all([
     db.order.count({ where: { storeId } }),
     db.product.count({ where: { storeId } }),
-    db.customer.count({ where: { storeId } })
+    db.customer.count({ where: { storeId } }),
+    db.storeAnalytics.aggregate({
+      where: { storeId },
+      _sum: { pageViews: true, visitors: true }
+    })
   ])
+
+  const totalPageViews = storeAnalytics._sum.pageViews || 0
+  const totalVisitors = storeAnalytics._sum.visitors || 0
 
   // Calculate Revenue
   const storeOrders = await db.order.findMany({
@@ -37,6 +44,30 @@ export default async function StoreAnalyticsPage({
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Store Analytics</h2>
         <p className="text-muted-foreground">Detailed metrics and performance for your store.</p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Page Views</CardTitle>
+            <Eye className="h-4 w-4 text-violet-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalPageViews.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">Total storefront views</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Unique Visitors</CardTitle>
+            <UserCheck className="h-4 w-4 text-pink-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalVisitors.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">Total unique visitors</p>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

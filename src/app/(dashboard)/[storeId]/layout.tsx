@@ -41,7 +41,7 @@ export default async function DashboardLayout({
     const firstStore = await db.storeMember.findFirst({
       where: { userId: session.user.id }
     })
-    
+
     if (firstStore) {
       redirect(`/${firstStore.storeId}`)
     } else {
@@ -59,9 +59,9 @@ export default async function DashboardLayout({
               <StoreIcon className="h-6 w-6" />
               <span className="truncate w-32">{storeMember.store.name}</span>
             </div>
-            <a 
-              href={`/storefront/${storeMember.store.slug}`} 
-              target="_blank" 
+            <a
+              href={`/storefront/${storeMember.store.slug}`}
+              target="_blank"
               rel="noreferrer"
               className="text-slate-400 hover:text-blue-600 transition-colors"
               title="View Storefront"
@@ -84,9 +84,9 @@ export default async function DashboardLayout({
           <div className="flex-1 flex items-center gap-2">
             <h1 className="font-semibold text-lg hidden md:block">Dashboard</h1>
             <h1 className="font-semibold text-lg md:hidden">{storeMember.store.name}</h1>
-            <a 
-              href={`/storefront/${storeMember.store.slug}`} 
-              target="_blank" 
+            <a
+              href={`/storefront/${storeMember.store.slug}`}
+              target="_blank"
               rel="noreferrer"
               className="text-slate-400 hover:text-blue-600 transition-colors md:hidden"
               title="View Storefront"
@@ -112,7 +112,6 @@ export default async function DashboardLayout({
           </SubscriptionGuard>
         </main>
       </div>
-      <Toaster position="bottom-right" richColors />
     </div>
   )
 }
