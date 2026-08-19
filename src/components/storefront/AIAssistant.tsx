@@ -1,24 +1,38 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useChat } from "ai/react";
+import { useChat } from "@ai-sdk/react";
+import { TextStreamChatTransport } from "ai";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, X, Send, Bot } from "lucide-react";
 
 export function AIAssistant({ domain, storeId, primaryColor }: { domain?: string; storeId?: string; primaryColor?: string }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
-    api: '/api/chat',
-    body: { domain, storeId },
+  const { messages, sendMessage, status } = useChat({
+    transport: new TextStreamChatTransport({
+      api: '/api/chat',
+      body: { domain, storeId },
+    }),
   });
 
   const welcomeMessage = "Hi! I'm your AI shopping assistant. What are you looking for today? 🛍️";
 
+  const isLoading = status === 'streaming' || status === 'submitted';
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const text = inputValue.trim();
+    if (!text || isLoading) return;
+    setInputValue("");
+    sendMessage({ text });
+  };
 
   if (!isOpen) {
     return (
@@ -68,7 +82,9 @@ export function AIAssistant({ domain, storeId, primaryColor }: { domain?: string
               }`}
               style={m.role === 'user' ? { backgroundColor: primaryColor || '#0f172a' } : {}}
             >
-              {m.content}
+              {m.parts.map((part, i) =>
+                part.type === 'text' ? <span key={i}>{part.text}</span> : null
+              )}
             </div>
           </div>
         ))}
@@ -88,15 +104,15 @@ export function AIAssistant({ domain, storeId, primaryColor }: { domain?: string
       {/* Input Area */}
       <form onSubmit={handleSubmit} className="p-3 bg-white border-t border-slate-100 flex gap-2">
         <input
-          value={input}
-          onChange={handleInputChange}
+          value={inputValue}
+          onChange={e => setInputValue(e.target.value)}
           placeholder="Ask me anything..."
           className="flex-1 bg-slate-100 text-sm rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
         />
         <Button
           type="submit"
           size="icon"
-          disabled={isLoading || !input.trim()}
+          disabled={isLoading || !inputValue.trim()}
           className="rounded-full h-10 w-10 shrink-0"
           style={{ backgroundColor: primaryColor || '#0f172a' }}
         >

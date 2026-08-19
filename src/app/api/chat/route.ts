@@ -54,10 +54,10 @@ Keep your responses relatively short and easy to read. Use emojis occasionally.`
     const result = streamText({
       model: openai('gpt-4o-mini'),
       system: systemPrompt,
-      messages: convertToModelMessages(messages),
+      messages: await convertToModelMessages(messages),
     });
 
-    return result.toDataStreamResponse();
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error('AI Chat Error:', error);
     return new Response('Error processing chat request', { status: 500 });
