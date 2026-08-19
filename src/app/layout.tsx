@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 };
 
 import { CookieBanner } from "@/components/marketing/CookieBanner";
+import { Analytics } from "@vercel/analytics/react";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col">
         {children}
         <CookieBanner />
+        <Analytics />
       </body>
     </html>
   );
