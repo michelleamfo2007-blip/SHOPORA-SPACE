@@ -128,8 +128,8 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
     setIsLoading(true)
     try {
       const url = initialData 
-        ? /api/stores//products/ 
-        : /api/stores//products
+        ? `/api/stores/${storeId}/products/${initialData.id}` 
+        : `/api/stores/${storeId}/products`
       const method = initialData ? "PATCH" : "POST"
 
       const response = await fetch(url, {
@@ -153,7 +153,7 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
         })
       })
       if (!response.ok) throw new Error("Failed to save product")
-      router.push(//products)
+      router.push(`/${storeId}/products`)
       router.refresh()
     } catch (error) {
       console.error(error)
