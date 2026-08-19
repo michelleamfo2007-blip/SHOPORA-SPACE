@@ -11,7 +11,7 @@ export function AIAssistant({ domain, storeId, primaryColor }: { domain?: string
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, error } = useChat({
     transport: new TextStreamChatTransport({
       api: '/api/chat',
       body: { domain, storeId },
@@ -95,6 +95,13 @@ export function AIAssistant({ domain, storeId, primaryColor }: { domain?: string
               <span className="animate-pulse">●</span>
               <span className="animate-pulse delay-75">●</span>
               <span className="animate-pulse delay-150">●</span>
+            </div>
+          </div>
+        )}
+        {error && (
+          <div className="flex justify-start">
+            <div className="max-w-[85%] rounded-2xl px-4 py-2 text-sm bg-red-50 border border-red-200 text-red-600 rounded-bl-none shadow-sm">
+              Error connecting to AI: {error.message || 'Please check API keys'}
             </div>
           </div>
         )}
