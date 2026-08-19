@@ -7,15 +7,14 @@ export default async function FinancePage() {
   const now = new Date()
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
-  // 1. Calculate Gross Merchandise Value (GMV)
-  const allOrders = await db.order.findMany({
-    select: { totalAmount: true, createdAt: true, status: true },
-    where: { status: { notIn: ["CANCELLED", "REFUNDED", "PENDING"] } }
+  // 1. Calculate Total Platform Revenue from Approved Subscriptions
+  const allPayments = await db.subscriptionPayment.findMany({
+    where: { status: "APPROVED" }
   })
+  const totalRevenue = allPayments.reduce((sum, p) => sum + p.amount, 0)
 
-  const totalGMV = allOrders.reduce((sum, order) => sum + order.totalAmount, 0)
-  const thisMonthOrders = allOrders.filter(order => order.createdAt >= startOfMonth)
-  const monthlyGMV = thisMonthOrders.reduce((sum, order) => sum + order.totalAmount, 0)
+  const thisMonthPayments = allPayments.filter(p => p.createdAt >= startOfMonth)
+  const monthlyRevenue = thisMonthPayments.reduce((sum, p) => sum + p.amount, 0)
 
   // 2. Calculate Platform Monthly Recurring Revenue (MRR) from Subscriptions
   const activeSubscriptions = await db.subscription.findMany({
@@ -40,23 +39,23 @@ export default async function FinancePage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
-            <CardTitle className="text-sm font-medium text-slate-500">Total Platform GMV</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-500">Total Revenue</CardTitle>
             <DollarSign className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent className="px-6 pb-6">
-            <div className="text-3xl font-extrabold text-slate-900">₵{totalGMV.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-            <p className="text-xs font-medium text-slate-500 mt-1">Total volume across all stores</p>
+            <div className="text-3xl font-extrabold text-slate-900">₵{totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <p className="text-xs font-medium text-slate-500 mt-1">Total subscription payments</p>
           </CardContent>
         </Card>
 
         <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
-            <CardTitle className="text-sm font-medium text-slate-500">Monthly GMV</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-500">Monthly Revenue</CardTitle>
             <TrendingUp className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent className="px-6 pb-6">
-            <div className="text-3xl font-extrabold text-slate-900">₵{monthlyGMV.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-            <p className="text-xs font-medium text-slate-500 mt-1">Volume this month</p>
+            <div className="text-3xl font-extrabold text-slate-900">₵{monthlyRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <p className="text-xs font-medium text-slate-500 mt-1">Revenue this month</p>
           </CardContent>
         </Card>
 
