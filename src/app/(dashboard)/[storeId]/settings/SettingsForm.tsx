@@ -131,8 +131,14 @@ export function SettingsForm({ store }: { store: any }) {
               currentImage={heroImageUrl || store.heroImage}
               onUploaded={url => setHeroImageUrl(url)}
             />
-            {/* Hidden input carries the URL into the FormData */}
-            <input type="hidden" name="heroImage" value={heroImageUrl} />
+            <div className="mt-2 text-sm text-slate-500">Or paste an image URL directly:</div>
+            <Input 
+              type="text" 
+              name="heroImage" 
+              value={heroImageUrl} 
+              onChange={(e) => setHeroImageUrl(e.target.value)}
+              placeholder="https://example.com/hero.jpg"
+            />
           </div>
         </div>
       </div>
