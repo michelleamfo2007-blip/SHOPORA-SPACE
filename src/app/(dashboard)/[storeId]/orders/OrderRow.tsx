@@ -86,11 +86,9 @@ export function OrderRow({ order, store }: { order: any, store: any }) {
           </Button>
         ) : (
           <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button variant="ghost" className="h-8 w-8 p-0" disabled={loading}>
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
+            <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-slate-100 text-slate-500" disabled={loading}>
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "PROCESSING")}>
