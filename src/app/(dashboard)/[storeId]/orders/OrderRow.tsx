@@ -4,8 +4,10 @@ import { useState } from "react"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { verifyOrderPaymentAction } from "@/server/actions/order"
+import { verifyOrderPaymentAction, updateOrderStatusAction } from "@/server/actions/order"
 import { useRouter } from "next/navigation"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { MoreHorizontal } from "lucide-react"
 
 export function OrderRow({ order, store }: { order: any, store: any }) {
   const [loading, setLoading] = useState(false)
@@ -26,6 +28,15 @@ export function OrderRow({ order, store }: { order: any, store: any }) {
     } else {
       router.refresh()
     }
+  }
+
+  async function onUpdateStatus(e: React.MouseEvent, newStatus: string) {
+    e.stopPropagation()
+    setLoading(true)
+    const result = await updateOrderStatusAction(store.id, order.id, newStatus)
+    setLoading(false)
+    if (result.error) alert(result.error)
+    else router.refresh()
   }
 
   function getStatusColor(status: string) {
@@ -68,11 +79,34 @@ export function OrderRow({ order, store }: { order: any, store: any }) {
       <TableCell className="text-right font-medium">
         {store.currency} {order.totalAmount.toFixed(2)}
       </TableCell>
-      <TableCell className="text-right">
-        {order.status === "PENDING_VERIFICATION" && (
+      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+        {order.status === "PENDING_VERIFICATION" ? (
           <Button size="sm" onClick={onVerify} disabled={loading}>
             {loading ? "Verifying..." : "Verify Payment"}
           </Button>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0" disabled={loading}>
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "PROCESSING")}>
+                Mark as Processing
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "SHIPPED")}>
+                Mark as Shipped
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "DELIVERED")}>
+                Mark as Delivered
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "CANCELLED")} className="text-red-600">
+                Cancel Order
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </TableCell>
     </TableRow>
