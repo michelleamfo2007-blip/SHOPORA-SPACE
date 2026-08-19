@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Trash2, RefreshCw, Globe, Lock, ImageIcon } from "lucide-react"
 import { MediaUploader } from "@/components/dashboard/MediaUploader"
+import { MultiImageUploader } from "@/components/dashboard/MultiImageUploader"
 
 interface ProductFormProps {
   storeId: string
@@ -188,15 +189,14 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
 
           <Card className="border-slate-200 shadow-sm">
             <CardHeader>
-              <CardTitle>Product Images</CardTitle>
-              <CardDescription>Upload the main image for your product.</CardDescription>
+              <CardTitle>Product Images *</CardTitle>
+              <CardDescription>Upload images for your product.</CardDescription>
             </CardHeader>
             <CardContent>
-              <MediaUploader 
+              <MultiImageUploader 
                 storeId={storeId} 
-                currentMedia={images[0] || ""} 
-                onUploaded={(url) => setImages([url])} 
-                label="Upload Main Image"
+                images={images} 
+                onImagesChange={setImages} 
               />
             </CardContent>
           </Card>
