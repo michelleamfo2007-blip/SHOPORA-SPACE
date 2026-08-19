@@ -43,6 +43,20 @@ export async function startTrialAction(planName: string, interval: string = "mon
     })
   }
 
+  // Find if they already have a draft store and clean it up to prevent duplicates
+  const existingDraftMembership = await db.storeMember.findFirst({
+    where: {
+      userId: userId,
+      store: { slug: { startsWith: "draft-" } }
+    }
+  })
+
+  if (existingDraftMembership) {
+    await db.store.delete({
+      where: { id: existingDraftMembership.storeId }
+    }).catch((err) => console.error("Failed to delete old draft store:", err))
+  }
+
   // 2. Create a "Draft" Store
   // We use a temporary random slug that they will change during the setup step
   const tempSlug = `draft-${Date.now()}-${Math.floor(Math.random() * 1000)}`

@@ -21,11 +21,13 @@ export default async function DashboardRedirectPage() {
   // Check if they are a member of any store
   const storeMember = await db.storeMember.findFirst({
     where: { userId: session.user.id },
+    include: { store: true }
   });
 
-  if (storeMember) {
+  if (storeMember && storeMember.store && !storeMember.store.slug.startsWith("draft-")) {
     redirect(`/${storeMember.storeId}`);
   } else {
-    redirect("/onboarding");
+    // If they have no store or only a draft store, they need to choose a package first
+    redirect("/onboarding/packages");
   }
 }
