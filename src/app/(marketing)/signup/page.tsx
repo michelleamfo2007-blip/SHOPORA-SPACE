@@ -49,8 +49,7 @@ export default function SignupPage() {
           setError("Account created but failed to sign in automatically")
           setLoading(false)
         } else {
-          router.push("/dashboard")
-          router.refresh()
+          window.location.href = "/dashboard"
         }
       }
     } catch (err) {
