@@ -1,186 +1,137 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { updateStoreBrandingAction } from "@/server/actions/store"
-import { HeroImageUploader } from "@/components/dashboard/HeroImageUploader"
+import { MediaUploader } from "@/components/dashboard/MediaUploader"
 
 export function SettingsForm({ store }: { store: any }) {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  const [heroImageUrl, setHeroImageUrl] = useState<string>(store.heroImage || "")
+  const [isLoading, setIsLoading] = useState(false)
+  
+  const [name, setName] = useState(store.name || "")
+  const [description, setDescription] = useState(store.description || "")
+  const [currency, setCurrency] = useState(store.currency || "GHS")
+  
+  const [logoUrl, setLogoUrl] = useState(store.logoUrl || "")
+  const [heroImageUrl, setHeroImageUrl] = useState(store.heroImage || "")
+  const [primaryColor, setPrimaryColor] = useState(store.primaryColor || "#000000")
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-
-    const formData = new FormData(e.currentTarget)
+    setIsLoading(true)
     try {
-      const result = await updateStoreBrandingAction(store.id, formData)
-      if (result.success) {
-        toast.success("Store settings updated successfully!")
-        router.refresh()
-      }
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update settings")
+      const formData = new FormData()
+      formData.append("storeId", store.id)
+      formData.append("name", name)
+      formData.append("description", description)
+      formData.append("currency", currency)
+      formData.append("logoUrl", logoUrl)
+      formData.append("heroImage", heroImageUrl)
+      formData.append("primaryColor", primaryColor)
+      
+      const result = await updateStoreBrandingAction(formData)
+      if (result?.error) throw new Error(result.error)
+      
+      toast.success("Settings updated successfully")
+      router.refresh()
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update settings")
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
   return (
-    <form className="grid gap-6" onSubmit={handleSubmit}>
-      <div className="grid gap-2">
-        <Label htmlFor="name">Store Name (Read-Only)</Label>
-        <Input id="name" defaultValue={store.name} disabled className="bg-slate-50" />
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="slug">Store URL (Read-Only)</Label>
-        <div className="flex items-center space-x-2">
-          <Input id="slug" defaultValue={store.slug} disabled className="flex-1 bg-slate-50" />
-          <span className="text-sm text-slate-500 font-medium">.shopora.space</span>
-        </div>
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="description">Store Description / Tagline</Label>
-        <Textarea 
-          id="description" 
-          name="description" 
-          defaultValue={store.description || ""} 
-          placeholder="e.g. Premium wigs for every occasion"
-          className="resize-none"
-        />
-        <p className="text-xs text-slate-500">This appears on your storefront homepage.</p>
-      </div>
-
-      <div className="grid gap-2 border-t pt-4">
-        <h3 className="text-lg font-semibold mb-2">Regional Settings</h3>
-        <Label htmlFor="currency">Currency Symbol</Label>
-        <Input 
-          id="currency" 
-          name="currency" 
-          defaultValue={store.currency || "$"} 
-          placeholder="e.g. GHS, GH₵, $, £" 
-          className="w-full max-w-xs"
-        />
-        <p className="text-xs text-slate-500">This symbol will be displayed next to all prices on your storefront.</p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
+    <form onSubmit={onSubmit} className="grid gap-8 max-w-2xl">
+      <div className="grid gap-6">
+        <h3 className="text-lg font-medium border-b pb-2">General Details</h3>
+        
         <div className="grid gap-2">
-          <Label htmlFor="logoUrl">Logo Image URL</Label>
+          <Label>Store Name</Label>
           <Input 
-            id="logoUrl" 
-            name="logoUrl" 
-            defaultValue={store.logoUrl || ""} 
-            placeholder="https://example.com/logo.png" 
+            value={name} 
+            onChange={e => setName(e.target.value)} 
+            placeholder="e.g. My Awesome Store"
+            required 
           />
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="primaryColor">Primary Brand Color</Label>
-          <div className="flex gap-2">
-            <Input 
-              type="color"
-              id="primaryColor" 
-              name="primaryColor" 
-              defaultValue={store.primaryColor || "#2563eb"} 
-              className="w-16 h-10 p-1"
-            />
-            <Input 
-              defaultValue={store.primaryColor || "#2563eb"} 
-              disabled 
-              className="flex-1 bg-slate-50"
-            />
-          </div>
+          <Label>Description</Label>
+          <Textarea 
+            value={description} 
+            onChange={e => setDescription(e.target.value)} 
+            placeholder="What is your store about?"
+            rows={3} 
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label>Store Currency</Label>
+          <select 
+            value={currency} 
+            onChange={e => setCurrency(e.target.value)}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+          >
+            <option value="GHS">Ghanaian Cedi (GHS)</option>
+            <option value="USD">US Dollar (USD)</option>
+            <option value="EUR">Euro (EUR)</option>
+            <option value="GBP">British Pound (GBP)</option>
+          </select>
         </div>
       </div>
 
-      <div className="pt-4 border-t">
-        <h3 className="text-lg font-semibold mb-4">Storefront Hero Section</h3>
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="heroHeadline">Hero Headline</Label>
+      <div className="grid gap-6">
+        <h3 className="text-lg font-medium border-b pb-2">Branding</h3>
+        
+        <div className="grid gap-2">
+          <Label>Brand Color</Label>
+          <div className="flex gap-4 items-center">
             <Input 
-              id="heroHeadline" 
-              name="heroHeadline" 
-              defaultValue={store.heroHeadline || ""} 
-              placeholder="Your Hair. Your Confidence. Your Look." 
+              type="color" 
+              value={primaryColor} 
+              onChange={e => setPrimaryColor(e.target.value)} 
+              className="w-16 h-10 p-1 cursor-pointer" 
+            />
+            <Input 
+              value={primaryColor} 
+              onChange={e => setPrimaryColor(e.target.value)} 
+              placeholder="#000000"
+              className="w-32" 
             />
           </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-2">
-            <Label htmlFor="heroSubtext">Hero Subtext</Label>
-            <Input 
-              id="heroSubtext" 
-              name="heroSubtext" 
-              defaultValue={store.heroSubtext || ""} 
-              placeholder="Premium wigs made to elevate your everyday look." 
+            <Label>Logo</Label>
+            <MediaUploader 
+              storeId={store.id} 
+              currentMedia={logoUrl} 
+              onUploaded={setLogoUrl} 
+              label="Upload Logo"
             />
           </div>
           <div className="grid gap-2">
             <Label>Hero Background Image</Label>
-            <HeroImageUploader
-              storeId={store.id}
-              currentImage={heroImageUrl || store.heroImage}
-              onUploaded={url => setHeroImageUrl(url)}
-            />
-            <div className="mt-2 text-sm text-slate-500">Or paste an image URL directly:</div>
-            <Input 
-              type="text" 
-              name="heroImage" 
-              value={heroImageUrl} 
-              onChange={(e) => setHeroImageUrl(e.target.value)}
-              placeholder="https://example.com/hero.jpg"
+            <MediaUploader 
+              storeId={store.id} 
+              currentMedia={heroImageUrl} 
+              onUploaded={setHeroImageUrl} 
+              label="Upload Hero Image"
             />
           </div>
         </div>
       </div>
 
-      <div className="pt-4 border-t">
-        <h3 className="text-lg font-semibold mb-4">About & Social</h3>
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="aboutText">About The Seller</Label>
-            <Textarea 
-              id="aboutText" 
-              name="aboutText" 
-              defaultValue={store.aboutText || ""} 
-              placeholder="Meet Chelle Wigs. Quality hair. Beautiful looks. Confidence that lasts." 
-              className="resize-none h-24"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="instagramHandle">Instagram Handle</Label>
-              <Input 
-                id="instagramHandle" 
-                name="instagramHandle" 
-                defaultValue={store.instagramHandle || ""} 
-                placeholder="@chellewigs" 
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="whatsappNumber">WhatsApp Number</Label>
-              <Input 
-                id="whatsappNumber" 
-                name="whatsappNumber" 
-                defaultValue={store.whatsappNumber || ""} 
-                placeholder="+233..." 
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Button type="submit" className="w-fit" disabled={loading}>
-        {loading ? "Saving..." : "Save Changes"}
+      <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+        {isLoading ? "Saving..." : "Save Settings"}
       </Button>
     </form>
   )

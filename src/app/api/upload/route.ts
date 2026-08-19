@@ -33,7 +33,7 @@ export async function POST(req: Request) {
 
     // Prepare file
     const ext = file.name.split(".").pop() ?? "jpg";
-    const fileName = `hero-${storeId}-${Date.now()}.${ext}`;
+    const fileName = `media-${storeId}-${Date.now()}.${ext}`;
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 

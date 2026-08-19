@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Trash2, RefreshCw, Globe, Lock } from "lucide-react"
-import { HeroImageUploader } from "@/components/dashboard/HeroImageUploader"
+import { Plus, Trash2, RefreshCw, Globe, Lock, ImageIcon } from "lucide-react"
+import { MediaUploader } from "@/components/dashboard/MediaUploader"
 
 interface ProductFormProps {
   storeId: string
@@ -192,15 +192,12 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
               <CardDescription>Upload the main image for your product.</CardDescription>
             </CardHeader>
             <CardContent>
-              <HeroImageUploader 
+              <MediaUploader 
                 storeId={storeId} 
-                currentImage={images[0] || ""} 
+                currentMedia={images[0] || ""} 
                 onUploaded={(url) => setImages([url])} 
+                label="Upload Main Image"
               />
-              <div className="mt-4 grid gap-2">
-                <Label className="text-xs text-slate-500">Image URL (Fallback)</Label>
-                <Input value={images[0] || ""} onChange={e => setImages([e.target.value])} placeholder="https://..." />
-              </div>
             </CardContent>
           </Card>
 
@@ -323,12 +320,30 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
                 <Textarea value={seoDescription} onChange={e => setSeoDescription(e.target.value)} placeholder={description?.substring(0, 160) || "Brief description for search engines..."} rows={3} />
               </div>
               
-              {/* Live Preview */}
-              <div className="mt-4 p-4 border rounded-lg bg-slate-50">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">Search Result Preview</span>
-                <div className="text-[#1a0dab] text-xl cursor-pointer hover:underline truncate">{seoTitle || name || "Product Title"}</div>
-                <div className="text-[#006621] text-sm truncate">shopora.space/products/this-product</div>
-                <div className="text-[#545454] text-sm mt-1 line-clamp-2">{seoDescription || description || "No description provided."}</div>
+              {/* Live Preview Card */}
+              <div className="mt-4 p-6 bg-[#faf9f8] border rounded-lg flex justify-center">
+                <div className="w-64 bg-white border border-slate-100 rounded-lg shadow-sm overflow-hidden">
+                  <div className="aspect-square bg-[#e2e4e9] relative flex flex-col items-center justify-center">
+                    {images[0] ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={images[0]} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <>
+                        <ImageIcon className="w-10 h-10 text-slate-300 mb-2" />
+                        <span className="text-xs text-slate-400 font-medium">No image uploaded</span>
+                      </>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <div className="text-[10px] font-medium text-slate-500 tracking-wider mb-1">NEW IN</div>
+                    <div className="font-serif text-[15px] font-semibold leading-snug line-clamp-2 mb-2 text-slate-900">
+                      {seoTitle || name || "Premium Product Name Example"}
+                    </div>
+                    <div className="font-bold text-sm text-slate-900">
+                      GHS {price || "0.00"}
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -388,12 +403,24 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
             </CardHeader>
             <CardContent className="grid gap-4">
               <div className="grid gap-2">
-                <Label>Size Guide Image URL</Label>
-                <Input value={sizeGuideUrl} onChange={e => setSizeGuideUrl(e.target.value)} placeholder="https://..." />
+                <Label>Size Guide Image</Label>
+                <MediaUploader 
+                  storeId={storeId} 
+                  currentMedia={sizeGuideUrl} 
+                  onUploaded={setSizeGuideUrl} 
+                  label="Upload Size Guide"
+                />
               </div>
               <div className="grid gap-2">
-                <Label>Product Video URL</Label>
-                <Input value={videoUrl} onChange={e => setVideoUrl(e.target.value)} placeholder="YouTube or MP4 link..." />
+                <Label>Product Video</Label>
+                <MediaUploader 
+                  storeId={storeId} 
+                  currentMedia={videoUrl} 
+                  onUploaded={setVideoUrl} 
+                  type="video"
+                  accept="video/*"
+                  label="Upload Video"
+                />
               </div>
             </CardContent>
           </Card>
