@@ -1,9 +1,7 @@
 import { db } from "@/lib/db"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Star } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ReviewVisibilityToggle, DeleteReviewButton, AddManualReviewModal } from "./ReviewsClient"
-
+import { Star } from "lucide-react"
 export default async function ReviewsPage({
   params
 }: {
@@ -18,68 +16,69 @@ export default async function ReviewsPage({
   })
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8 pb-10">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Product Reviews</h2>
-          <p className="text-muted-foreground">Monitor and manage customer feedback.</p>
+          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+            <Star className="w-8 h-8 text-amber-500 fill-amber-500" />
+            Product Reviews
+          </h2>
+          <p className="text-slate-500 mt-1">Monitor and manage customer feedback.</p>
         </div>
         <AddManualReviewModal storeId={storeId} />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Customer Reviews</CardTitle>
-          <CardDescription>
-            Reviews are automatically published. You can hide inappropriate reviews from your storefront.
-          </CardDescription>
+      <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
+        <CardHeader className="px-6 py-5 border-b border-slate-100 bg-slate-50/30">
+          <CardTitle className="text-lg font-bold text-slate-900">Customer Reviews</CardTitle>
+          <p className="text-sm text-slate-500 mt-1">Reviews are automatically published. You can hide inappropriate reviews from your storefront.</p>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Rating</TableHead>
-                  <TableHead className="w-1/3">Comment</TableHead>
-                  <TableHead>Visibility</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs font-bold text-slate-400 bg-slate-50/50 uppercase tracking-wider">
+                <tr>
+                  <th className="px-6 py-4">Product</th>
+                  <th className="px-6 py-4">Customer</th>
+                  <th className="px-6 py-4">Rating</th>
+                  <th className="px-6 py-4 w-1/3">Comment</th>
+                  <th className="px-6 py-4">Visibility</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
                 {reviews.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center text-slate-500 font-medium">
                       No reviews found.
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ) : (
                   reviews.map((review) => (
-                    <TableRow key={review.id}>
-                      <TableCell className="font-medium">{review.product.name}</TableCell>
-                      <TableCell>{review.customer?.name || "Anonymous"}</TableCell>
-                      <TableCell>
+                    <tr key={review.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-6 py-4 font-bold text-slate-900">{review.product.name}</td>
+                      <td className="px-6 py-4 font-semibold text-slate-600">{review.customer?.name || "Anonymous"}</td>
+                      <td className="px-6 py-4">
                         <div className="flex items-center text-amber-500">
                           {Array.from({ length: 5 }).map((_, i) => (
-                            <Star key={i} className={`w-4 h-4 ${i < review.rating ? "fill-current" : "text-slate-300"}`} />
+                            <Star key={i} className={`w-4 h-4 ${i < review.rating ? "fill-current" : "text-slate-200 fill-slate-200"}`} />
                           ))}
                         </div>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {review.comment || <span className="italic">No comment</span>}
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-600 italic">
+                        {review.comment || <span className="text-slate-400">No comment</span>}
+                      </td>
+                      <td className="px-6 py-4">
                         <ReviewVisibilityToggle storeId={storeId} reviewId={review.id} initialIsHidden={review.status === "HIDDEN"} />
-                      </TableCell>
-                      <TableCell className="text-right">
+                      </td>
+                      <td className="px-6 py-4 text-right">
                         <DeleteReviewButton storeId={storeId} reviewId={review.id} />
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ))
                 )}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
         </CardContent>
       </Card>

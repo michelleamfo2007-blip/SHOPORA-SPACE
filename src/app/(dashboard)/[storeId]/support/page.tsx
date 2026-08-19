@@ -1,7 +1,5 @@
 import { db } from "@/lib/db"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Plus } from "lucide-react"
@@ -21,73 +19,80 @@ export default async function SupportPage({
   })
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 pb-10">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Support Tickets</h2>
-          <p className="text-muted-foreground">Manage customer inquiries and track issues.</p>
+          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+            <Plus className="w-8 h-8 text-indigo-500" />
+            Support Tickets
+          </h2>
+          <p className="text-slate-500 mt-1">Manage customer inquiries and track issues.</p>
         </div>
         <Link href={`/${storeId}/support/new`}>
-          <Button type="button">
-            <Plus className="mr-2 h-4 w-4" />
+          <Button className="bg-slate-900 text-white rounded-xl px-5 py-2.5 font-bold hover:bg-slate-800 transition-colors shadow-sm flex items-center gap-2">
+            <Plus className="w-4 h-4" />
             Log New Issue
           </Button>
         </Link>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Customer Inquiries</CardTitle>
-          <CardDescription>
-            Keep track of customer problems and resolve them promptly.
-          </CardDescription>
+      <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
+        <CardHeader className="px-6 py-5 border-b border-slate-100 bg-slate-50/30">
+          <CardTitle className="text-lg font-bold text-slate-900">Customer Inquiries</CardTitle>
+          <p className="text-sm text-slate-500 mt-1">Keep track of customer problems and resolve them promptly.</p>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Subject</TableHead>
-                  <TableHead className="w-1/3">Message</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs font-bold text-slate-400 bg-slate-50/50 uppercase tracking-wider">
+                <tr>
+                  <th className="px-6 py-4">Customer</th>
+                  <th className="px-6 py-4">Subject</th>
+                  <th className="px-6 py-4 w-1/3">Message</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
                 {tickets.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-medium">
                       No support tickets yet.
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ) : (
                   tickets.map((ticket) => (
-                    <TableRow key={ticket.id}>
-                      <TableCell className="font-medium">
-                        {ticket.customer.name}
-                        <div className="text-xs text-muted-foreground">{ticket.customer.email}</div>
-                      </TableCell>
-                      <TableCell className="font-medium">{ticket.subject}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
+                    <tr key={ticket.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-slate-900">{ticket.customer.name}</div>
+                        <div className="text-xs font-medium text-slate-500 mt-0.5">{ticket.customer.email}</div>
+                      </td>
+                      <td className="px-6 py-4 font-bold text-slate-700">{ticket.subject}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-slate-500">
                         {ticket.message}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={ticket.status === "RESOLVED" ? "secondary" : "default"} className={ticket.status === "OPEN" ? "bg-blue-500 hover:bg-blue-600" : ""}>
-                          {ticket.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
+                      </td>
+                      <td className="px-6 py-4">
+                        {ticket.status === "RESOLVED" ? (
+                          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                            Resolved
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 ring-1 ring-inset ring-blue-600/20">
+                            Open
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <ResolveTicketButton storeId={storeId} ticketId={ticket.id} isResolved={ticket.status === "RESOLVED"} />
                           <DeleteTicketButton storeId={storeId} ticketId={ticket.id} />
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ))
                 )}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
         </CardContent>
       </Card>

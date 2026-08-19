@@ -1,9 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { TableCell, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { verifyOrderPaymentAction, updateOrderStatusAction } from "@/server/actions/order"
 import { useRouter } from "next/navigation"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -53,60 +51,66 @@ export function OrderRow({ order, store }: { order: any, store: any }) {
   }
 
   return (
-    <TableRow 
-      className="cursor-pointer hover:bg-slate-50 transition-colors"
+    <tr 
+      className="cursor-pointer hover:bg-slate-50/50 transition-colors group"
       onClick={() => router.push(`/${store.id}/orders/${order.id}`)}
     >
-      <TableCell className="font-medium text-blue-600">
+      <td className="px-6 py-4 font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
         #{order.orderNumber}
-        <div className="text-xs text-slate-400 font-normal mt-1">{new Date(order.createdAt).toLocaleDateString()}</div>
-      </TableCell>
-      <TableCell>
+        <div className="text-xs text-slate-500 font-medium mt-1">{new Date(order.createdAt).toLocaleDateString()}</div>
+      </td>
+      <td className="px-6 py-4 font-semibold text-slate-700">
         {order.customer.name}
-      </TableCell>
-      <TableCell>
-        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
+      </td>
+      <td className="px-6 py-4">
+        <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset ${
+          order.status === "PENDING" || order.status === "PENDING_VERIFICATION" ? "bg-amber-50 text-amber-700 ring-amber-600/20" :
+          order.status === "PROCESSING" ? "bg-blue-50 text-blue-700 ring-blue-600/20" :
+          order.status === "SHIPPED" ? "bg-indigo-50 text-indigo-700 ring-indigo-600/20" :
+          order.status === "DELIVERED" ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20" :
+          "bg-red-50 text-red-700 ring-red-600/20"
+        }`}>
           {order.status.replace("_", " ")}
         </span>
-      </TableCell>
-      <TableCell>
+      </td>
+      <td className="px-6 py-4">
         {payment?.reference ? (
-          <span className="font-mono text-sm bg-slate-100 px-2 py-1 rounded">{payment.reference}</span>
+          <span className="font-mono text-xs bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded-md">{payment.reference}</span>
         ) : (
-          <span className="text-slate-400">-</span>
+          <span className="text-slate-400 font-semibold">-</span>
         )}
-      </TableCell>
-      <TableCell className="text-right font-medium">
+      </td>
+      <td className="px-6 py-4 text-right font-extrabold text-slate-900">
         {store.currency} {order.totalAmount.toFixed(2)}
-      </TableCell>
-      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+      </td>
+      <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
         {order.status === "PENDING_VERIFICATION" ? (
-          <Button size="sm" onClick={onVerify} disabled={loading}>
+          <Button size="sm" onClick={onVerify} disabled={loading} className="bg-amber-100 text-amber-700 hover:bg-amber-200 font-bold border-0">
             {loading ? "Verifying..." : "Verify Payment"}
           </Button>
         ) : (
           <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-slate-100 text-slate-500" disabled={loading}>
+            <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-900 transition-colors" disabled={loading}>
               <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
+              <MoreHorizontal className="h-5 w-5" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "PROCESSING")}>
+            <DropdownMenuContent align="end" className="font-medium rounded-xl">
+              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "PROCESSING")} className="cursor-pointer">
                 Mark as Processing
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "SHIPPED")}>
+              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "SHIPPED")} className="cursor-pointer">
                 Mark as Shipped
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "DELIVERED")}>
+              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "DELIVERED")} className="cursor-pointer">
                 Mark as Delivered
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "CANCELLED")} className="text-red-600">
+              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "CANCELLED")} className="text-red-600 cursor-pointer focus:text-red-600 focus:bg-red-50">
                 Cancel Order
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-      </TableCell>
-    </TableRow>
+      </td>
+    </tr>
   )
 }

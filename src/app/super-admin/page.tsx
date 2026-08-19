@@ -5,12 +5,28 @@ import { Store, Users, ShoppingCart, DollarSign, AlertCircle, Clock } from "luci
 export default async function SuperAdminOverview() {
   // We'll fetch basic metrics here. In a production app with huge data,
   // these should be cached or aggregated in a separate table.
-  const [totalStores, totalUsers, totalOrders, pendingApprovals] = await Promise.all([
+  const [
+    totalStores, 
+    totalUsers, 
+    totalOrders, 
+    pendingApprovals,
+    activeSubs,
+    trialSubs,
+    revenueAgg
+  ] = await Promise.all([
     db.store.count(),
     db.user.count(),
     db.order.count(),
-    db.waitlistEntry.count({ where: { status: "PENDING" } })
+    db.waitlistEntry.count({ where: { status: "PENDING" } }),
+    db.subscription.count({ where: { status: "ACTIVE" } }),
+    db.subscription.count({ where: { status: "TRIAL" } }),
+    db.subscriptionPayment.aggregate({
+      _sum: { amount: true },
+      where: { status: "APPROVED" }
+    })
   ]);
+
+  const platformRevenue = revenueAgg._sum.amount || 0;
 
   return (
     <div className="max-w-6xl space-y-8">
@@ -44,12 +60,23 @@ export default async function SuperAdminOverview() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+            <CardTitle className="text-sm font-medium">Active Subs</CardTitle>
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalOrders}</div>
-            <p className="text-xs text-muted-foreground">Across all stores</p>
+            <div className="text-2xl font-bold">{activeSubs}</div>
+            <p className="text-xs text-muted-foreground">Paying stores</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Free Trials</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{trialSubs}</div>
+            <p className="text-xs text-muted-foreground">Stores on trial</p>
           </CardContent>
         </Card>
 
@@ -59,7 +86,7 @@ export default async function SuperAdminOverview() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">GHS 0.00</div>
+            <div className="text-2xl font-bold">₵{platformRevenue.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">From subscriptions</p>
           </CardContent>
         </Card>
