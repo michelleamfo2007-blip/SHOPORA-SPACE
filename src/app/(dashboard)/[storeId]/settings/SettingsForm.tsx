@@ -60,6 +60,19 @@ export function SettingsForm({ store }: { store: any }) {
         <p className="text-xs text-slate-500">This appears on your storefront homepage.</p>
       </div>
 
+      <div className="grid gap-2 border-t pt-4">
+        <h3 className="text-lg font-semibold mb-2">Regional Settings</h3>
+        <Label htmlFor="currency">Currency Symbol</Label>
+        <Input 
+          id="currency" 
+          name="currency" 
+          defaultValue={store.currency || "$"} 
+          placeholder="e.g. GHS, GH₵, $, £" 
+          className="w-full max-w-xs"
+        />
+        <p className="text-xs text-slate-500">This symbol will be displayed next to all prices on your storefront.</p>
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div className="grid gap-2">
           <Label htmlFor="logoUrl">Logo Image URL</Label>

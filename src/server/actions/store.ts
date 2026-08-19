@@ -80,6 +80,7 @@ export async function updateStoreBrandingAction(storeId: string, formData: FormD
   const aboutText = formData.get("aboutText") as string | null
   const instagramHandle = formData.get("instagramHandle") as string | null
   const whatsappNumber = formData.get("whatsappNumber") as string | null
+  const currency = formData.get("currency") as string | null
 
   await db.store.update({
     where: { id: storeId },
@@ -92,7 +93,8 @@ export async function updateStoreBrandingAction(storeId: string, formData: FormD
       heroImage,
       aboutText,
       instagramHandle,
-      whatsappNumber
+      whatsappNumber,
+      ...(currency && { currency })
     }
   })
 
