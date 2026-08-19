@@ -8,6 +8,9 @@ import { Search } from "lucide-react";
 type Product = {
   id: string;
   name: string;
+  images: string[];
+  price: number | null;
+  compareAtPrice: number | null;
   variants: { price: number; compareAtPrice: number | null; imageUrl: string | null }[];
 };
 
@@ -30,8 +33,8 @@ export function ProductsClient({ products, currency, primaryColor, basePath, tit
 
   // Sort products
   const sortedProducts = [...filteredProducts].sort((a, b) => {
-    const priceA = a.variants[0]?.price ?? 0;
-    const priceB = b.variants[0]?.price ?? 0;
+    const priceA = a.variants[0]?.price ?? a.price ?? 0;
+    const priceB = b.variants[0]?.price ?? b.price ?? 0;
 
     if (sortOption === "price-low-high") return priceA - priceB;
     if (sortOption === "price-high-low") return priceB - priceA;
@@ -84,9 +87,9 @@ export function ProductsClient({ products, currency, primaryColor, basePath, tit
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {sortedProducts.map((product) => {
             const variant = product.variants[0];
-            const price = variant?.price ?? 0;
-            const compareAtPrice = variant?.compareAtPrice ?? null;
-            const imageUrl = variant?.imageUrl ?? null;
+            const price = variant?.price ?? product.price ?? 0;
+            const compareAtPrice = variant?.compareAtPrice ?? product.compareAtPrice ?? null;
+            const imageUrl = variant?.imageUrl ?? product.images?.[0] ?? null;
             
             return (
               <Link key={product.id} href={`${basePath}/product/${product.id}`} className="group">

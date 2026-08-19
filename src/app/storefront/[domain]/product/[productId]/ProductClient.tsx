@@ -7,22 +7,22 @@ import { useCart } from "@/lib/cart"
 
 export function ProductClient({ product, store }: { product: any, store: any }) {
   const router = useRouter()
-  const [selectedVariant, setSelectedVariant] = useState(product.variants[0])
+  const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0])
 
-  const price = selectedVariant?.price || 0
-  const compareAtPrice = selectedVariant?.compareAtPrice
-  const imageUrl = selectedVariant?.imageUrl
+  const price = selectedVariant?.price ?? product.price ?? 0
+  const compareAtPrice = selectedVariant?.compareAtPrice ?? product.compareAtPrice
+  const imageUrl = selectedVariant?.imageUrl ?? product.images?.[0]
 
   const cart = useCart()
 
   const handleAddToCart = () => {
     cart.addItem({
-      variantId: selectedVariant.id,
+      variantId: selectedVariant?.id ?? product.id, // Fallback to product.id if no variants
       productId: product.id,
-      name: product.name,
-      price: selectedVariant.price,
+      name: selectedVariant ? `${product.name} - ${selectedVariant.name}` : product.name,
+      price: price,
       quantity: 1,
-      imageUrl: selectedVariant.imageUrl,
+      imageUrl: imageUrl,
     })
     
     // Instead of redirecting to checkout immediately, we can open the cart or notify the user
@@ -110,7 +110,7 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
             <div className="mt-10 border-t pt-8 text-sm text-slate-500 grid grid-cols-2 gap-4">
               <div>
                 <span className="font-semibold text-slate-700 block mb-1">SKU</span>
-                {selectedVariant?.sku || "N/A"}
+                {selectedVariant?.sku || product.sku || "N/A"}
               </div>
               <div>
                 <span className="font-semibold text-slate-700 block mb-1">Category</span>
@@ -118,8 +118,8 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
               </div>
               <div>
                 <span className="font-semibold text-slate-700 block mb-1">Availability</span>
-                {selectedVariant?.stockCount > 0 ? (
-                  <span className="text-green-600 font-medium">In Stock ({selectedVariant.stockCount})</span>
+                {(selectedVariant?.stockCount ?? product.stockCount) > 0 ? (
+                  <span className="text-green-600 font-medium">In Stock ({(selectedVariant?.stockCount ?? product.stockCount)})</span>
                 ) : (
                   <span className="text-red-500 font-medium">Out of Stock</span>
                 )}
