@@ -252,44 +252,6 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
         </div>
       </section>
 
-      {/* 6. Find Your Perfect Match */}
-      <section className="py-24 bg-slate-50 relative overflow-hidden">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col lg:flex-row">
-            <div className="p-10 md:p-16 flex-1 flex flex-col justify-center">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-6">
-                Find Your Perfect Match
-              </h2>
-              <p className="text-lg text-slate-600 mb-8">
-                Not sure what to choose? Browse our collections to find exactly what you're looking for.
-              </p>
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="font-semibold text-slate-900 w-20">Category:</div>
-                  <div className="text-slate-500">Browse by collection</div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="font-semibold text-slate-900 w-20">Style:</div>
-                  <div className="text-slate-500">Find your unique look</div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="font-semibold text-slate-900 w-20">Budget:</div>
-                  <div className="text-slate-500">All price ranges available</div>
-                </div>
-              </div>
-              <div>
-                <Link href={`${basePath}/products`} className="inline-flex items-center justify-center bg-slate-900 text-white rounded-full px-8 py-4 font-semibold hover:bg-slate-800 transition-colors" style={{ backgroundColor: store.primaryColor || '#0f172a' }}>
-                  Shop Now <span className="ml-2">→</span>
-                </Link>
-                <p className="text-xs text-slate-400 mt-4">* AI recommendations coming soon to Shopora!</p>
-              </div>
-            </div>
-            <div className="lg:w-1/2 bg-slate-200 min-h-[300px] relative">
-              <img src="https://images.unsplash.com/photo-1595426114644-8d93c048bc78?q=80&w=1000&auto=format&fit=crop" alt="Find your perfect match" className="absolute inset-0 w-full h-full object-cover" />
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* 7. Reviews */}
       {reviews.length > 0 && (
