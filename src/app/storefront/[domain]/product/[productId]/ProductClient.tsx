@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { useCart } from "@/lib/cart"
 
 export function ProductClient({ product, store }: { product: any, store: any }) {
   const router = useRouter()
@@ -12,40 +13,22 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
   const compareAtPrice = selectedVariant?.compareAtPrice
   const imageUrl = selectedVariant?.imageUrl
 
+  const cart = useCart()
+
   const handleAddToCart = () => {
-    // In a real app, this would use a Cart Context or state management
-    // For this MVP, since they requested "Add to Cart" directly to Checkout:
-    // We will save to local storage and navigate to checkout.
-    const cartItem = {
+    cart.addItem({
       variantId: selectedVariant.id,
-      quantity: 1,
-      price: selectedVariant.price,
+      productId: product.id,
       name: product.name,
-      variantName: selectedVariant.name,
-      storeId: store.id
-    }
+      price: selectedVariant.price,
+      quantity: 1,
+      imageUrl: selectedVariant.imageUrl,
+    })
     
-    // Store in localStorage for the checkout page to read
-    const existingCart = JSON.parse(localStorage.getItem("shopora_cart") || "[]")
-    
-    // Check if same variant exists, increment qty
-    const existingItemIndex = existingCart.findIndex((i: any) => i.variantId === selectedVariant.id)
-    if (existingItemIndex > -1) {
-      existingCart[existingItemIndex].quantity += 1
-    } else {
-      existingCart.push(cartItem)
-    }
-    
-    localStorage.setItem("shopora_cart", JSON.stringify(existingCart))
-    
-    // Redirect to checkout
-    // Handle both /storefront/[domain] paths and wildcard subdomains
-    if (window.location.pathname.startsWith('/storefront/')) {
-      const parts = window.location.pathname.split('/')
-      router.push(`/storefront/${parts[2]}/checkout`)
-    } else {
-      router.push(`/checkout`)
-    }
+    // Instead of redirecting to checkout immediately, we can open the cart or notify the user
+    // Since we now have a Cart Drawer, it will update automatically.
+    // If they want to go straight to checkout, we can keep the routing:
+    // We will just let the user open the cart drawer for now, so we remove the auto-redirect.
   }
 
   return (

@@ -4,6 +4,7 @@ import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
 import { ShoppingCart } from "lucide-react"
 import { AIAssistant } from "@/components/storefront/AIAssistant"
+import { CartDrawer } from "@/components/storefront/CartDrawer"
 
 import { headers } from "next/headers"
 
@@ -57,10 +58,11 @@ export default async function StorefrontLayout({
             </nav>
 
             <div className="flex items-center gap-4">
-              <button className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="text-sm font-medium">0</span>
-              </button>
+              <CartDrawer 
+                currency={store.currency} 
+                primaryColor={store.primaryColor} 
+                basePath={basePath} 
+              />
             </div>
           </div>
         </div>
@@ -110,11 +112,11 @@ export default async function StorefrontLayout({
                 {store.whatsappNumber ? (
                   <li><a href={`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Contact Us</a></li>
                 ) : (
-                  <li><Link href={`${basePath}/#contact`} className="hover:text-white transition-colors">Contact</Link></li>
+                  <li><Link href={`${basePath}/pages/faq`} className="hover:text-white transition-colors">Contact</Link></li>
                 )}
-                <li><Link href={`${basePath}/#faqs`} className="hover:text-white transition-colors">FAQs</Link></li>
-                <li><Link href={`${basePath}/#shipping`} className="hover:text-white transition-colors">Shipping Policy</Link></li>
-                <li><Link href={`${basePath}/#refunds`} className="hover:text-white transition-colors">Returns Policy</Link></li>
+                <li><Link href={`${basePath}/pages/faq`} className="hover:text-white transition-colors">FAQs</Link></li>
+                <li><Link href={`${basePath}/pages/shipping`} className="hover:text-white transition-colors">Shipping Policy</Link></li>
+                <li><Link href={`${basePath}/pages/refunds`} className="hover:text-white transition-colors">Returns Policy</Link></li>
               </ul>
             </div>
             
