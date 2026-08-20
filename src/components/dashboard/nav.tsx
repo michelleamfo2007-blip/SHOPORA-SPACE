@@ -117,13 +117,6 @@ export function DashboardNav({ storeId, isMobileMenu }: DashboardNavProps) {
       color: "text-slate-500",
       active: pathname === `/${storeId}/settings`,
     },
-    {
-      href: `/${storeId}/guide`,
-      label: "Guide",
-      icon: LifeBuoy,
-      color: "text-amber-600",
-      active: pathname === `/${storeId}/guide`,
-    },
   ]
 
   if (isMobileMenu) {
