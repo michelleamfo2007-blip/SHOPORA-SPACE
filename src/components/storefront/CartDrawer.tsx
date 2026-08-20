@@ -166,7 +166,7 @@ export function CartDrawer({ currency, primaryColor, basePath }: CartDrawerProps
               <p>{currency} {totalPrice.toFixed(2)}</p>
             </div>
             <p className="text-sm text-slate-500 mb-6">
-              Delivery fees are calculated at checkout.
+              Delivery fees are paid directly to the rider upon arrival.
             </p>
             <button
               onClick={() => {
