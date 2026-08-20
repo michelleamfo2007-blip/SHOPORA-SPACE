@@ -162,27 +162,27 @@ export function SettingsForm({ store }: { store: any }) {
             />
           </div>
           <div className="grid gap-2">
-            <Label>Instagram Handle</Label>
+            <Label>Instagram Link</Label>
             <Input 
               value={instagramHandle} 
               onChange={e => setInstagramHandle(e.target.value)} 
-              placeholder="e.g. @mystore"
+              placeholder="e.g. https://instagram.com/mystore"
             />
           </div>
           <div className="grid gap-2">
-            <Label>TikTok Handle</Label>
+            <Label>TikTok Link</Label>
             <Input 
               value={tiktokHandle} 
               onChange={e => setTiktokHandle(e.target.value)} 
-              placeholder="e.g. @mystore"
+              placeholder="e.g. https://tiktok.com/@mystore"
             />
           </div>
           <div className="grid gap-2">
-            <Label>Snapchat Handle</Label>
+            <Label>Snapchat Link</Label>
             <Input 
               value={snapchatHandle} 
               onChange={e => setSnapchatHandle(e.target.value)} 
-              placeholder="e.g. @mystore"
+              placeholder="e.g. https://snapchat.com/add/mystore"
             />
           </div>
         </div>

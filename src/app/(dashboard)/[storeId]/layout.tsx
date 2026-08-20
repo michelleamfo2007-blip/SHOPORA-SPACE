@@ -80,8 +80,9 @@ export default async function DashboardLayout({
       {/* Main Content */}
       <div className="flex flex-1 w-full flex-col min-h-screen">
         {/* Top Header */}
-        <header className="flex h-[60px] flex-shrink-0 items-center gap-4 border-b bg-slate-50/50 px-4 md:px-6">
-          <div className="flex-1 flex items-center gap-2">
+        <header className="flex h-[60px] flex-shrink-0 items-center justify-between border-b bg-slate-50/50 px-4 md:px-6">
+          <div className="flex items-center gap-3">
+            <DashboardNav storeId={storeId} isMobileMenu />
             <h1 className="font-semibold text-lg hidden md:block">Dashboard</h1>
             <h1 className="font-semibold text-lg md:hidden">{storeMember.store.name}</h1>
             <a
@@ -97,7 +98,6 @@ export default async function DashboardLayout({
           <div className="flex items-center gap-4">
             <span className="text-sm text-slate-500 hidden md:block">{session.user.email}</span>
             <div className="h-8 w-8 rounded-full bg-slate-200" />
-            <DashboardNav storeId={storeId} isMobileMenu />
           </div>
         </header>
 
