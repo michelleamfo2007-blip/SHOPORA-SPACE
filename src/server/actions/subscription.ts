@@ -156,6 +156,49 @@ export async function submitPaymentReference(storeId: string, formData: FormData
     }
   })
 
+  // Send Notifications
+  try {
+    const emailPromises = []
+    
+    // Notify Tenant Admin (Receipt)
+    if (session.user.email) {
+      emailPromises.push(
+        resend.emails.send({
+          from: "Shopora Billing <billing@shopora.space>",
+          to: session.user.email,
+          subject: `Subscription Payment Submitted - ${store.name}`,
+          html: `
+            <p>Hi there,</p>
+            <p>We have successfully received your payment reference for your Shopora subscription.</p>
+            <p><strong>Amount:</strong> ${store.currency || "GHS"} ${store.subscription.plan.price}</p>
+            <p><strong>Reference:</strong> ${reference}</p>
+            <p>Our team is currently verifying the payment. Your subscription will be activated shortly.</p>
+          `
+        })
+      )
+    }
+
+    // Notify Super Admin
+    emailPromises.push(
+      resend.emails.send({
+        from: "Shopora System <billing@shopora.space>",
+        to: "shoporaspace@gmail.com",
+        subject: `New Subscription Payment Pending 💰`,
+        html: `
+          <p>A tenant has submitted a manual payment reference for their subscription.</p>
+          <p><strong>Store:</strong> ${store.name} (${store.slug})</p>
+          <p><strong>Plan:</strong> ${store.subscription.plan.name}</p>
+          <p><strong>Reference:</strong> ${reference}</p>
+          <p>Log in to the Super Admin dashboard (Subscriptions tab) to verify and approve the payment.</p>
+        `
+      })
+    )
+
+    await Promise.all(emailPromises)
+  } catch (err) {
+    console.error("Failed to send subscription payment notification emails", err)
+  }
+
   // We do NOT update the subscription status here.
   // The super admin must approve it manually.
 

@@ -2,6 +2,8 @@
 
 import { db } from "@/lib/db"
 
+import { resend } from "@/lib/resend"
+
 export async function processCheckoutAction(formData: FormData) {
   const storeId = formData.get("storeId") as string
   const email = formData.get("email") as string
@@ -18,7 +20,10 @@ export async function processCheckoutAction(formData: FormData) {
     throw new Error("Missing required fields")
   }
 
-  const store = await db.store.findUnique({ where: { id: storeId } })
+  const store = await db.store.findUnique({ 
+    where: { id: storeId },
+    include: { members: { include: { user: true } } }
+  })
   if (!store) throw new Error("Store not found")
 
   const cartItems = JSON.parse(cartDataStr) as Array<{
@@ -50,11 +55,12 @@ export async function processCheckoutAction(formData: FormData) {
   }
 
   // 2. Create Order with PENDING_VERIFICATION status
+  const orderNumber = `ORD-${Date.now().toString().slice(-6)}`
   const order = await db.order.create({
     data: {
       storeId,
       customerId: customer.id,
-      orderNumber: `ORD-${Date.now().toString().slice(-6)}`,
+      orderNumber,
       totalAmount,
       status: "PENDING_VERIFICATION", 
       shippingAddress: `${exactLocation}, ${city}, ${country}`,
@@ -75,6 +81,52 @@ export async function processCheckoutAction(formData: FormData) {
       }
     }
   })
+
+  // 3. Send Notifications
+  const owner = store.members.find(m => m.role === "OWNER")?.user
+  
+  try {
+    const emailPromises = []
+    
+    // Notify Tenant Admin
+    if (owner && owner.email) {
+      emailPromises.push(
+        resend.emails.send({
+          from: "Orders <orders@shopora.space>",
+          to: owner.email,
+          subject: `New Order Received: ${orderNumber} 🎉`,
+          html: `
+            <p>Hi ${owner.name || "Merchant"},</p>
+            <p>You have received a new order on your store (<strong>${store.name}</strong>).</p>
+            <p><strong>Order Number:</strong> ${orderNumber}</p>
+            <p><strong>Customer:</strong> ${firstName} ${lastName}</p>
+            <p><strong>Total Amount:</strong> ${store.currency} ${totalAmount.toFixed(2)}</p>
+            <p><strong>Payment Reference:</strong> ${reference}</p>
+            <p>Log in to your dashboard to verify the payment and fulfill the order.</p>
+          `
+        })
+      )
+    }
+
+    // Notify Super Admin
+    emailPromises.push(
+      resend.emails.send({
+        from: "Shopora System <orders@shopora.space>",
+        to: "shoporaspace@gmail.com",
+        subject: `Platform Sale: ${store.name} 🚀`,
+        html: `
+          <p>A new order was placed on a tenant's store.</p>
+          <p><strong>Store:</strong> ${store.name} (${store.slug})</p>
+          <p><strong>Amount:</strong> ${store.currency} ${totalAmount.toFixed(2)}</p>
+          <p><strong>Reference:</strong> ${reference}</p>
+        `
+      })
+    )
+
+    await Promise.all(emailPromises)
+  } catch (err) {
+    console.error("Failed to send order notification emails", err)
+  }
 
   return { orderId: order.id }
 }
