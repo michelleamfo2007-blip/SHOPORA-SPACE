@@ -139,7 +139,7 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
               style={{ backgroundColor: store.primaryColor || "#2563eb", color: "#ffffff" }}
               onClick={handleAddToCart}
             >
-              Add to Cart & Checkout
+              Add to Cart
             </Button>
 
             <div className="mt-10 border-t pt-8 text-sm text-slate-500 grid grid-cols-2 gap-4">

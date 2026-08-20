@@ -84,7 +84,7 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
   }
   const updateOptionValues = (index: number, valStr: string) => {
     const newOpts = [...options]
-    newOpts[index].values = valStr.split(",").map(v => v.trim()).filter(Boolean)
+    newOpts[index].values = valStr.split(/[,;]/).map(v => v.trim()).filter(Boolean)
     setOptions(newOpts)
     generateVariants(newOpts)
   }
