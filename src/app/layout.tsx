@@ -21,6 +21,12 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 import { CookieBanner } from "@/components/marketing/CookieBanner";
 import { Analytics } from "@vercel/analytics/react";
 

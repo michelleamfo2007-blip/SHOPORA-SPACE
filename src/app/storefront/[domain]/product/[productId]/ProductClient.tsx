@@ -79,7 +79,7 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
           
           {/* Product Image Gallery */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 w-full min-w-0">
             <div className="aspect-[4/5] bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 w-full overflow-hidden relative">
               {activeImageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -114,8 +114,8 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
           </div>
 
           {/* Product Details */}
-          <div className="flex flex-col">
-            <h1 className="text-3xl md:text-4xl font-serif text-slate-900 mb-4 tracking-tight">
+          <div className="flex flex-col w-full min-w-0">
+            <h1 className="text-3xl md:text-4xl font-serif text-slate-900 mb-4 tracking-tight break-words">
               {product.name}
             </h1>
             
