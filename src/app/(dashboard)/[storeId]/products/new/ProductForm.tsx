@@ -47,9 +47,10 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
   const [seoDescription, setSeoDescription] = useState(initialData?.seoDescription || "")
 
   // Options & Variants
-  const [options, setOptions] = useState<{ name: string; values: string[] }[]>(
+  const [options, setOptions] = useState<{ name: string; valueString: string; values: string[] }[]>(
     initialData?.options?.map((o: any) => ({
       name: o.name,
+      valueString: o.values.map((v: any) => v.value).join(", "),
       values: o.values.map((v: any) => v.value)
     })) || []
   )
@@ -71,7 +72,7 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
     setSku(`${prefix}-${random}`)
   }
 
-  const addOption = () => setOptions([...options, { name: "", values: [""] }])
+  const addOption = () => setOptions([...options, { name: "", valueString: "", values: [] }])
   const removeOption = (index: number) => {
     const newOpts = options.filter((_, i) => i !== index)
     setOptions(newOpts)
@@ -84,6 +85,7 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
   }
   const updateOptionValues = (index: number, valStr: string) => {
     const newOpts = [...options]
+    newOpts[index].valueString = valStr
     newOpts[index].values = valStr.split(/[,;]/).map(v => v.trim()).filter(Boolean)
     setOptions(newOpts)
     generateVariants(newOpts)
@@ -271,7 +273,7 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
                   </div>
                   <div className="grid gap-2 w-full md:flex-[2]">
                     <Label>Values (comma separated)</Label>
-                    <Input value={option.values.join(", ")} placeholder="Small, Medium, Large" onChange={e => updateOptionValues(index, e.target.value)} />
+                    <Input value={option.valueString !== undefined ? option.valueString : option.values.join(", ")} placeholder="Small, Medium, Large" onChange={e => updateOptionValues(index, e.target.value)} />
                   </div>
                   <Button type="button" variant="ghost" className="absolute top-2 right-2 md:static md:mt-7 text-red-500 hover:text-red-700 hover:bg-red-50 p-2" onClick={() => removeOption(index)}>
                     <Trash2 className="h-4 w-4" />

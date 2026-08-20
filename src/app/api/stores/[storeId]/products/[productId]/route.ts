@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
@@ -42,7 +42,20 @@ export async function PATCH(
       return new NextResponse("Unauthorized access to this store", { status: 403 })
     }
 
-    // Update the main product fields
+    // Process Option mapping
+    const optionData = options?.map((opt: { name: string; values: string[] }, index: number) => ({
+      name: opt.name,
+      position: index + 1,
+      values: {
+        create: opt.values.map((val: string) => ({ value: val }))
+      }
+    })) || []
+
+    // Delete existing options and variants to rebuild them clean
+    await db.productOption.deleteMany({ where: { productId } })
+    await db.productVariant.deleteMany({ where: { productId } })
+
+    // Update the main product fields and create new options
     const product = await db.product.update({
       where: { id: productId, storeId },
       data: {
@@ -60,12 +73,51 @@ export async function PATCH(
         videoUrl,
         seoTitle,
         seoDescription,
+        options: {
+          create: optionData
+        }
+      },
+      include: {
+        options: {
+          include: { values: true }
+        }
       }
     })
 
-    // Currently we won't rebuild options and variants automatically on update 
-    // unless we delete all and recreate, which is dangerous for stock.
-    // For now, updating the product is supported. We can add variant updating logic later.
+    // If variants exist, create them
+    if (variants && variants.length > 0) {
+      const variantData = variants.map((v: { name: string; price: number; compareAtPrice?: number | null; sku?: string; stockCount: number; imageBase64?: string }) => {
+        const variantValues = v.name.split(" / ")
+        const optionValueIds: { id: string }[] = []
+
+        product.options.forEach((opt: any, optIndex: number) => {
+          const valName = variantValues[optIndex]
+          const matchedVal = opt.values.find((ov: any) => ov.value === valName)
+          if (matchedVal) {
+            optionValueIds.push({ id: matchedVal.id })
+          }
+        })
+        
+        const generatedSku = `${name.substring(0,3).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`
+
+        return {
+          productId: product.id,
+          name: v.name,
+          price: v.price,
+          compareAtPrice: v.compareAtPrice ? parseFloat(v.compareAtPrice as any) : null,
+          sku: v.sku || generatedSku,
+          stockCount: v.stockCount,
+          imageUrl: v.imageBase64 || null,
+          optionValues: optionValueIds.length > 0 ? { connect: optionValueIds } : undefined
+        }
+      })
+
+      for (const vData of variantData) {
+        await db.productVariant.create({
+          data: vData
+        })
+      }
+    }
 
     return NextResponse.json({ success: true, product })
   } catch (error) {
