@@ -150,6 +150,21 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
                     <div className="flex flex-wrap gap-2">
                       {opt.values.map((val: any) => {
                         const isSelected = selectedOptions[opt.name] === val.value
+
+                        if (opt.name.toLowerCase() === 'color' || opt.name.toLowerCase() === 'colour') {
+                          return (
+                            <button
+                              key={val.id}
+                              onClick={() => setSelectedOptions(prev => ({ ...prev, [opt.name]: val.value }))}
+                              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                                isSelected ? 'ring-2 ring-offset-2 ring-slate-900 scale-110' : 'ring-1 ring-slate-200 hover:ring-slate-400'
+                              }`}
+                              style={{ backgroundColor: val.value.toLowerCase().replace(/ /g, '') }}
+                              title={val.value}
+                            />
+                          )
+                        }
+
                         return (
                           <button 
                             key={val.id}
@@ -157,7 +172,7 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
                             className={`min-w-[60px] px-4 py-3 border flex items-center justify-center text-sm font-medium transition-colors hover:border-slate-900`}
                             style={{
                               backgroundColor: isSelected ? (store.primaryColor || '#0f172a') : '#ffffff',
-                              color: isSelected ? '#ffffff' : '#0f172a',
+                              color: isSelected ? '#ffffff' : (store.primaryColor || '#0f172a'),
                               borderColor: isSelected ? (store.primaryColor || '#0f172a') : '#e2e8f0',
                             }}
                           >

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
@@ -118,6 +119,8 @@ export async function PATCH(
         })
       }
     }
+
+    revalidatePath('/', 'layout') // Invalidate all cached pages to ensure storefront updates
 
     return NextResponse.json({ success: true, product })
   } catch (error) {
