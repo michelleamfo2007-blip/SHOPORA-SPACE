@@ -93,7 +93,7 @@ export async function processCheckoutAction(formData: FormData) {
           resend.emails.send({
             from: "Orders <orders@shopora.space>",
             to: member.user.email,
-            subject: `New Order Received: ${orderNumber} 🎉`,
+            subject: `New Order Received: ${orderNumber}`,
             html: `
               <p>Hi ${member.user.name || "Merchant"},</p>
               <p>You have received a new order on your store (<strong>${store.name}</strong>).</p>
@@ -113,7 +113,7 @@ export async function processCheckoutAction(formData: FormData) {
       resend.emails.send({
         from: "Shopora System <orders@shopora.space>",
         to: "shoporaspace@gmail.com",
-        subject: `Platform Sale: ${store.name} 🚀`,
+        subject: `Platform Sale: ${store.name}`,
         html: `
           <p>A new order was placed on a tenant's store.</p>
           <p><strong>Store:</strong> ${store.name} (${store.slug})</p>

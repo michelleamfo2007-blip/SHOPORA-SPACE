@@ -93,10 +93,10 @@ export async function startTrialAction(planName: string, interval: string = "mon
     await resend.emails.send({
       from: "Michelle from Shopora <billing@shopora.space>",
       to: user.email,
-      subject: "Your Shopora 7-day free trial has started 🎉",
+      subject: "Your Shopora 7-day free trial has started",
       html: `
         <p>Hi ${user.name || user.email.split('@')[0]},</p>
-        <p>Your Shopora 7-day free trial has started 🎉</p>
+        <p>Your Shopora 7-day free trial has started!</p>
         <p>You currently have access to the ${planName} plan.</p>
         <p>Your trial ends on ${endDate.toLocaleDateString()}. After your 7-day trial, your subscription will need to be renewed manually to keep your store active.</p>
         <p>Click here to finish setting up your store:<br><a href="https://shopora.space/onboarding">https://shopora.space/onboarding</a></p>
@@ -108,7 +108,7 @@ export async function startTrialAction(planName: string, interval: string = "mon
     await resend.emails.send({
       from: 'Shopora System <billing@shopora.space>',
       to: 'shoporaspace@gmail.com',
-      subject: 'New Store Created / Trial Started 🚀',
+      subject: 'New Store Created / Trial Started',
       html: `
         <p>A new client has successfully created a store and started their trial!</p>
         <p><strong>Client:</strong> ${user.name} (${user.email})</p>
@@ -183,7 +183,7 @@ export async function submitPaymentReference(storeId: string, formData: FormData
       resend.emails.send({
         from: "Shopora System <billing@shopora.space>",
         to: "shoporaspace@gmail.com",
-        subject: `New Subscription Payment Pending 💰`,
+        subject: `New Subscription Payment Pending`,
         html: `
           <p>A tenant has submitted a manual payment reference for their subscription.</p>
           <p><strong>Store:</strong> ${store.name} (${store.slug})</p>
