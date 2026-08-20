@@ -38,11 +38,10 @@ export default async function StorefrontLayout({
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href={`${basePath}/`} className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                {store.logoUrl ? (
+                {store.logoUrl && (
                   <img src={store.logoUrl} alt={`${store.name} Logo`} className="h-8 w-auto object-contain" />
-                ) : (
-                  <span>{store.name}</span>
                 )}
+                <span>{store.name}</span>
               </Link>
             </div>
             
