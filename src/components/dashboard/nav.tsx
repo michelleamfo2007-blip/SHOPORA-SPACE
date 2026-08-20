@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Package, LayoutGrid, Box, ShoppingCart, Truck, Users, CreditCard, Ticket, BarChart3, Star, LifeBuoy, Settings } from "lucide-react"
+import { LayoutDashboard, Package, LayoutGrid, Box, ShoppingCart, Truck, Users, CreditCard, Ticket, BarChart3, Star, LifeBuoy, Settings, Wallet } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -102,6 +102,13 @@ export function DashboardNav({ storeId, isMobileMenu }: DashboardNavProps) {
       icon: LifeBuoy,
       color: "text-indigo-500",
       active: pathname === `/${storeId}/support`,
+    },
+    {
+      href: `/${storeId}/billing`,
+      label: "Billing",
+      icon: Wallet,
+      color: "text-blue-500",
+      active: pathname === `/${storeId}/billing`,
     },
     {
       href: `/${storeId}/settings`,
