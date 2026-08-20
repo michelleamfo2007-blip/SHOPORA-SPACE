@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
 import { useCart } from "@/lib/cart"
+import { useFavorites } from "@/lib/favorites"
+import { Heart } from "lucide-react"
 
 export function ProductClient({ product, store }: { product: any, store: any }) {
   const router = useRouter()
@@ -45,6 +46,9 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
     // If they want to go straight to checkout, we can keep the routing:
     // We will just let the user open the cart drawer for now, so we remove the auto-redirect.
   }
+
+  const { isFavorite, toggleFavorite } = useFavorites()
+  const isFaved = isFavorite(product.id)
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -88,22 +92,22 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
 
           {/* Product Details */}
           <div className="flex flex-col">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
+            <h1 className="text-3xl md:text-4xl font-serif text-slate-900 mb-4 tracking-tight">
               {product.name}
             </h1>
             
-            <div className="flex items-center gap-4 mb-8">
-              <span className="text-3xl font-bold text-blue-600">
+            <div className="flex items-center gap-3 mb-8">
+              <span className="text-2xl font-bold text-slate-900">
                 {store.currency} {price.toFixed(2)}
               </span>
-              {compareAtPrice && compareAtPrice > price && (
-                <span className="text-xl text-slate-400 line-through font-medium">
+              {compareAtPrice !== null && compareAtPrice > price && (
+                <span className="text-lg text-slate-400 line-through">
                   {store.currency} {compareAtPrice.toFixed(2)}
                 </span>
               )}
             </div>
 
-            <div className="prose prose-slate max-w-none mb-10 text-slate-600 text-lg leading-relaxed">
+            <div className="prose prose-slate max-w-none mb-10 text-slate-600 text-[15px] leading-relaxed">
               {product.description ? (
                 <p>{product.description}</p>
               ) : (
@@ -112,18 +116,23 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
             </div>
 
             {/* Variants Selector */}
-            {product.variants.length > 1 && (
+            {product.variants.length > 0 && (
               <div className="mb-10">
-                <h3 className="font-semibold text-slate-900 mb-4 text-lg">Select Option</h3>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="font-semibold text-slate-900 text-sm uppercase tracking-wide">Options</h3>
+                  {selectedVariant && (
+                    <span className="text-sm text-slate-500">{selectedVariant.name !== "Default Title" ? selectedVariant.name : ""}</span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
                   {product.variants.map((variant: any) => (
                     <button 
                       key={variant.id}
                       onClick={() => handleVariantSelect(variant)}
-                      className={`px-6 py-3 border-2 rounded-xl text-sm font-medium transition-all ${
+                      className={`min-w-[60px] px-4 py-3 border flex items-center justify-center text-sm font-medium transition-colors ${
                         selectedVariant.id === variant.id 
-                        ? 'border-blue-600 bg-blue-50 text-blue-700' 
-                        : 'border-slate-200 hover:border-slate-400 text-slate-700'
+                        ? 'bg-slate-900 text-white border-slate-900' 
+                        : 'bg-white text-slate-900 border-slate-200 hover:border-slate-900'
                       }`}
                     >
                       {variant.name}
@@ -133,14 +142,22 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
               </div>
             )}
 
-            <Button 
-              size="lg" 
-              className="w-full mt-auto py-7 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
-              style={{ backgroundColor: store.primaryColor || "#2563eb", color: "#ffffff" }}
-              onClick={handleAddToCart}
-            >
-              Add to Cart
-            </Button>
+            {/* Desktop Actions */}
+            <div className="hidden md:flex items-center gap-4 mt-auto">
+              <button 
+                onClick={() => toggleFavorite(product.id)}
+                className="w-14 h-14 border border-slate-200 rounded-none flex items-center justify-center hover:border-slate-900 transition-colors shrink-0"
+              >
+                <Heart className={`w-6 h-6 ${isFaved ? 'fill-red-500 text-red-500' : 'text-slate-700'}`} />
+              </button>
+              <button 
+                className="flex-1 h-14 bg-slate-900 text-white text-lg font-bold hover:bg-slate-800 transition-colors"
+                style={{ backgroundColor: store.primaryColor || "#0f172a" }}
+                onClick={handleAddToCart}
+              >
+                Add to Cart
+              </button>
+            </div>
 
             <div className="mt-10 border-t pt-8 text-sm text-slate-500 grid grid-cols-2 gap-4">
               <div>
@@ -164,6 +181,23 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Mobile Sticky Actions */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-40 flex items-center gap-3">
+          <button 
+            onClick={() => toggleFavorite(product.id)}
+            className="w-12 h-12 flex items-center justify-center shrink-0 border border-slate-200"
+          >
+            <Heart className={`w-6 h-6 ${isFaved ? 'fill-red-500 text-red-500' : 'text-slate-700'}`} />
+          </button>
+          <button 
+            className="flex-1 h-12 bg-slate-900 text-white font-bold"
+            style={{ backgroundColor: store.primaryColor || "#0f172a" }}
+            onClick={handleAddToCart}
+          >
+            Add to Cart
+          </button>
         </div>
 
         {/* Product Video */}
