@@ -138,12 +138,12 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
             {products.map((product) => {
               const variant = product.variants[0]
               const price = variant?.price ?? 0
               const compareAtPrice = variant?.compareAtPrice ?? null
-              const imageUrl = variant?.imageUrl ?? null
+              const imageUrl = variant?.imageUrl || product.images?.[0] || null
               
               return (
                 <Link key={product.id} href={`${basePath}/product/${product.id}`} className="group">

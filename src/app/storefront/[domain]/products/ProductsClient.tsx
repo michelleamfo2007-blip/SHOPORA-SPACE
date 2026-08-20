@@ -84,7 +84,7 @@ export function ProductsClient({ products, currency, primaryColor, basePath, tit
       </div>
 
       {sortedProducts.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
           {sortedProducts.map((product) => {
             const variant = product.variants[0];
             const price = variant?.price ?? product.price ?? 0;

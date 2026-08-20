@@ -153,11 +153,14 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
               </div>
               <div>
                 <span className="font-semibold text-slate-700 block mb-1">Availability</span>
-                {(selectedVariant?.stockCount ?? product.stockCount) > 0 ? (
-                  <span className="text-green-600 font-medium">In Stock ({(selectedVariant?.stockCount ?? product.stockCount)})</span>
-                ) : (
-                  <span className="text-red-500 font-medium">Out of Stock</span>
-                )}
+                {(() => {
+                  const stock = selectedVariant?.stockCount || product.stockCount || 0;
+                  return stock > 0 ? (
+                    <span className="text-green-600 font-medium">In Stock ({stock})</span>
+                  ) : (
+                    <span className="text-red-500 font-medium">Out of Stock</span>
+                  );
+                })()}
               </div>
             </div>
           </div>
