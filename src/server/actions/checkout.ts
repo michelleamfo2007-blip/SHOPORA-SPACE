@@ -83,30 +83,30 @@ export async function processCheckoutAction(formData: FormData) {
   })
 
   // 3. Send Notifications
-  const owner = store.members.find(m => m.role === "OWNER")?.user
-  
   try {
     const emailPromises = []
     
-    // Notify Tenant Admin
-    if (owner && owner.email) {
-      emailPromises.push(
-        resend.emails.send({
-          from: "Orders <orders@shopora.space>",
-          to: owner.email,
-          subject: `New Order Received: ${orderNumber} 🎉`,
-          html: `
-            <p>Hi ${owner.name || "Merchant"},</p>
-            <p>You have received a new order on your store (<strong>${store.name}</strong>).</p>
-            <p><strong>Order Number:</strong> ${orderNumber}</p>
-            <p><strong>Customer:</strong> ${firstName} ${lastName}</p>
-            <p><strong>Total Amount:</strong> ${store.currency} ${totalAmount.toFixed(2)}</p>
-            <p><strong>Payment Reference:</strong> ${reference}</p>
-            <p>Log in to your dashboard to verify the payment and fulfill the order.</p>
-          `
-        })
-      )
-    }
+    // Notify All Tenant Admins (Store Members)
+    store.members.forEach(member => {
+      if (member.user && member.user.email) {
+        emailPromises.push(
+          resend.emails.send({
+            from: "Orders <orders@shopora.space>",
+            to: member.user.email,
+            subject: `New Order Received: ${orderNumber} 🎉`,
+            html: `
+              <p>Hi ${member.user.name || "Merchant"},</p>
+              <p>You have received a new order on your store (<strong>${store.name}</strong>).</p>
+              <p><strong>Order Number:</strong> ${orderNumber}</p>
+              <p><strong>Customer:</strong> ${firstName} ${lastName}</p>
+              <p><strong>Total Amount:</strong> ${store.currency} ${totalAmount.toFixed(2)}</p>
+              <p><strong>Payment Reference:</strong> ${reference}</p>
+              <p>Log in to your dashboard to verify the payment and fulfill the order.</p>
+            `
+          })
+        )
+      }
+    })
 
     // Notify Super Admin
     emailPromises.push(

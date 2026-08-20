@@ -67,7 +67,7 @@ export function AddManualReviewModal({ storeId }: { storeId: string }) {
   const [name, setName] = useState("")
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState("")
-
+   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {

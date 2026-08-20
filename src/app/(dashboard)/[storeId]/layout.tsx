@@ -112,6 +112,7 @@ export default async function DashboardLayout({
           </SubscriptionGuard>
         </main>
       </div>
+      <Toaster position="bottom-right" richColors />
     </div>
   )
 }

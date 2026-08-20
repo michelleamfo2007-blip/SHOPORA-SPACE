@@ -9,6 +9,17 @@ export default async function AnalyticsPage() {
   const totalCustomers = await db.customer.count()
   const totalProducts = await db.product.count()
 
+  // Platform Analytics (Main Website)
+  const platformStats = await db.platformAnalytics.aggregate({
+    _sum: {
+      pageViews: true,
+      visitors: true,
+    }
+  })
+  
+  const platformViews = platformStats._sum.pageViews || 0
+  const platformVisitors = platformStats._sum.visitors || 0
+
   // Get Top 10 stores by order count
   const topStores = await db.store.findMany({
     include: {
@@ -78,6 +89,30 @@ export default async function AnalyticsPage() {
           <CardContent className="px-6 pb-6">
             <div className="text-3xl font-extrabold text-slate-900">{totalProducts.toLocaleString()}</div>
             <p className="text-xs font-medium text-slate-500 mt-1">Items listed for sale</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
+            <CardTitle className="text-sm font-medium text-slate-500">Main Website Views</CardTitle>
+            <BarChart3 className="h-4 w-4 text-purple-500" />
+          </CardHeader>
+          <CardContent className="px-6 pb-6">
+            <div className="text-3xl font-extrabold text-slate-900">{platformViews.toLocaleString()}</div>
+            <p className="text-xs font-medium text-slate-500 mt-1">Total page views on landing pages</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
+            <CardTitle className="text-sm font-medium text-slate-500">Main Website Unique Visitors</CardTitle>
+            <Users className="h-4 w-4 text-pink-500" />
+          </CardHeader>
+          <CardContent className="px-6 pb-6">
+            <div className="text-3xl font-extrabold text-slate-900">{platformVisitors.toLocaleString()}</div>
+            <p className="text-xs font-medium text-slate-500 mt-1">Unique daily visitors</p>
           </CardContent>
         </Card>
       </div>
