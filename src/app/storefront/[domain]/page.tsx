@@ -82,7 +82,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
               href={`${basePath}/products`}
               className="inline-block bg-white text-slate-900 rounded-full px-8 py-4 text-lg font-semibold shadow-xl transition-transform hover:scale-105"
             >
-              Shop Wigs
+              Shop Now
             </Link>
             <Link
               href="#categories"
