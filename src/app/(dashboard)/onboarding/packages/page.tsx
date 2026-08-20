@@ -99,9 +99,7 @@ export default function PackagesPage() {
               </CardContent>
               <CardFooter>
                 <form action={startTrialAction.bind(null, pkg.name, intervalStr)} className="w-full">
-                  <Button type="submit" className="w-full font-semibold" size="lg">
-                    Start 7-Day Free Trial
-                  </Button>
+                  <SubmitButton />
                 </form>
               </CardFooter>
             </Card>
@@ -109,5 +107,24 @@ export default function PackagesPage() {
         })}
       </div>
     </div>
+  )
+}
+
+import { useFormStatus } from "react-dom"
+import { Loader2 } from "lucide-react"
+
+function SubmitButton() {
+  const { pending } = useFormStatus()
+  return (
+    <Button type="submit" className="w-full font-semibold" size="lg" disabled={pending}>
+      {pending ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Processing...
+        </>
+      ) : (
+        "Start 7-Day Free Trial"
+      )}
+    </Button>
   )
 }

@@ -103,8 +103,21 @@ export async function startTrialAction(planName: string, interval: string = "mon
         <p>Best,<br>Michelle</p>
       `
     })
+
+    // Notify Super Admin
+    await resend.emails.send({
+      from: 'Shopora System <billing@shopora.space>',
+      to: 'shoporaspace@gmail.com',
+      subject: 'New Store Created / Trial Started 🚀',
+      html: `
+        <p>A new client has successfully created a store and started their trial!</p>
+        <p><strong>Client:</strong> ${user.name} (${user.email})</p>
+        <p><strong>Plan:</strong> ${planName}</p>
+        <p>Log in to the Super Admin dashboard to view more details.</p>
+      `
+    })
   } catch (err) {
-    console.error("Failed to send trial start email", err)
+    console.error("Failed to send trial start emails", err)
   }
 
   // 5. Redirect to store setup

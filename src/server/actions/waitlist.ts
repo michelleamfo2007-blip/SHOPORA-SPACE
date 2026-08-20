@@ -62,6 +62,18 @@ export async function joinWaitlistAction(formData: FormData) {
       console.error("Resend API Error (Waitlist Join):", resendError)
     }
 
+    // Notify Super Admin
+    await resend.emails.send({
+      from: 'Shopora System <customersupport@shopora.space>',
+      to: 'shoporaspace@gmail.com',
+      subject: 'New Waitlist Signup 🎉',
+      html: `
+        <p>A new user has joined the waitlist:</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p>Log in to the Super Admin dashboard to approve them.</p>
+      `
+    }).catch(err => console.error("Failed to notify super admin:", err))
+
     return { success: true }
   } catch (error: any) {
     console.error("Waitlist Error:", error)
