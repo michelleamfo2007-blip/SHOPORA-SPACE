@@ -78,7 +78,7 @@ export default async function DashboardLayout({
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-1 w-full flex-col min-h-screen">
+      <div className="flex flex-1 w-full max-w-full flex-col min-h-screen overflow-x-hidden">
         {/* Top Header */}
         <header className="flex h-[60px] flex-shrink-0 items-center justify-between border-b bg-slate-50/50 px-4 md:px-6">
           <div className="flex items-center gap-3">
@@ -102,7 +102,7 @@ export default async function DashboardLayout({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
+        <main className="flex-1 p-4 md:p-6 overflow-x-hidden overflow-y-auto">
           <SubscriptionGuard
             storeId={storeId}
             status={storeMember.store.subscription?.status || "TRIAL"}
