@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { db } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Store, Users, ShoppingCart, DollarSign, AlertCircle, Clock } from "lucide-react";
