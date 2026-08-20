@@ -6,12 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { BillingClient } from "./BillingClient"
 
-export default async function BillingPage({ params }: { params: { storeId: string } }) {
+export default async function BillingPage({ params }: { params: Promise<{ storeId: string }> }) {
+  const { storeId } = await params
+  
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) redirect("/login")
 
   const store = await db.store.findUnique({
-    where: { id: params.storeId },
+    where: { id: storeId },
     include: {
       subscription: {
         include: { plan: true, payments: { orderBy: { createdAt: "desc" }, take: 1 } }
@@ -19,7 +21,7 @@ export default async function BillingPage({ params }: { params: { storeId: strin
     }
   })
 
-  if (!store || !store.subscription) {
+  if (!store || !store.subscription || !store.subscription.plan) {
     return (
       <div className="p-6 max-w-4xl mx-auto mt-10">
         <Card>
@@ -34,7 +36,7 @@ export default async function BillingPage({ params }: { params: { storeId: strin
 
   const { subscription } = store
   const { plan, payments } = subscription
-  const latestPayment = payments[0]
+  const latestPayment = payments && payments.length > 0 ? payments[0] : null
 
   const isTrial = subscription.status === "TRIAL"
   const isPastDue = subscription.status === "PAST_DUE"
