@@ -143,9 +143,9 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
               <div className="mb-10 flex flex-col gap-6">
                 {product.options.map((opt: any) => (
                   <div key={opt.id}>
-                    <div className="flex items-center gap-2 mb-3">
-                      <h3 className="font-semibold text-slate-900 text-sm uppercase tracking-wide">{opt.name}</h3>
-                      <span className="text-sm text-slate-500">{selectedOptions[opt.name]}</span>
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      <h3 className="font-semibold text-slate-900 text-sm uppercase tracking-wide break-words">{opt.name}</h3>
+                      <span className="text-sm text-slate-500 break-words">{selectedOptions[opt.name]}</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {opt.values.map((val: any) => {
@@ -231,16 +231,16 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
               </button>
             </div>
 
-            <div className="mt-10 border-t pt-8 text-sm text-slate-500 grid grid-cols-2 gap-4">
-              <div>
+            <div className="mt-10 border-t pt-8 text-sm text-slate-500 grid grid-cols-2 gap-4 break-words">
+              <div className="overflow-hidden">
                 <span className="font-semibold text-slate-700 block mb-1">SKU</span>
-                {activeVariant?.sku || product.sku || "N/A"}
+                <span className="break-all">{activeVariant?.sku || product.sku || "N/A"}</span>
               </div>
-              <div>
+              <div className="overflow-hidden">
                 <span className="font-semibold text-slate-700 block mb-1">Category</span>
-                {product.categories.map((c: any) => c.name).join(", ") || "None"}
+                <span className="break-words">{product.categories.map((c: any) => c.name).join(", ") || "None"}</span>
               </div>
-              <div>
+              <div className="overflow-hidden">
                 <span className="font-semibold text-slate-700 block mb-1">Availability</span>
                 {(() => {
                   const stock = activeVariant?.stockCount || product.stockCount || 0;

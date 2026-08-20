@@ -31,7 +31,7 @@ export default async function StorefrontLayout({
     const basePath = isPreview ? `/storefront/${domain}` : ""
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col overflow-x-hidden w-full max-w-[100vw]">
       {/* Storefront Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -69,7 +69,7 @@ export default async function StorefrontLayout({
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 bg-slate-50">
+      <main className="flex-1 bg-slate-50 overflow-x-hidden">
         {children}
       </main>
 
