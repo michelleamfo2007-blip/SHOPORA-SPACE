@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react";
+import { ProductCard } from "@/components/storefront/ProductCard";
 
 type Product = {
   id: string;
@@ -85,55 +85,14 @@ export function ProductsClient({ products, currency, primaryColor, basePath, tit
 
       {sortedProducts.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
-          {sortedProducts.map((product) => {
-            const variant = product.variants[0];
-            const price = variant?.price ?? product.price ?? 0;
-            const compareAtPrice = variant?.compareAtPrice ?? product.compareAtPrice ?? null;
-            const imageUrl = variant?.imageUrl ?? product.images?.[0] ?? null;
-            
-            return (
-              <Link key={product.id} href={`${basePath}/product/${product.id}`} className="group">
-                <Card className="h-full overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-white rounded-2xl">
-                  <div className="aspect-[4/5] bg-slate-100 relative w-full overflow-hidden">
-                    {imageUrl ? (
-                      <img 
-                        src={imageUrl} 
-                        alt={product.name} 
-                        className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center text-slate-400 bg-slate-50">
-                        <span className="text-sm">No Image</span>
-                      </div>
-                    )}
-                    {compareAtPrice !== null && compareAtPrice > price && (
-                      <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md tracking-wider">
-                        SALE
-                      </div>
-                    )}
-                  </div>
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold text-lg text-slate-900 truncate group-hover:text-blue-600 transition-colors mb-2">
-                      {product.name}
-                    </h3>
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="font-bold text-lg text-slate-900">
-                        {currency} {price.toFixed(2)}
-                      </span>
-                      {compareAtPrice !== null && compareAtPrice > price && (
-                        <span className="text-sm text-slate-400 line-through font-medium">
-                          {currency} {compareAtPrice.toFixed(2)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="w-full bg-slate-900 text-white text-center py-2.5 rounded-lg font-medium group-hover:bg-opacity-90 transition-all" style={{ backgroundColor: primaryColor || '#0f172a' }}>
-                      View Product
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
+          {sortedProducts.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              currency={currency}
+              basePath={basePath}
+            />
+          ))}
         </div>
       ) : (
         <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-slate-100">
