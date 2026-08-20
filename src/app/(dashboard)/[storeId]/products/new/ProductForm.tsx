@@ -264,16 +264,16 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
             </CardHeader>
             <CardContent className="grid gap-6">
               {options.map((option, index) => (
-                <div key={index} className="flex items-start gap-4 p-4 border rounded-lg bg-slate-50/50">
-                  <div className="grid gap-2 flex-1">
+                <div key={index} className="flex flex-col md:flex-row items-start gap-4 p-4 border rounded-lg bg-slate-50/50 relative">
+                  <div className="grid gap-2 w-full md:flex-1 pr-8 md:pr-0">
                     <Label>Option Name (e.g. Size)</Label>
                     <Input value={option.name} onChange={e => updateOptionName(index, e.target.value)} />
                   </div>
-                  <div className="grid gap-2 flex-[2]">
+                  <div className="grid gap-2 w-full md:flex-[2]">
                     <Label>Values (comma separated)</Label>
                     <Input value={option.values.join(", ")} placeholder="Small, Medium, Large" onChange={e => updateOptionValues(index, e.target.value)} />
                   </div>
-                  <Button type="button" variant="ghost" className="mt-7 text-red-500" onClick={() => removeOption(index)}>
+                  <Button type="button" variant="ghost" className="absolute top-2 right-2 md:static md:mt-7 text-red-500 hover:text-red-700 hover:bg-red-50 p-2" onClick={() => removeOption(index)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -286,16 +286,19 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
                   </div>
                   <div className="divide-y max-h-[400px] overflow-y-auto">
                     {variants.map((variant, index) => (
-                      <div key={index} className="p-4 grid grid-cols-12 gap-4 items-center bg-white hover:bg-slate-50 transition-colors">
-                        <div className="col-span-3 font-medium text-sm">{variant.name}</div>
-                        <div className="col-span-3">
-                          <Input type="number" size={1} className="h-8 text-sm" placeholder="Price" value={variant.price} onChange={e => updateVariant(index, "price", e.target.value)} />
+                      <div key={index} className="p-4 grid grid-cols-1 md:grid-cols-12 gap-3 items-center bg-white hover:bg-slate-50 transition-colors">
+                        <div className="md:col-span-3 font-medium text-sm text-slate-800 break-words mb-2 md:mb-0">{variant.name}</div>
+                        <div className="md:col-span-3 flex items-center gap-2">
+                          <span className="text-xs text-slate-500 md:hidden w-12 font-medium">Price</span>
+                          <Input type="number" size={1} className="h-8 text-sm flex-1" placeholder="Price" value={variant.price} onChange={e => updateVariant(index, "price", e.target.value)} />
                         </div>
-                        <div className="col-span-2">
-                          <Input type="number" className="h-8 text-sm" placeholder="Stock" value={variant.stockCount} onChange={e => updateVariant(index, "stockCount", e.target.value)} />
+                        <div className="md:col-span-2 flex items-center gap-2">
+                          <span className="text-xs text-slate-500 md:hidden w-12 font-medium">Stock</span>
+                          <Input type="number" className="h-8 text-sm flex-1" placeholder="Stock" value={variant.stockCount} onChange={e => updateVariant(index, "stockCount", e.target.value)} />
                         </div>
-                        <div className="col-span-4">
-                          <Input className="h-8 text-sm" placeholder="SKU" value={variant.sku} onChange={e => updateVariant(index, "sku", e.target.value)} />
+                        <div className="md:col-span-4 flex items-center gap-2">
+                          <span className="text-xs text-slate-500 md:hidden w-12 font-medium">SKU</span>
+                          <Input className="h-8 text-sm flex-1" placeholder="SKU" value={variant.sku} onChange={e => updateVariant(index, "sku", e.target.value)} />
                         </div>
                       </div>
                     ))}
