@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { useCart } from "@/lib/cart"
 import { useFavorites } from "@/lib/favorites"
@@ -8,13 +8,41 @@ import { Heart } from "lucide-react"
 
 export function ProductClient({ product, store }: { product: any, store: any }) {
   const router = useRouter()
-  const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0])
+  
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {}
+    if (product.options && product.options.length > 0) {
+      product.options.forEach((opt: any, i: number) => {
+        const variantParts = product.variants?.[0]?.name.split(' / ') || []
+        initial[opt.name] = variantParts[i] || opt.values?.[0]?.value || ""
+      })
+    }
+    return initial
+  })
+
+  // Fallback for products without proper option structure
+  const [fallbackVariant, setFallbackVariant] = useState(product.variants?.[0])
+
+  const activeVariant = useMemo(() => {
+    if (product.options && product.options.length > 0) {
+      const expectedName = product.options.map((opt: any) => selectedOptions[opt.name]).join(' / ')
+      return product.variants.find((v: any) => v.name === expectedName) || product.variants?.[0]
+    }
+    return fallbackVariant
+  }, [selectedOptions, fallbackVariant, product.options, product.variants])
+
   const [activeImageUrl, setActiveImageUrl] = useState<string | null>(
-    product.variants?.[0]?.imageUrl || product.images?.[0] || null
+    activeVariant?.imageUrl || product.images?.[0] || null
   )
 
-  const price = selectedVariant?.price ?? product.price ?? 0
-  const compareAtPrice = selectedVariant?.compareAtPrice ?? product.compareAtPrice
+  useEffect(() => {
+    if (activeVariant?.imageUrl) {
+      setActiveImageUrl(activeVariant.imageUrl)
+    }
+  }, [activeVariant])
+
+  const price = activeVariant?.price ?? product.price ?? 0
+  const compareAtPrice = activeVariant?.compareAtPrice ?? product.compareAtPrice
 
   // Collect all unique images for the gallery
   const allImages = Array.from(new Set([
@@ -22,20 +50,15 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
     ...(product.variants?.map((v: any) => v.imageUrl).filter(Boolean) || [])
   ])) as string[]
 
-  const handleVariantSelect = (variant: any) => {
-    setSelectedVariant(variant)
-    if (variant.imageUrl) {
-      setActiveImageUrl(variant.imageUrl)
-    }
-  }
+  // No longer needed, activeImageUrl managed via useEffect
 
   const cart = useCart()
 
   const handleAddToCart = () => {
     cart.addItem({
-      variantId: selectedVariant?.id ?? product.id, // Fallback to product.id if no variants
+      variantId: activeVariant?.id ?? product.id,
       productId: product.id,
-      name: selectedVariant ? `${product.name} - ${selectedVariant.name}` : product.name,
+      name: activeVariant ? `${product.name} - ${activeVariant.name}` : product.name,
       price: price,
       quantity: 1,
       imageUrl: activeImageUrl || product.images?.[0],
@@ -115,29 +138,63 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
               )}
             </div>
 
-            {/* Variants Selector */}
-            {product.variants.length > 0 && (
+            {/* Options Selectors */}
+            {product.options && product.options.length > 0 ? (
+              <div className="mb-10 flex flex-col gap-6">
+                {product.options.map((opt: any) => (
+                  <div key={opt.id}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <h3 className="font-semibold text-slate-900 text-sm uppercase tracking-wide">{opt.name}</h3>
+                      <span className="text-sm text-slate-500">{selectedOptions[opt.name]}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {opt.values.map((val: any) => {
+                        const isSelected = selectedOptions[opt.name] === val.value
+                        return (
+                          <button 
+                            key={val.id}
+                            onClick={() => setSelectedOptions(prev => ({ ...prev, [opt.name]: val.value }))}
+                            className={`min-w-[60px] px-4 py-3 border flex items-center justify-center text-sm font-medium transition-colors hover:border-slate-900`}
+                            style={{
+                              backgroundColor: isSelected ? (store.primaryColor || '#0f172a') : '#ffffff',
+                              color: isSelected ? '#ffffff' : '#0f172a',
+                              borderColor: isSelected ? (store.primaryColor || '#0f172a') : '#e2e8f0',
+                            }}
+                          >
+                            {val.value}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : product.variants.length > 0 && (
               <div className="mb-10">
                 <div className="flex items-center gap-2 mb-3">
                   <h3 className="font-semibold text-slate-900 text-sm uppercase tracking-wide">Options</h3>
-                  {selectedVariant && (
-                    <span className="text-sm text-slate-500">{selectedVariant.name !== "Default Title" ? selectedVariant.name : ""}</span>
+                  {activeVariant && (
+                    <span className="text-sm text-slate-500">{activeVariant.name !== "Default Title" ? activeVariant.name : ""}</span>
                   )}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {product.variants.map((variant: any) => (
-                    <button 
-                      key={variant.id}
-                      onClick={() => handleVariantSelect(variant)}
-                      className={`min-w-[60px] px-4 py-3 border flex items-center justify-center text-sm font-medium transition-colors ${
-                        selectedVariant.id === variant.id 
-                        ? 'bg-slate-900 text-white border-slate-900' 
-                        : 'bg-white text-slate-900 border-slate-200 hover:border-slate-900'
-                      }`}
-                    >
-                      {variant.name}
-                    </button>
-                  ))}
+                  {product.variants.map((variant: any) => {
+                    const isSelected = activeVariant?.id === variant.id
+                    return (
+                      <button 
+                        key={variant.id}
+                        onClick={() => setFallbackVariant(variant)}
+                        className={`min-w-[60px] px-4 py-3 border flex items-center justify-center text-sm font-medium transition-colors hover:border-slate-900`}
+                        style={{
+                          backgroundColor: isSelected ? (store.primaryColor || '#0f172a') : '#ffffff',
+                          color: isSelected ? '#ffffff' : '#0f172a',
+                          borderColor: isSelected ? (store.primaryColor || '#0f172a') : '#e2e8f0',
+                        }}
+                      >
+                        {variant.name}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -162,7 +219,7 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
             <div className="mt-10 border-t pt-8 text-sm text-slate-500 grid grid-cols-2 gap-4">
               <div>
                 <span className="font-semibold text-slate-700 block mb-1">SKU</span>
-                {selectedVariant?.sku || product.sku || "N/A"}
+                {activeVariant?.sku || product.sku || "N/A"}
               </div>
               <div>
                 <span className="font-semibold text-slate-700 block mb-1">Category</span>
@@ -171,7 +228,7 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
               <div>
                 <span className="font-semibold text-slate-700 block mb-1">Availability</span>
                 {(() => {
-                  const stock = selectedVariant?.stockCount || product.stockCount || 0;
+                  const stock = activeVariant?.stockCount || product.stockCount || 0;
                   return stock > 0 ? (
                     <span className="text-green-600 font-medium">In Stock ({stock})</span>
                   ) : (

@@ -23,7 +23,12 @@ export default async function ProductPage({
     },
     include: {
       variants: true,
-      categories: true
+      categories: true,
+      options: {
+        include: {
+          values: true
+        }
+      }
     }
   })
 
