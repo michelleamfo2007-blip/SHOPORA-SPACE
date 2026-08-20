@@ -69,7 +69,7 @@ export default async function BillingPage({ params }: { params: Promise<{ storeI
             </div>
             <div className="flex justify-between border-b pb-2">
               <span className="text-slate-500">Price</span>
-              <span className="font-semibold">{plan.currency} {plan.price.toFixed(2)} / {plan.interval}</span>
+              <span className="font-semibold">GH₵ {plan.price.toFixed(2)} / {plan.interval}</span>
             </div>
             {trialEndsAt && (
               <div className="flex justify-between pb-2">
