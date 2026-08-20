@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import Link from "next/link"
 import { 
   DollarSign, 
   Store, 
@@ -109,115 +110,127 @@ export function SuperAdminOverviewClient({
       {/* Main Metric Cards Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Card 1: Platform Revenue */}
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-50/50 to-orange-50/20 hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-700/80">Platform Revenue</span>
-              <div className="w-10 h-10 rounded-full bg-amber-100/80 flex items-center justify-center text-amber-700">
-                <DollarSign className="w-5 h-5" />
+        <Link href="/super-admin/finance" className="block h-full">
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-50/50 to-orange-50/20 hover:shadow-md hover:scale-[1.02] transition-all cursor-pointer h-full">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-700/80">Platform Revenue</span>
+                <div className="w-10 h-10 rounded-full bg-amber-100/80 flex items-center justify-center text-amber-700">
+                  <DollarSign className="w-5 h-5" />
+                </div>
               </div>
-            </div>
-            <div className="mt-4">
-              <h3 className="text-2xl font-extrabold text-slate-900 font-mono">
-                GHS {stats.platformRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              </h3>
-              <p className="text-xs font-medium text-amber-700/80 mt-1.5 flex items-center gap-1">
-                <TrendingUp className="w-3.5 h-3.5" />
-                <span>Subscription earnings</span>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="mt-4">
+                <h3 className="text-2xl font-extrabold text-slate-900 font-mono">
+                  GHS {stats.platformRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </h3>
+                <p className="text-xs font-medium text-amber-700/80 mt-1.5 flex items-center gap-1">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span>Subscription earnings</span>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Card 2: Total Sellers */}
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-slate-50 to-slate-100/50 hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Total Sellers</span>
-              <div className="w-10 h-10 rounded-full bg-slate-200/80 flex items-center justify-center text-slate-700">
-                <Store className="w-5 h-5" />
+        <Link href="/super-admin/sellers" className="block h-full">
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-slate-50 to-slate-100/50 hover:shadow-md hover:scale-[1.02] transition-all cursor-pointer h-full">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Total Sellers</span>
+                <div className="w-10 h-10 rounded-full bg-slate-200/80 flex items-center justify-center text-slate-700">
+                  <Store className="w-5 h-5" />
+                </div>
               </div>
-            </div>
-            <div className="mt-4">
-              <h3 className="text-2xl font-extrabold text-slate-900">{stats.totalSellers}</h3>
-              <p className="text-xs font-medium text-slate-500 mt-1.5">
-                Active storefronts on platform
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="mt-4">
+                <h3 className="text-2xl font-extrabold text-slate-900">{stats.totalSellers}</h3>
+                <p className="text-xs font-medium text-slate-500 mt-1.5">
+                  Active storefronts on platform
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Card 3: Total Customers */}
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50/50 to-indigo-50/10 hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-700/80">Total Customers</span>
-              <div className="w-10 h-10 rounded-full bg-blue-100/80 flex items-center justify-center text-blue-700">
-                <Users className="w-5 h-5" />
+        <Link href="/super-admin/customers" className="block h-full">
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50/50 to-indigo-50/10 hover:shadow-md hover:scale-[1.02] transition-all cursor-pointer h-full">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-blue-700/80">Total Customers</span>
+                <div className="w-10 h-10 rounded-full bg-blue-100/80 flex items-center justify-center text-blue-700">
+                  <Users className="w-5 h-5" />
+                </div>
               </div>
-            </div>
-            <div className="mt-4">
-              <h3 className="text-2xl font-extrabold text-slate-900">{stats.totalCustomers}</h3>
-              <p className="text-xs font-medium text-slate-500 mt-1.5">
-                Registered platform users
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="mt-4">
+                <h3 className="text-2xl font-extrabold text-slate-900">{stats.totalCustomers}</h3>
+                <p className="text-xs font-medium text-slate-500 mt-1.5">
+                  Registered platform users
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Card 4: Total Orders */}
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-indigo-50/40 to-indigo-100/10 hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-700/80">Total Orders</span>
-              <div className="w-10 h-10 rounded-full bg-indigo-100/80 flex items-center justify-center text-indigo-700">
-                <ShoppingBag className="w-5 h-5" />
+        <Link href="/super-admin/analytics" className="block h-full">
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-indigo-50/40 to-indigo-100/10 hover:shadow-md hover:scale-[1.02] transition-all cursor-pointer h-full">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-indigo-700/80">Total Orders</span>
+                <div className="w-10 h-10 rounded-full bg-indigo-100/80 flex items-center justify-center text-indigo-700">
+                  <ShoppingBag className="w-5 h-5" />
+                </div>
               </div>
-            </div>
-            <div className="mt-4">
-              <h3 className="text-2xl font-extrabold text-slate-900">{stats.totalOrders}</h3>
-              <p className="text-xs font-medium text-slate-500 mt-1.5">
-                Across all platform stores
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="mt-4">
+                <h3 className="text-2xl font-extrabold text-slate-900">{stats.totalOrders}</h3>
+                <p className="text-xs font-medium text-slate-500 mt-1.5">
+                  Across all platform stores
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Card 5: Pending Approvals */}
-        <Card className={`border-0 shadow-sm bg-gradient-to-br hover:shadow-md transition-shadow ${stats.pendingApprovals > 0 ? 'from-orange-50/50 to-orange-100/10' : 'from-emerald-50/40 to-emerald-100/10'}`}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <span className={`text-xs font-bold uppercase tracking-wider ${stats.pendingApprovals > 0 ? 'text-orange-700/80' : 'text-emerald-700/80'}`}>Pending Approvals</span>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${stats.pendingApprovals > 0 ? 'bg-orange-100 text-orange-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                <Clock className="w-5 h-5" />
+        <Link href="/super-admin/waitlist" className="block h-full">
+          <Card className={`border-0 shadow-sm bg-gradient-to-br hover:shadow-md hover:scale-[1.02] transition-all cursor-pointer h-full ${stats.pendingApprovals > 0 ? 'from-orange-50/50 to-orange-100/10' : 'from-emerald-50/40 to-emerald-100/10'}`}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <span className={`text-xs font-bold uppercase tracking-wider ${stats.pendingApprovals > 0 ? 'text-orange-700/80' : 'text-emerald-700/80'}`}>Pending Approvals</span>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${stats.pendingApprovals > 0 ? 'bg-orange-100 text-orange-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                  <Clock className="w-5 h-5" />
+                </div>
               </div>
-            </div>
-            <div className="mt-4">
-              <h3 className="text-2xl font-extrabold text-slate-900">{stats.pendingApprovals}</h3>
-              <p className="text-xs font-medium text-slate-500 mt-1.5">
-                Stores/Payments awaiting review
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="mt-4">
+                <h3 className="text-2xl font-extrabold text-slate-900">{stats.pendingApprovals}</h3>
+                <p className="text-xs font-medium text-slate-500 mt-1.5">
+                  Stores/Payments awaiting review
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Card 6: Active Disputes */}
-        <Card className={`border-0 shadow-sm bg-gradient-to-br hover:shadow-md transition-shadow ${stats.activeDisputes > 0 ? 'from-red-50/50 to-red-100/10' : 'from-slate-50 to-slate-100/50'}`}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <span className={`text-xs font-bold uppercase tracking-wider ${stats.activeDisputes > 0 ? 'text-red-700/80' : 'text-slate-500'}`}>Active Disputes</span>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${stats.activeDisputes > 0 ? 'bg-red-100 text-red-700' : 'bg-slate-200 text-slate-700'}`}>
-                <AlertTriangle className="w-5 h-5" />
+        <Link href="/super-admin/moderation" className="block h-full">
+          <Card className={`border-0 shadow-sm bg-gradient-to-br hover:shadow-md hover:scale-[1.02] transition-all cursor-pointer h-full ${stats.activeDisputes > 0 ? 'from-red-50/50 to-red-100/10' : 'from-slate-50 to-slate-100/50'}`}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <span className={`text-xs font-bold uppercase tracking-wider ${stats.activeDisputes > 0 ? 'text-red-700/80' : 'text-slate-500'}`}>Active Disputes</span>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${stats.activeDisputes > 0 ? 'bg-red-100 text-red-700' : 'bg-slate-200 text-slate-700'}`}>
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
               </div>
-            </div>
-            <div className="mt-4">
-              <h3 className="text-2xl font-extrabold text-slate-900">{stats.activeDisputes}</h3>
-              <p className="text-xs font-medium text-slate-500 mt-1.5">
-                Disputes requiring attention
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="mt-4">
+                <h3 className="text-2xl font-extrabold text-slate-900">{stats.activeDisputes}</h3>
+                <p className="text-xs font-medium text-slate-500 mt-1.5">
+                  Disputes requiring attention
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       {/* Sales Chart and Pending Payments Grid */}
