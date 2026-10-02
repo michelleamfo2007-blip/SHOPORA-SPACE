@@ -84,7 +84,8 @@ export default async function StorefrontLayout({
         Delivery fee paid on arrival
       </div>
 
-      <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-[#faf8f5]/90 backdrop-blur-md">
+      {/* No backdrop-filter here: it would trap the fixed menu and bag panels inside the header. */}
+      <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-[#faf8f5]">
         <div className="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-5 md:h-20 md:px-8">
           <div className="flex items-center">
             <MobileMenu storeName={store.name} basePath={basePath} hasCategories={hasCategories} whatsappHref={whatsappHref} />

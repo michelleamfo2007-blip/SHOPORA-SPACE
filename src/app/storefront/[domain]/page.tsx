@@ -75,30 +75,30 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
   return (
     <div>
       {store.heroImage ? (
-        <section className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-10 md:grid-cols-2 md:gap-16 md:px-8 md:py-16">
+        <section className="mx-auto grid max-w-7xl items-center gap-6 px-5 pb-4 pt-6 md:grid-cols-2 md:gap-16 md:px-8 md:py-16">
           <div className="order-2 md:order-1">
             <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Welcome to</p>
-            <h1 className="mt-4 font-display text-5xl leading-[0.95] tracking-tight md:text-7xl lg:text-8xl">{headline}</h1>
-            {subtext && <p className="mt-6 max-w-md text-base leading-relaxed text-stone-600">{subtext}</p>}
-            <div className="mt-10">{actions}</div>
+            <h1 className="mt-3 font-display text-4xl leading-[0.95] tracking-tight md:mt-4 md:text-7xl lg:text-8xl">{headline}</h1>
+            {subtext && <p className="mt-4 max-w-md text-base leading-relaxed text-stone-600 md:mt-6">{subtext}</p>}
+            <div className="mt-6 md:mt-10">{actions}</div>
           </div>
           <div className="order-1 md:order-2">
             {/* Banners are often posters with text in them, so they are shown whole rather than cropped. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={store.heroImage} alt={headline} className="mx-auto max-h-[75vh] w-full object-contain" />
+            <img src={store.heroImage} alt={headline} className="mx-auto max-h-[55vh] w-full object-contain md:max-h-[75vh]" />
           </div>
         </section>
       ) : (
-        <section className="mx-auto max-w-7xl px-5 pt-16 md:px-8 md:pt-24">
+        <section className="mx-auto max-w-7xl px-5 pt-10 md:px-8 md:pt-24">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Welcome to</p>
-            <h1 className="mt-5 font-display text-6xl leading-[0.95] tracking-tight md:text-8xl">{headline}</h1>
-            {subtext && <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-stone-600">{subtext}</p>}
-            <div className="mt-10 flex justify-center">{actions}</div>
+            <h1 className="mt-4 font-display text-5xl leading-[0.95] tracking-tight md:mt-5 md:text-8xl">{headline}</h1>
+            {subtext && <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-stone-600 md:mt-6">{subtext}</p>}
+            <div className="mt-8 flex justify-center md:mt-10">{actions}</div>
           </div>
 
           {mosaicImages.length === 3 && (
-            <div className="mt-16 grid grid-cols-3 items-end gap-3 md:mt-20 md:gap-6">
+            <div className="mt-10 grid grid-cols-3 items-end gap-3 md:mt-20 md:gap-6">
               {mosaicImages.map((img, i) => (
                 <div key={img} className={`overflow-hidden bg-[#efebe4] ${i === 1 ? "aspect-[3/4]" : "aspect-[4/5]"}`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -110,28 +110,8 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
         </section>
       )}
 
-      <section className="mt-12 border-y border-stone-200 md:mt-16">
-        <div className="mx-auto grid max-w-7xl divide-y divide-stone-200 px-5 md:grid-cols-3 md:divide-x md:divide-y-0 md:px-8">
-          {[
-            { icon: Truck, title: "Delivered to your door", text: "The delivery fee is paid to the rider on arrival." },
-            { icon: Smartphone, title: "Pay with ease", text: "Mobile Money or bank transfer at checkout." },
-            whatsappHref
-              ? { icon: MessageCircle, title: "Here to help", text: "Questions before you order? Message us on WhatsApp." }
-              : { icon: BadgeCheck, title: "Personally confirmed", text: "Every order is checked by the seller before it ships." },
-          ].map((item) => (
-            <div key={item.title} className="flex items-start gap-4 py-6 md:px-8 md:first:pl-0 md:last:pr-0">
-              <item.icon className="mt-0.5 h-5 w-5 shrink-0 text-stone-700" strokeWidth={1.25} />
-              <div>
-                <p className="text-sm text-stone-900">{item.title}</p>
-                <p className="mt-1 text-sm text-stone-500">{item.text}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {collections.length > 1 && (
-        <section className="mx-auto max-w-7xl px-5 pt-20 md:px-8 md:pt-28">
+        <section className="mx-auto max-w-7xl px-5 pt-12 md:px-8 md:pt-28">
           <div className="mb-10 flex items-end justify-between">
             <div>
               <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Browse</p>
@@ -163,7 +143,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
         </section>
       )}
 
-      <section id="shop" className="mx-auto max-w-7xl px-5 pt-20 md:px-8 md:pt-28">
+      <section id="shop" className="mx-auto max-w-7xl px-5 pt-12 md:px-8 md:pt-28">
         <div className="mb-10 flex items-end justify-between gap-6">
           <div>
             <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Just in</p>
@@ -196,6 +176,27 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
             <p className="mt-3 text-sm text-stone-500">Check back soon to see what {store.name} has in store.</p>
           </div>
         )}
+      </section>
+
+      <section className="mt-16 border-y border-stone-200 md:mt-28">
+        <div className="mx-auto grid max-w-7xl grid-cols-3 divide-x divide-stone-200 md:px-8">
+          {[
+            { icon: Truck, title: "Delivered to your door", short: "Delivery to your door", text: "The delivery fee is paid to the rider on arrival." },
+            { icon: Smartphone, title: "Pay with ease", short: "MoMo or bank transfer", text: "Mobile Money or bank transfer at checkout." },
+            whatsappHref
+              ? { icon: MessageCircle, title: "Here to help", short: "Help on WhatsApp", text: "Questions before you order? Message us on WhatsApp." }
+              : { icon: BadgeCheck, title: "Personally confirmed", short: "Checked by the seller", text: "Every order is checked by the seller before it ships." },
+          ].map((item) => (
+            <div key={item.title} className="flex flex-col items-center gap-2 px-2 py-5 text-center md:flex-row md:items-start md:gap-4 md:px-8 md:py-6 md:text-left md:first:pl-0 md:last:pr-0">
+              <item.icon className="h-5 w-5 shrink-0 text-stone-700 md:mt-0.5" strokeWidth={1.25} />
+              <p className="text-xs leading-snug text-stone-700 md:hidden">{item.short}</p>
+              <div className="hidden md:block">
+                <p className="text-sm text-stone-900">{item.title}</p>
+                <p className="mt-1 text-sm text-stone-500">{item.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       {store.aboutText && (
