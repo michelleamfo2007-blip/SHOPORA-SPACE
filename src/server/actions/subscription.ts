@@ -38,6 +38,7 @@ export async function startTrialAction(planName: string, interval: string = "mon
       data: {
         name: planName,
         price: defaultPrices[planName]?.[safeInterval] || 0,
+        currency: "GHS",
         interval: safeInterval,
       }
     })

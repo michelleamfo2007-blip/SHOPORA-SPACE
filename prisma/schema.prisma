@@ -218,7 +218,7 @@ model SubscriptionPlan {
   id        String         @id @default(cuid())
   name      String
   price     Float
-  currency  String         @default("USD")
+  currency  String         @default("GHS")
   interval  String         @default("month")
   features  String?        // JSON string
   

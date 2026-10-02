@@ -51,7 +51,7 @@ export function SubscriptionsClient({ payments }: { payments: any[] }) {
               </td>
               <td className="px-4 py-3">
                 {p.subscription.plan.name} <br />
-                <span className="text-slate-500">{p.subscription.plan.currency} {p.amount}</span>
+                <span className="text-slate-500">GHS {p.amount}</span>
               </td>
               <td className="px-4 py-3">{p.paymentMethod}</td>
               <td className="px-4 py-3 font-mono text-xs">{p.reference}</td>
