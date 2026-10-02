@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 import { redirect } from "next/navigation"
+import { requireStoreAccess } from "@/lib/store-access"
 
 export async function createStoreAction(formData: FormData) {
   const session = await getServerSession(authOptions)
@@ -61,12 +62,9 @@ export async function updateStoreBrandingAction(storeId: string, formData: FormD
     throw new Error("Unauthorized")
   }
 
-  // Verify ownership or admin access
-  const membership = await db.storeMember.findUnique({
-    where: { storeId_userId: { storeId, userId: session.user.id } }
-  })
+  const { member: membership } = await requireStoreAccess(storeId)
 
-  if (!membership || (membership.role !== "OWNER" && membership.role !== "ADMIN")) {
+  if (membership.role !== "OWNER" && membership.role !== "ADMIN") {
     throw new Error("Unauthorized to manage store settings")
   }
 

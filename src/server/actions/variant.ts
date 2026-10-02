@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 import { revalidatePath } from "next/cache"
+import { requireStoreAccess } from "@/lib/store-access"
 
 export async function createVariantAction(formData: FormData) {
   const session = await getServerSession(authOptions)
@@ -20,11 +21,10 @@ export async function createVariantAction(formData: FormData) {
     throw new Error("Missing required fields")
   }
 
-  // Verify access
-  const storeMember = await db.storeMember.findUnique({
-    where: { storeId_userId: { storeId, userId: session.user.id } }
-  })
-  if (!storeMember) throw new Error("Unauthorized access")
+  await requireStoreAccess(storeId)
+
+  const product = await db.product.findFirst({ where: { id: productId, storeId } })
+  if (!product) throw new Error("Product not found")
 
   await db.productVariant.create({
     data: {

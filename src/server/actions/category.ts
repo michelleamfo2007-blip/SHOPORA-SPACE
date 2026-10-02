@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 import { revalidatePath } from "next/cache"
+import { requireStoreAccess } from "@/lib/store-access"
 
 export async function createCategoryAction(formData: FormData) {
   const session = await getServerSession(authOptions)
@@ -15,10 +16,7 @@ export async function createCategoryAction(formData: FormData) {
 
   if (!storeId || !name) throw new Error("Missing required fields")
 
-  const storeMember = await db.storeMember.findUnique({
-    where: { storeId_userId: { storeId, userId: session.user.id } }
-  })
-  if (!storeMember) throw new Error("Unauthorized access")
+  await requireStoreAccess(storeId)
 
   const existingCategory = await db.category.findUnique({
     where: { storeId_slug: { storeId, slug } }

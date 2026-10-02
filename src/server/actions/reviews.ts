@@ -1,13 +1,11 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { requireStoreAccess } from "@/lib/store-access"
 
 export async function toggleReviewStatusAction(storeId: string, reviewId: string, isHidden: boolean) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) throw new Error("Unauthorized")
+  await requireStoreAccess(storeId)
 
   await db.review.update({
     where: { id: reviewId, storeId },
@@ -19,8 +17,7 @@ export async function toggleReviewStatusAction(storeId: string, reviewId: string
 }
 
 export async function deleteReviewAction(storeId: string, reviewId: string) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) throw new Error("Unauthorized")
+  await requireStoreAccess(storeId)
 
   await db.review.delete({
     where: { id: reviewId, storeId }
@@ -31,8 +28,7 @@ export async function deleteReviewAction(storeId: string, reviewId: string) {
 }
 
 export async function addManualReviewAction(storeId: string, data: { customerName: string, rating: number, comment: string, productId?: string }) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) throw new Error("Unauthorized")
+  await requireStoreAccess(storeId)
 
   // Find or create customer
   let customer = await db.customer.findFirst({ where: { storeId, name: data.customerName } })
@@ -42,7 +38,10 @@ export async function addManualReviewAction(storeId: string, data: { customerNam
 
   // If no product is specified, just pick the first active product (or none if schema allows, but productId is required in schema)
   let prodId = data.productId
-  if (!prodId) {
+  if (prodId) {
+    const product = await db.product.findFirst({ where: { id: prodId, storeId } })
+    if (!product) throw new Error("Product not found")
+  } else {
     const p = await db.product.findFirst({ where: { storeId } })
     if (p) prodId = p.id
     else throw new Error("Store has no products to review.")

@@ -1,26 +1,12 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { requireStoreAccess } from "@/lib/store-access"
 import { redirect } from "next/navigation"
 
 export async function createDiscountAction(storeId: string, formData: FormData) {
-  const session = await getServerSession(authOptions)
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized")
-  }
-
-  // Verify store access
-  const storeMember = await db.storeMember.findUnique({
-    where: { storeId_userId: { storeId, userId: session.user.id } }
-  })
-
-  if (!storeMember) {
-    throw new Error("Unauthorized")
-  }
+  await requireStoreAccess(storeId)
 
   const code = formData.get("code") as string
   const type = formData.get("type") as string
@@ -46,8 +32,7 @@ export async function createDiscountAction(storeId: string, formData: FormData) 
 }
 
 export async function toggleDiscountAction(storeId: string, discountId: string, isActive: boolean) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) throw new Error("Unauthorized")
+  await requireStoreAccess(storeId)
 
   await db.discount.update({
     where: { id: discountId, storeId },
@@ -59,8 +44,7 @@ export async function toggleDiscountAction(storeId: string, discountId: string, 
 }
 
 export async function deleteDiscountAction(storeId: string, discountId: string) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) throw new Error("Unauthorized")
+  await requireStoreAccess(storeId)
 
   await db.discount.delete({
     where: { id: discountId, storeId }

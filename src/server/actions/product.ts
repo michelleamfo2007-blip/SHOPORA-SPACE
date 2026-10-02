@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 import { redirect } from "next/navigation"
 import { getProductLimitMessage } from "@/lib/plan-limits"
+import { requireStoreAccess } from "@/lib/store-access"
 
 export async function createProductAction(formData: FormData) {
   const session = await getServerSession(authOptions)
@@ -33,19 +34,7 @@ export async function createProductAction(formData: FormData) {
   // Auto Generate SKU if not provided
   const sku = providedSku || `${name.substring(0,3).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`
 
-  // Verify user is authorized for this store
-  const storeMember = await db.storeMember.findUnique({
-    where: {
-      storeId_userId: {
-        storeId,
-        userId: session.user.id
-      }
-    }
-  })
-
-  if (!storeMember) {
-    throw new Error("Unauthorized access to this store")
-  }
+  await requireStoreAccess(storeId)
 
   const limitMessage = await getProductLimitMessage(storeId)
   if (limitMessage) {

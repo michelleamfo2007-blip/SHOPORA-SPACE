@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
 import { ProductStatus, ProductVisibility } from "@prisma/client"
+import { getStoreAccess } from "@/lib/store-access"
 
 export async function PATCH(
   req: Request,
@@ -29,18 +30,14 @@ export async function PATCH(
       return new NextResponse("Missing required fields", { status: 400 })
     }
 
-    // Verify user is authorized for this store
-    const storeMember = await db.storeMember.findUnique({
-      where: {
-        storeId_userId: {
-          storeId,
-          userId: session.user.id
-        }
-      }
-    })
+    const access = await getStoreAccess(storeId)
+    if ("error" in access) {
+      return new NextResponse(access.error, { status: access.status })
+    }
 
-    if (!storeMember) {
-      return new NextResponse("Unauthorized access to this store", { status: 403 })
+    const existingProduct = await db.product.findFirst({ where: { id: productId, storeId } })
+    if (!existingProduct) {
+      return new NextResponse("Product not found", { status: 404 })
     }
 
     // Process Option mapping

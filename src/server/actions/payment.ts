@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { getStoreAccess } from "@/lib/store-access";
 
 export async function savePaymentSettings(
   storeId: string,
@@ -11,6 +12,9 @@ export async function savePaymentSettings(
   mobileMoneyNumber: string,
   instructions: string
 ) {
+  const access = await getStoreAccess(storeId);
+  if ("error" in access) return { error: access.error };
+
   try {
     await db.storePaymentSetting.upsert({
       where: { storeId },

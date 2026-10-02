@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache"
 import { Resend } from "resend"
 import { OrderAcceptedEmail } from "@/emails/OrderAcceptedEmail"
 import { OrderStatusEmail } from "@/emails/OrderStatusEmail"
+import { getStoreAccess } from "@/lib/store-access"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -69,6 +70,9 @@ async function sendOrderStatusEmail(orderId: string, storeId: string, kind: "SHI
 }
 
 export async function verifyOrderPaymentAction(storeId: string, orderId: string) {
+  const access = await getStoreAccess(storeId)
+  if ("error" in access) return { error: access.error }
+
   try {
     const order = await db.order.findUnique({ where: { id: orderId, storeId } })
     if (!order) return { error: "Order not found" }
@@ -98,6 +102,9 @@ export async function verifyOrderPaymentAction(storeId: string, orderId: string)
 }
 
 export async function updateOrderStatusAction(storeId: string, orderId: string, status: string) {
+  const access = await getStoreAccess(storeId)
+  if ("error" in access) return { error: access.error }
+
   try {
     const validStatuses = ["PENDING", "PENDING_VERIFICATION", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"]
     if (!validStatuses.includes(status)) {

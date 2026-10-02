@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
-import { db } from "@/lib/db";
+import { getStoreAccess } from "@/lib/store-access";
 
 export async function POST(req: Request) {
   try {
@@ -23,12 +23,9 @@ export async function POST(req: Request) {
       return Response.json({ error: "File and storeId are required" }, { status: 400 });
     }
 
-    // Verify user is an owner/admin of this store
-    const membership = await db.storeMember.findUnique({
-      where: { storeId_userId: { storeId, userId: session.user.id } },
-    });
-    if (!membership) {
-      return new Response("Forbidden", { status: 403 });
+    const access = await getStoreAccess(storeId);
+    if ("error" in access) {
+      return new Response(access.error, { status: access.status });
     }
 
     // Prepare file

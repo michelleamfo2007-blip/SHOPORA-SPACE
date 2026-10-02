@@ -4,6 +4,7 @@ import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
 import { ProductStatus, ProductVisibility } from "@prisma/client"
 import { getProductLimitMessage } from "@/lib/plan-limits"
+import { getStoreAccess } from "@/lib/store-access"
 
 export async function POST(
   req: Request,
@@ -29,18 +30,9 @@ export async function POST(
       return new NextResponse("Missing required fields", { status: 400 })
     }
 
-    // Verify user is authorized for this store
-    const storeMember = await db.storeMember.findUnique({
-      where: {
-        storeId_userId: {
-          storeId,
-          userId: session.user.id
-        }
-      }
-    })
-
-    if (!storeMember) {
-      return new NextResponse("Unauthorized access to this store", { status: 403 })
+    const access = await getStoreAccess(storeId)
+    if ("error" in access) {
+      return new NextResponse(access.error, { status: access.status })
     }
 
     const limitMessage = await getProductLimitMessage(storeId)

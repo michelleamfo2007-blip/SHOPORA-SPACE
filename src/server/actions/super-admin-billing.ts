@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { Resend } from "resend"
+import { formatBillingDate } from "@/lib/subscription"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -73,7 +74,7 @@ export async function approvePaymentAction(paymentId: string) {
           <p>Your payment for <strong>${payment.subscription.store.name}</strong> has been approved.</p>
           <p><strong>Plan:</strong> ${payment.subscription.plan.name}</p>
           <p><strong>Amount:</strong> GHS ${payment.amount.toFixed(2)}</p>
-          <p><strong>Active until:</strong> ${nextEnd.toLocaleDateString()}</p>
+          <p><strong>Active until:</strong> ${formatBillingDate(nextEnd)}</p>
           <p>You can open your store dashboard here:<br><a href="https://shopora.space/dashboard">https://shopora.space/dashboard</a></p>
         `,
       })
@@ -95,10 +96,42 @@ export async function rejectPaymentAction(paymentId: string) {
     throw new Error("Unauthorized: Super Admins only.")
   }
 
-  await db.subscriptionPayment.update({
+  const payment = await db.subscriptionPayment.update({
     where: { id: paymentId },
-    data: { status: "REJECTED" }
+    data: { status: "REJECTED" },
+    include: {
+      subscription: {
+        include: {
+          store: {
+            include: {
+              members: { where: { role: "OWNER" }, include: { user: true } },
+            },
+          },
+        },
+      },
+    },
   })
+
+  const store = payment.subscription.store
+  const owner = store.members[0]?.user
+  if (owner?.email) {
+    const billingUrl = `https://shopora.space/${store.id}/billing`
+    try {
+      await resend.emails.send({
+        from: "Shopora Billing <billing@shopora.space>",
+        to: owner.email,
+        subject: `We couldn't confirm your ${store.name} payment`,
+        html: `
+          <p>Hi ${owner.name || "there"},</p>
+          <p>We couldn't confirm your payment of <strong>GHS ${payment.amount.toFixed(2)}</strong> for <strong>${store.name}</strong> (reference: ${payment.reference}), so it has not been approved.</p>
+          <p>Please check that the amount and transaction reference are correct, then submit your payment again from your Billing page:<br><a href="${billingUrl}">${billingUrl}</a></p>
+          <p>If you think this is a mistake, contact <a href="mailto:support@shopora.space">support@shopora.space</a>.</p>
+        `,
+      })
+    } catch (error) {
+      console.error("Failed to send payment rejection email:", error)
+    }
+  }
 
   revalidatePath("/super-admin/subscriptions")
   return { success: true }
