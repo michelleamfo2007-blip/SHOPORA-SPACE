@@ -1,20 +1,11 @@
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"
 
-import { db } from "@/lib/db";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Store, Users, ShoppingCart, DollarSign, AlertCircle, Clock } from "lucide-react";
+import Link from "next/link"
+import { db } from "@/lib/db"
+import { Card, CardContent } from "@/components/ui/card"
 
 export default async function SuperAdminOverview() {
-  // We'll fetch basic metrics here. In a production app with huge data,
-  // these should be cached or aggregated in a separate table.
-  const [
-    totalStores, 
-    totalUsers, 
-    pendingApprovals,
-    activeSubs,
-    trialSubs,
-    revenueAgg
-  ] = await Promise.all([
+  const [totalStores, totalUsers, pendingApprovals, activeSubs, trialSubs, revenueAgg] = await Promise.all([
     db.store.count(),
     db.user.count(),
     db.subscriptionPayment.count({ where: { status: "PENDING" } }),
@@ -22,102 +13,42 @@ export default async function SuperAdminOverview() {
     db.subscription.count({ where: { status: "TRIAL" } }),
     db.subscriptionPayment.aggregate({
       _sum: { amount: true },
-      where: { status: "APPROVED" }
-    })
-  ]);
+      where: { status: "APPROVED" },
+    }),
+  ])
 
-  const platformRevenue = revenueAgg._sum.amount || 0;
+  const platformRevenue = revenueAgg._sum.amount || 0
+
+  const cards = [
+    { label: "Total Sellers", detail: "Active stores on platform", value: String(totalStores), href: "/super-admin/sellers" },
+    { label: "Total Customers", detail: "Registered users", value: String(totalUsers), href: "/super-admin/customers" },
+    { label: "Active Subs", detail: "Paying stores", value: String(activeSubs), href: "/super-admin/subscriptions" },
+    { label: "Free Trials", detail: "Stores on trial", value: String(trialSubs), href: "/super-admin/subscriptions" },
+    { label: "Platform Revenue", detail: "From subscriptions", value: `GH₵ ${platformRevenue.toFixed(2)}`, href: "/super-admin/finance" },
+    { label: "Pending Approvals", detail: "Payments waiting for review", value: String(pendingApprovals), href: "/super-admin/subscriptions", warn: pendingApprovals > 0 },
+    { label: "Active Disputes", detail: "Store suspensions", value: "0", href: "/super-admin/moderation" },
+  ]
 
   return (
     <div className="space-y-8 pb-10">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
-            <Store className="w-8 h-8 text-blue-500" />
-            Platform Overview
-          </h2>
-          <p className="text-slate-500 mt-1">Welcome back. Here is what's happening on Shopora today.</p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-semibold tracking-tight">Platform</h1>
+        <p className="mt-1 text-stone-500">Stores, trials, and subscription payments.</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
-            <CardTitle className="text-sm font-medium text-slate-500">Total Sellers</CardTitle>
-            <Store className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <div className="text-3xl font-extrabold text-slate-900">{totalStores}</div>
-            <p className="text-xs font-medium text-slate-500 mt-1">Active stores on platform</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
-            <CardTitle className="text-sm font-medium text-slate-500">Total Customers</CardTitle>
-            <Users className="h-4 w-4 text-indigo-500" />
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <div className="text-3xl font-extrabold text-slate-900">{totalUsers}</div>
-            <p className="text-xs font-medium text-slate-500 mt-1">Registered users</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
-            <CardTitle className="text-sm font-medium text-slate-500">Active Subs</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <div className="text-3xl font-extrabold text-slate-900">{activeSubs}</div>
-            <p className="text-xs font-medium text-slate-500 mt-1">Paying stores</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
-            <CardTitle className="text-sm font-medium text-slate-500">Free Trials</CardTitle>
-            <Clock className="h-4 w-4 text-amber-500" />
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <div className="text-3xl font-extrabold text-slate-900">{trialSubs}</div>
-            <p className="text-xs font-medium text-slate-500 mt-1">Stores on trial</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
-            <CardTitle className="text-sm font-medium text-slate-500">Platform Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-teal-500" />
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <div className="text-3xl font-extrabold text-slate-900">₵{platformRevenue.toFixed(2)}</div>
-            <p className="text-xs font-medium text-slate-500 mt-1">From subscriptions</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
-            <CardTitle className="text-sm font-medium text-slate-500">Pending Approvals</CardTitle>
-            <Clock className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <div className="text-3xl font-extrabold text-slate-900">{pendingApprovals}</div>
-            <p className="text-xs font-medium text-slate-500 mt-1">Payments waiting for review</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
-            <CardTitle className="text-sm font-medium text-slate-500">Active Disputes</CardTitle>
-            <AlertCircle className="h-4 w-4 text-rose-500" />
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <div className="text-3xl font-extrabold text-slate-900">0</div>
-            <p className="text-xs font-medium text-slate-500 mt-1">Requires attention</p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {cards.map((item) => (
+          <Link key={item.label} href={item.href} className="block rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950">
+            <Card className="h-full border-stone-200 bg-white shadow-none transition-colors hover:border-stone-400">
+              <CardContent className="p-5">
+                <p className="text-sm text-stone-500">{item.label}</p>
+                <p className={`mt-2 text-3xl font-semibold ${item.warn ? "text-red-600" : "text-stone-950"}`}>{item.value}</p>
+                <p className="mt-1 text-xs text-stone-500">{item.detail}</p>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
       </div>
     </div>
-  );
+  )
 }

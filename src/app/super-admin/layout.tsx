@@ -24,9 +24,9 @@ export default async function SuperAdminLayout({
   }
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-stone-50 text-stone-950 md:flex-row">
       <SuperAdminNav />
-      <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto p-4 md:p-8">
         {children}
       </main>
     </div>
