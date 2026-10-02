@@ -98,18 +98,18 @@ export default async function StorefrontLayout({
             </nav>
           </div>
 
-          <Link href={`${basePath}/`} className="flex items-center gap-3 justify-self-center">
+          <Link href={`${basePath}/`} className="flex min-w-0 items-center gap-2 justify-self-center md:gap-3">
             {store.logoUrl && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={store.logoUrl} alt="" className="h-9 w-9 rounded-full object-cover md:h-11 md:w-11" />
+              <img src={store.logoUrl} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover md:h-11 md:w-11" />
             )}
-            <span className="max-w-[46vw] truncate font-display text-2xl leading-none tracking-tight md:max-w-none md:text-[32px]">
+            <span className="max-w-[40vw] truncate font-display text-xl leading-none tracking-tight md:max-w-none md:text-[32px]">
               {store.name}
             </span>
           </Link>
 
-          <div className="flex items-center justify-end gap-2 md:gap-4">
-            <Link href={`${basePath}/products`} aria-label="Search products" className="hidden h-10 w-10 items-center justify-center text-stone-900 md:flex">
+          <div className="flex items-center justify-end md:gap-4">
+            <Link href={`${basePath}/products`} aria-label="Search products" className="flex h-10 w-10 items-center justify-center text-stone-900">
               <Search className="h-5 w-5" strokeWidth={1.5} />
             </Link>
             <CartDrawer currency={store.currency} basePath={basePath} />
