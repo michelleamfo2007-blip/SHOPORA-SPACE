@@ -43,6 +43,13 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
   ])
 
   const collections = categories.filter((cat) => cat.products.length > 0)
+  const ribbon = [
+    `Welcome to ${store.name}`,
+    ...collections.map((cat) => cat.name),
+    "Delivery fee paid on arrival",
+    "Pay with Mobile Money or bank transfer",
+    store.whatsappNumber ? "Order easily on WhatsApp" : "Every order personally confirmed",
+  ]
   const headline = store.heroHeadline || store.name
   const subtext = store.heroSubtext || store.description
   const whatsappHref = store.whatsappNumber ? whatsappLink(store.whatsappNumber, `Hi ${store.name}, I'd like to place an order.`) : null
@@ -110,6 +117,21 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
         </section>
       )}
 
+      <section className="mt-10 overflow-hidden border-y border-stone-200 py-5 md:mt-16 md:py-7" aria-label={`About ${store.name}`}>
+        <div className="flex w-max animate-marquee motion-reduce:animate-none">
+          {[0, 1].map((copy) => (
+            <div key={copy} className="flex shrink-0 items-center" aria-hidden={copy === 1}>
+              {ribbon.map((text, i) => (
+                <span key={i} className="flex items-center whitespace-nowrap font-display text-2xl italic text-stone-700 md:text-3xl">
+                  <span className="px-6 md:px-10">{text}</span>
+                  <span className="text-base not-italic text-[var(--store-accent)]">✦</span>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </section>
+
       {collections.length > 1 && (
         <section className="mx-auto max-w-7xl px-5 pt-12 md:px-8 md:pt-28">
           <div className="mb-10 flex items-end justify-between">
@@ -143,7 +165,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
         </section>
       )}
 
-      <section id="shop" className="mx-auto max-w-7xl px-5 pt-12 md:px-8 md:pt-28">
+      <section id="shop" className="mx-auto max-w-7xl px-5 pt-12 md:px-8 md:pt-20">
         <div className="mb-10 flex items-end justify-between gap-6">
           <div>
             <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Just in</p>
