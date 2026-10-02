@@ -92,7 +92,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
           <div className="order-1 md:order-2">
             {/* Banners are often posters with text in them, so they are shown whole rather than cropped. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={store.heroImage} alt={headline} className="mx-auto max-h-[55vh] w-full object-contain md:max-h-[75vh]" />
+            <img src={store.heroImage} alt={headline} className="mx-auto h-auto max-h-[40vh] w-auto max-w-full object-contain md:max-h-[75vh] md:w-full" />
           </div>
         </section>
       ) : (
