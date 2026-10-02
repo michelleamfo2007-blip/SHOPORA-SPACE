@@ -6,6 +6,7 @@ import { resend } from "@/lib/resend"
 import { isSubscriptionLapsed } from "@/lib/subscription"
 import { DEFAULT_VARIANT_NAME } from "@/lib/product-variants"
 import { NewOrderEmail } from "@/emails/NewOrderEmail"
+import { OrderReceivedEmail } from "@/emails/OrderReceivedEmail"
 
 const variantSelect = { id: true, price: true, name: true, product: { select: { name: true } } } as const
 
@@ -141,12 +142,38 @@ export async function processCheckoutAction(formData: FormData) {
     const emailPromises = []
     
     const totalLabel = `${store.currency} ${totalAmount.toFixed(2)}`
+    const fromName = store.name.replace(/[<>"\\,;:@]/g, "").trim() || "Shopora"
+    const emailItems = cartItems.map(({ name, quantity, price }) => ({ name, quantity, price }))
+    const shippingAddress = order.shippingAddress ?? `${exactLocation}, ${city}, ${country}`
+    const storeReplyTo = store.contactEmail || store.members.find((m) => m.user?.email)?.user?.email
+
+    emailPromises.push(
+      resend.emails.send({
+        from: `${fromName} <orders@shopora.space>`,
+        to: email,
+        ...(storeReplyTo ? { replyTo: storeReplyTo } : {}),
+        subject: `We've received your order ${orderNumber}`,
+        react: OrderReceivedEmail({
+          customerFirstName: firstName,
+          storeName: store.name,
+          orderNumber,
+          currency: store.currency,
+          totalAmount,
+          items: emailItems,
+          shippingAddress,
+          paymentReference: reference,
+          storeUrl: `https://www.shopora.space/storefront/${store.slug}`,
+          storeWhatsapp: store.whatsappNumber,
+          storeEmail: store.contactEmail,
+        }),
+      })
+    )
 
     store.members.forEach(member => {
       if (member.user && member.user.email) {
         emailPromises.push(
           resend.emails.send({
-            from: `${store.name.replace(/[<>"\\,;:@]/g, "").trim() || "Shopora"} via Shopora <orders@shopora.space>`,
+            from: `${fromName} via Shopora <orders@shopora.space>`,
             to: member.user.email,
             replyTo: email,
             subject: `New order ${orderNumber} · ${totalLabel}`,
@@ -154,12 +181,12 @@ export async function processCheckoutAction(formData: FormData) {
               merchantName: member.user.name?.split(" ")[0] || "there",
               storeName: store.name,
               orderNumber,
-              orderUrl: `https://shopora.space/${store.id}/orders/${order.id}`,
+              orderUrl: `https://www.shopora.space/${store.id}/orders/${order.id}`,
               currency: store.currency,
               totalAmount,
-              items: cartItems.map(({ name, quantity, price }) => ({ name, quantity, price })),
+              items: emailItems,
               customer: { name: `${firstName} ${lastName}`, phone, email },
-              shippingAddress: order.shippingAddress ?? `${exactLocation}, ${city}, ${country}`,
+              shippingAddress,
               paymentReference: reference,
             }),
           })
