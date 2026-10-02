@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
+import { getStorefrontBasePath } from "@/lib/storefront"
 import { ProductClient } from "./ProductClient"
 
 export default async function ProductPage({ 
@@ -33,5 +34,15 @@ export default async function ProductPage({
 
   if (!product) notFound()
 
-  return <ProductClient product={product} store={store} />
+  const [basePath, related] = await Promise.all([
+    getStorefrontBasePath(domain),
+    db.product.findMany({
+      where: { storeId: store.id, status: "ACTIVE", visibility: "VISIBLE", id: { not: product.id } },
+      include: { variants: { take: 2 } },
+      orderBy: { createdAt: "desc" },
+      take: 4,
+    }),
+  ])
+
+  return <ProductClient product={product} store={store} basePath={basePath} related={related} />
 }

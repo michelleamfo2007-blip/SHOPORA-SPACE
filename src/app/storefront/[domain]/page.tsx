@@ -1,233 +1,257 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import { ArrowRight, MessageCircle, Smartphone, Truck, BadgeCheck } from "lucide-react"
 import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
+import { getStorefrontBasePath, whatsappLink } from "@/lib/storefront"
 import { ProductCard } from "@/components/storefront/ProductCard"
 
-import { headers } from "next/headers"
-
 export default async function StorefrontHomePage({ params }: { params: Promise<{ domain: string }> }) {
-  const { domain } = await params;
+  const { domain } = await params
   const store = await getStoreByHost(domain)
-  
+
   if (!store) {
     notFound()
   }
 
-  const headersList = await headers()
-    const host = headersList.get("host") || ""
-    const isPreview = host.includes("vercel.app") || host.includes("localhost:3000") || host === "shopora.space" || host === "www.shopora.space"
-    // If testing via Vercel preview or localhost, the base path is /storefront/[domain]
-    // Otherwise on the actual custom domain, the base path is just /
-    const basePath = isPreview ? `/storefront/${domain}` : ""
+  const basePath = await getStorefrontBasePath(domain)
 
-    // Fetch active products for this store
-    const products = await db.product.findMany({
-      where: { 
-        storeId: store.id,
-        status: "ACTIVE",
-        visibility: "VISIBLE"
-      },
-      include: {
-        variants: {
-          take: 1
-        },
-        categories: true
-      },
+  const [products, categories, reviews] = await Promise.all([
+    db.product.findMany({
+      where: { storeId: store.id, status: "ACTIVE", visibility: "VISIBLE" },
+      include: { variants: { take: 2 } },
       orderBy: { createdAt: "desc" },
-      take: 8 // Featured products
-    })
-
-    const categories = await db.category.findMany({
+      take: 8,
+    }),
+    db.category.findMany({
       where: { storeId: store.id },
-      take: 8
-    })
-
-    const reviews = await db.review.findMany({
+      include: {
+        products: {
+          where: { status: "ACTIVE", visibility: "VISIBLE" },
+          select: { images: true, variants: { select: { imageUrl: true }, take: 1 } },
+          take: 1,
+        },
+      },
+      take: 6,
+    }),
+    db.review.findMany({
       where: { storeId: store.id, status: "PUBLISHED" },
       orderBy: { createdAt: "desc" },
       take: 3,
-      include: { customer: true }
-    })
+      include: { customer: true },
+    }),
+  ])
 
-    const heroImage = store.heroImage
-    const heroHeadline = store.heroHeadline
-    const heroSubtext = store.heroSubtext
+  const collections = categories.filter((cat) => cat.products.length > 0)
+  const headline = store.heroHeadline || store.name
+  const subtext = store.heroSubtext || store.description
+  const whatsappHref = store.whatsappNumber ? whatsappLink(store.whatsappNumber, `Hi ${store.name}, I'd like to place an order.`) : null
+  const mosaicImages = products
+    .map((p) => p.variants[0]?.imageUrl || p.images[0])
+    .filter((img): img is string => !!img)
+    .slice(0, 3)
+
+  const actions = (
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+      <Link
+        href={`${basePath}/products`}
+        className="inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-[var(--store-accent)] px-7 text-sm tracking-wide text-white transition-opacity hover:opacity-90"
+      >
+        Shop the collection <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
+      </Link>
+      {whatsappHref && (
+        <a
+          href={whatsappHref}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-full border border-stone-900 px-7 text-sm tracking-wide text-stone-900 transition-colors hover:bg-stone-900 hover:text-white"
+        >
+          Order on WhatsApp
+        </a>
+      )}
+    </div>
+  )
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <section className="bg-white">
-        {heroImage ? (
-          <div>
-            <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-6">
-              <div className="overflow-hidden rounded-2xl bg-neutral-950">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={heroImage}
-                  alt={heroHeadline || store.name}
-                  className="h-56 w-full object-cover object-center sm:h-72 md:h-80"
-                />
-              </div>
-            </div>
-            <div className="flex flex-col items-center justify-center gap-3 px-6 py-6 sm:flex-row">
-              <Link
-                href={`${basePath}/products`}
-                className="inline-block rounded-full bg-slate-900 px-8 py-3 text-sm font-semibold text-white"
-              >
-                Shop Now
-              </Link>
-              <Link
-                href="#shop"
-                className="inline-block rounded-full border border-slate-300 px-8 py-3 text-sm font-semibold text-slate-900"
-              >
-                Explore Collection
-              </Link>
-            </div>
+    <div>
+      {store.heroImage ? (
+        <section className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-10 md:grid-cols-2 md:gap-16 md:px-8 md:py-16">
+          <div className="order-2 md:order-1">
+            <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Welcome to</p>
+            <h1 className="mt-4 font-display text-5xl leading-[0.95] tracking-tight md:text-7xl lg:text-8xl">{headline}</h1>
+            {subtext && <p className="mt-6 max-w-md text-base leading-relaxed text-stone-600">{subtext}</p>}
+            <div className="mt-10">{actions}</div>
           </div>
-        ) : (
-          <div
-            className="px-6 py-24 text-center text-white"
-            style={{ backgroundColor: store.primaryColor || "#0f172a" }}
-          >
-            <h1 className="mx-auto max-w-3xl text-4xl font-semibold tracking-tight md:text-6xl">
-              {heroHeadline || `Welcome to ${store.name}`}
-            </h1>
-            {(heroSubtext || store.description) && (
-              <p className="mx-auto mt-4 max-w-xl text-lg text-white/80">
-                {heroSubtext || store.description}
-              </p>
-            )}
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link
-                href={`${basePath}/products`}
-                className="inline-block rounded-full bg-white px-8 py-3.5 text-base font-semibold text-slate-900"
-              >
-                Shop Now
-              </Link>
-              <Link
-                href="#shop"
-                className="inline-block rounded-full border border-white px-8 py-3.5 text-base font-semibold text-white"
-              >
-                Explore Collection
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {heroImage && (heroHeadline || heroSubtext) && (
-          <div className="px-6 py-8 text-center">
-            {heroHeadline && (
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-5xl">{heroHeadline}</h1>
-            )}
-            {heroSubtext && (
-              <p className="mx-auto mt-3 max-w-xl text-slate-600">{heroSubtext}</p>
-            )}
-          </div>
-        )}
-      </section>
-
-      {categories.length > 0 && (
-      <section id="categories" className="bg-white py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 text-center">
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">Shop by Category</h2>
-          </div>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-6">
-            {categories.map((cat) => (
-              <Link key={cat.id} href={`${basePath}/categories/${cat.slug}`} className="flex h-28 items-end rounded-2xl bg-slate-100 p-4">
-                <h3 className="text-base font-semibold text-slate-900">{cat.name}</h3>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-      )}
-
-      <section id="shop" className="bg-slate-50 py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-end mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-4">Featured Collection</h2>
-              <div className="h-1 w-20 bg-slate-900 rounded-full" style={{ backgroundColor: store.primaryColor || '#0f172a' }}></div>
-            </div>
-            <Link href={`${basePath}/products`} className="text-blue-600 font-semibold hover:underline hidden sm:block" style={{ color: store.primaryColor || '#2563eb' }}>
-              View All Products
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                currency={store.currency}
-                basePath={basePath}
-              />
-            ))}
-          </div>
-          <div className="mt-10 text-center sm:hidden">
-            <Link href={`${basePath}/products`} className="inline-block bg-white text-slate-900 border border-slate-200 rounded-full px-8 py-3 font-semibold shadow-sm">
-              View All Products
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Seller Introduction */}
-      {store.aboutText && (
-        <section id="about" className="py-24 bg-white overflow-hidden">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-6">
-                Meet {store.name}
-              </h2>
-              <div className="h-1 w-20 mx-auto rounded-full mb-10" style={{ backgroundColor: store.primaryColor || '#0f172a' }}></div>
-              <p className="text-xl leading-relaxed text-slate-600">
-                {store.aboutText}
-              </p>
-            </div>
+          <div className="order-1 md:order-2">
+            {/* Banners are often posters with text in them, so they are shown whole rather than cropped. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={store.heroImage} alt={headline} className="mx-auto max-h-[75vh] w-full object-contain" />
           </div>
         </section>
-      )}
+      ) : (
+        <section className="mx-auto max-w-7xl px-5 pt-16 md:px-8 md:pt-24">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Welcome to</p>
+            <h1 className="mt-5 font-display text-6xl leading-[0.95] tracking-tight md:text-8xl">{headline}</h1>
+            {subtext && <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-stone-600">{subtext}</p>}
+            <div className="mt-10 flex justify-center">{actions}</div>
+          </div>
 
-
-
-      {/* 7. Reviews */}
-      {reviews.length > 0 && (
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-12">What Our Customers Say</h2>
-            <div className="grid md:grid-cols-3 gap-8">
-              {reviews.map(review => (
-                <div key={review.id} className="bg-slate-50 p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-full">
-                  <div className="flex justify-center gap-1 text-yellow-400 mb-6">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <svg key={i} className={`w-5 h-5 ${i < review.rating ? 'fill-current' : 'text-slate-200 fill-current'}`} viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                      </svg>
-                    ))}
-                  </div>
-                  <p className="text-lg font-medium text-slate-900 italic mb-8 flex-1">
-                    "{review.comment}"
-                  </p>
-                  <div className="flex items-center justify-center gap-4 mt-auto">
-                    <div className="w-10 h-10 bg-slate-300 rounded-full overflow-hidden flex items-center justify-center text-slate-600 font-bold">
-                      {review.customer?.name?.[0]?.toUpperCase() || "C"}
-                    </div>
-                    <div className="text-left">
-                      <div className="font-bold text-slate-900">{review.customer?.name || "Verified Customer"}</div>
-                      <div className="text-sm text-slate-500">Verified Buyer</div>
-                    </div>
-                  </div>
+          {mosaicImages.length === 3 && (
+            <div className="mt-16 grid grid-cols-3 items-end gap-3 md:mt-20 md:gap-6">
+              {mosaicImages.map((img, i) => (
+                <div key={img} className={`overflow-hidden bg-[#efebe4] ${i === 1 ? "aspect-[3/4]" : "aspect-[4/5]"}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img} alt="" className="h-full w-full object-cover" />
                 </div>
               ))}
             </div>
+          )}
+        </section>
+      )}
+
+      <section className="mt-12 border-y border-stone-200 md:mt-16">
+        <div className="mx-auto grid max-w-7xl divide-y divide-stone-200 px-5 md:grid-cols-3 md:divide-x md:divide-y-0 md:px-8">
+          {[
+            { icon: Truck, title: "Delivered to your door", text: "The delivery fee is paid to the rider on arrival." },
+            { icon: Smartphone, title: "Pay with ease", text: "Mobile Money or bank transfer at checkout." },
+            whatsappHref
+              ? { icon: MessageCircle, title: "Here to help", text: "Questions before you order? Message us on WhatsApp." }
+              : { icon: BadgeCheck, title: "Personally confirmed", text: "Every order is checked by the seller before it ships." },
+          ].map((item) => (
+            <div key={item.title} className="flex items-start gap-4 py-6 md:px-8 md:first:pl-0 md:last:pr-0">
+              <item.icon className="mt-0.5 h-5 w-5 shrink-0 text-stone-700" strokeWidth={1.25} />
+              <div>
+                <p className="text-sm text-stone-900">{item.title}</p>
+                <p className="mt-1 text-sm text-stone-500">{item.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {collections.length > 1 && (
+        <section className="mx-auto max-w-7xl px-5 pt-20 md:px-8 md:pt-28">
+          <div className="mb-10 flex items-end justify-between">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Browse</p>
+              <h2 className="mt-3 font-display text-4xl md:text-5xl">Collections</h2>
+            </div>
+          </div>
+          <div className="scrollbar-none -mx-5 flex snap-x gap-4 overflow-x-auto px-5 md:mx-0 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0">
+            {collections.map((cat) => {
+              const cover = cat.products[0]?.variants[0]?.imageUrl || cat.products[0]?.images[0]
+              return (
+                <Link
+                  key={cat.id}
+                  href={`${basePath}/categories/${cat.slug}`}
+                  className="group relative aspect-[4/5] w-[70vw] shrink-0 snap-start overflow-hidden bg-[#efebe4] md:w-auto"
+                >
+                  {cover && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={cover} alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-stone-950/55 via-transparent to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-6 text-white">
+                    <h3 className="font-display text-3xl">{cat.name}</h3>
+                    <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" strokeWidth={1.25} />
+                  </div>
+                </Link>
+              )
+            })}
           </div>
         </section>
       )}
 
+      <section id="shop" className="mx-auto max-w-7xl px-5 pt-20 md:px-8 md:pt-28">
+        <div className="mb-10 flex items-end justify-between gap-6">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Just in</p>
+            <h2 className="mt-3 font-display text-4xl md:text-5xl">New arrivals</h2>
+          </div>
+          {products.length > 0 && (
+            <Link href={`${basePath}/products`} className="group hidden items-center gap-2 text-sm text-stone-900 sm:flex">
+              <span className="border-b border-stone-900 pb-0.5">View all</span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={1.5} />
+            </Link>
+          )}
+        </div>
 
+        {products.length > 0 ? (
+          <>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} currency={store.currency} basePath={basePath} />
+              ))}
+            </div>
+            <div className="mt-12 text-center sm:hidden">
+              <Link href={`${basePath}/products`} className="inline-flex h-12 items-center rounded-full border border-stone-900 px-8 text-sm tracking-wide">
+                View all products
+              </Link>
+            </div>
+          </>
+        ) : (
+          <div className="border border-dashed border-stone-300 px-6 py-20 text-center">
+            <p className="font-display text-3xl">New pieces are on their way</p>
+            <p className="mt-3 text-sm text-stone-500">Check back soon to see what {store.name} has in store.</p>
+          </div>
+        )}
+      </section>
 
+      {store.aboutText && (
+        <section className="mx-auto max-w-7xl px-5 pt-20 md:px-8 md:pt-28">
+          <div className="grid gap-8 border-t border-stone-200 pt-12 md:grid-cols-[1fr_2fr] md:gap-16 md:pt-16">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">About</p>
+              <h2 className="mt-3 font-display text-4xl md:text-5xl">Our story</h2>
+            </div>
+            <p className="font-display text-2xl leading-snug text-stone-700 md:text-3xl">{store.aboutText}</p>
+          </div>
+        </section>
+      )}
+
+      {reviews.length > 0 && (
+        <section className="mx-auto max-w-7xl px-5 pt-20 md:px-8 md:pt-28">
+          <div className="mb-10 text-center">
+            <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Reviews</p>
+            <h2 className="mt-3 font-display text-4xl md:text-5xl">Kind words</h2>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {reviews.map((review) => (
+              <figure key={review.id} className="flex flex-col bg-[#f3efe8] p-8">
+                <div className="flex gap-0.5 text-[var(--store-accent)]" aria-label={`${review.rating} out of 5 stars`}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <svg key={i} className={`h-3.5 w-3.5 ${i < review.rating ? "fill-current" : "fill-stone-300"}`} viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <blockquote className="mt-6 flex-1 font-display text-2xl italic leading-snug text-stone-800">&ldquo;{review.comment}&rdquo;</blockquote>
+                <figcaption className="mt-8 text-[11px] uppercase tracking-[0.2em] text-stone-500">
+                  {review.customer?.name || "Verified customer"}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {whatsappHref && (
+        <section className="mx-auto max-w-7xl px-5 pt-20 md:px-8 md:pt-28">
+          <div className="bg-stone-900 px-6 py-16 text-center text-white md:py-20">
+            <h2 className="font-display text-4xl md:text-5xl">Need help choosing?</h2>
+            <p className="mx-auto mt-4 max-w-md text-sm text-white/70">Send us a message and we&apos;ll help you find the right piece, check sizes, or arrange delivery.</p>
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-8 inline-flex h-12 items-center rounded-full bg-white px-8 text-sm tracking-wide text-stone-900 transition-opacity hover:opacity-90"
+            >
+              Chat on WhatsApp
+            </a>
+          </div>
+        </section>
+      )}
     </div>
   )
 }

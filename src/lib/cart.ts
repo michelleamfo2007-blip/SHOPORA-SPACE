@@ -12,10 +12,13 @@ export interface CartItem {
 
 interface CartStore {
   items: CartItem[]
+  isDrawerOpen: boolean
   addItem: (item: CartItem) => void
   removeItem: (variantId: string) => void
   updateQuantity: (variantId: string, quantity: number) => void
   clearCart: () => void
+  openDrawer: () => void
+  closeDrawer: () => void
   getTotalPrice: () => number
   getTotalItems: () => number
 }
@@ -24,6 +27,7 @@ export const useCart = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
+      isDrawerOpen: false,
       
       addItem: (item) => {
         const currentItems = get().items
@@ -63,6 +67,10 @@ export const useCart = create<CartStore>()(
 
       clearCart: () => set({ items: [] }),
 
+      openDrawer: () => set({ isDrawerOpen: true }),
+
+      closeDrawer: () => set({ isDrawerOpen: false }),
+
       getTotalPrice: () => {
         return get().items.reduce(
           (total, item) => total + item.price * item.quantity,
@@ -79,6 +87,7 @@ export const useCart = create<CartStore>()(
     }),
     {
       name: "shopora-cart",
+      partialize: (state) => ({ items: state.items }),
     }
   )
 )

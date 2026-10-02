@@ -4,6 +4,14 @@ import { db } from "@/lib/db"
 
 import { resend } from "@/lib/resend"
 import { isSubscriptionLapsed } from "@/lib/subscription"
+import { DEFAULT_VARIANT_NAME } from "@/lib/product-variants"
+import { NewOrderEmail } from "@/emails/NewOrderEmail"
+
+const variantSelect = { id: true, price: true, name: true, product: { select: { name: true } } } as const
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!)
+}
 
 export async function processCheckoutAction(formData: FormData) {
   const storeId = formData.get("storeId") as string
@@ -47,7 +55,7 @@ export async function processCheckoutAction(formData: FormData) {
   const requestedIds = [...new Set(requestedItems.map((item) => item.variantId))]
   const variants = await db.productVariant.findMany({
     where: { id: { in: requestedIds }, product: { storeId } },
-    select: { id: true, price: true },
+    select: variantSelect,
   })
   const resolved = new Map(variants.map((v) => [v.id, v]))
 
@@ -56,7 +64,7 @@ export async function processCheckoutAction(formData: FormData) {
   if (unresolvedIds.length > 0) {
     const products = await db.product.findMany({
       where: { id: { in: unresolvedIds }, storeId },
-      select: { id: true, variants: { select: { id: true, price: true }, take: 1 } },
+      select: { id: true, variants: { select: variantSelect, take: 1 } },
     })
     for (const product of products) {
       if (product.variants[0]) resolved.set(product.id, product.variants[0])
@@ -67,12 +75,18 @@ export async function processCheckoutAction(formData: FormData) {
     return { error: "Some items in your cart are no longer available. Please remove them and try again." }
   }
 
-  const lineItems = new Map<string, { variantId: string; quantity: number; price: number }>()
+  const lineItems = new Map<string, { variantId: string; name: string; quantity: number; price: number }>()
   for (const item of requestedItems) {
     const variant = resolved.get(item.variantId)!
     const existing = lineItems.get(variant.id)
     if (existing) existing.quantity += item.quantity
-    else lineItems.set(variant.id, { variantId: variant.id, quantity: item.quantity, price: variant.price })
+    else
+      lineItems.set(variant.id, {
+        variantId: variant.id,
+        name: variant.name && variant.name !== DEFAULT_VARIANT_NAME ? `${variant.product.name} (${variant.name})` : variant.product.name,
+        quantity: item.quantity,
+        price: variant.price,
+      })
   }
   const cartItems = [...lineItems.values()]
 
@@ -126,29 +140,33 @@ export async function processCheckoutAction(formData: FormData) {
   try {
     const emailPromises = []
     
-    // Notify All Tenant Admins (Store Members)
+    const totalLabel = `${store.currency} ${totalAmount.toFixed(2)}`
+
     store.members.forEach(member => {
       if (member.user && member.user.email) {
         emailPromises.push(
           resend.emails.send({
-            from: "Orders <orders@shopora.space>",
+            from: `${store.name.replace(/[<>"\\,;:@]/g, "").trim() || "Shopora"} via Shopora <orders@shopora.space>`,
             to: member.user.email,
-            subject: `New Order Received: ${orderNumber}`,
-            html: `
-              <p>Hi ${member.user.name || "Merchant"},</p>
-              <p>You have received a new order on your store (<strong>${store.name}</strong>).</p>
-              <p><strong>Order Number:</strong> ${orderNumber}</p>
-              <p><strong>Customer:</strong> ${firstName} ${lastName}</p>
-              <p><strong>Total Amount:</strong> ${store.currency} ${totalAmount.toFixed(2)}</p>
-              <p><strong>Payment Reference:</strong> ${reference}</p>
-              <p>Log in to your dashboard to verify the payment and fulfill the order.</p>
-            `
+            replyTo: email,
+            subject: `New order ${orderNumber} · ${totalLabel}`,
+            react: NewOrderEmail({
+              merchantName: member.user.name?.split(" ")[0] || "there",
+              storeName: store.name,
+              orderNumber,
+              orderUrl: `https://shopora.space/${store.id}/orders/${order.id}`,
+              currency: store.currency,
+              totalAmount,
+              items: cartItems.map(({ name, quantity, price }) => ({ name, quantity, price })),
+              customer: { name: `${firstName} ${lastName}`, phone, email },
+              shippingAddress: order.shippingAddress ?? `${exactLocation}, ${city}, ${country}`,
+              paymentReference: reference,
+            }),
           })
         )
       }
     })
 
-    // Notify Super Admin
     emailPromises.push(
       resend.emails.send({
         from: "Shopora System <orders@shopora.space>",
@@ -156,9 +174,9 @@ export async function processCheckoutAction(formData: FormData) {
         subject: `Platform Sale: ${store.name}`,
         html: `
           <p>A new order was placed on a tenant's store.</p>
-          <p><strong>Store:</strong> ${store.name} (${store.slug})</p>
-          <p><strong>Amount:</strong> ${store.currency} ${totalAmount.toFixed(2)}</p>
-          <p><strong>Reference:</strong> ${reference}</p>
+          <p><strong>Store:</strong> ${escapeHtml(store.name)} (${escapeHtml(store.slug)})</p>
+          <p><strong>Amount:</strong> ${escapeHtml(totalLabel)}</p>
+          <p><strong>Reference:</strong> ${escapeHtml(reference)}</p>
         `
       })
     )
@@ -168,5 +186,5 @@ export async function processCheckoutAction(formData: FormData) {
     console.error("Failed to send order notification emails", err)
   }
 
-  return { orderId: order.id }
+  return { orderId: order.id, orderNumber }
 }

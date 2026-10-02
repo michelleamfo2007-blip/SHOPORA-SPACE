@@ -1,11 +1,27 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import { Cormorant_Garamond, DM_Sans } from "next/font/google"
+import { Search } from "lucide-react"
 import { getStoreByHost } from "@/lib/tenant"
+import { db } from "@/lib/db"
 import { isSubscriptionLapsed } from "@/lib/subscription"
+import { getStoreAccent, getStorefrontBasePath, whatsappLink } from "@/lib/storefront"
 import { CartDrawer } from "@/components/storefront/CartDrawer"
+import { MobileMenu } from "@/components/storefront/MobileMenu"
+import { SocialIcons } from "@/components/storefront/SocialIcons"
 import { StoreAnalyticsTracker } from "@/components/storefront/StoreAnalyticsTracker"
 
-import { headers } from "next/headers"
+const display = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-store-display",
+})
+
+const sans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-store-sans",
+})
 
 export default async function StorefrontLayout({
   children,
@@ -21,21 +37,26 @@ export default async function StorefrontLayout({
     notFound()
   }
 
+  const accent = getStoreAccent(store.primaryColor)
+  const themeStyle = { "--store-accent": accent } as React.CSSProperties
+  const fontClasses = `${display.variable} ${sans.variable} font-store`
+  const whatsappHref = store.whatsappNumber ? whatsappLink(store.whatsappNumber) : null
+
   if (isSubscriptionLapsed(store.subscription)) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6 text-center">
+      <div className={`${fontClasses} flex min-h-screen flex-col items-center justify-center bg-[#faf8f5] px-6 text-center text-stone-900`}>
         {store.logoUrl && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={store.logoUrl} alt={`${store.name} Logo`} className="mb-6 h-14 w-auto object-contain" />
+          <img src={store.logoUrl} alt={`${store.name} Logo`} className="mb-8 h-16 w-auto object-contain" />
         )}
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{store.name}</h1>
-        <p className="mt-3 max-w-sm text-slate-600">This store is temporarily unavailable. Please check back soon.</p>
-        {store.whatsappNumber && (
+        <h1 className="font-display text-5xl">{store.name}</h1>
+        <p className="mt-4 max-w-sm text-stone-600">This store is temporarily unavailable. Please check back soon.</p>
+        {whatsappHref && (
           <a
-            href={`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, "")}`}
+            href={whatsappHref}
             target="_blank"
             rel="noreferrer"
-            className="mt-6 rounded-full border border-slate-300 px-6 py-2.5 text-sm font-semibold text-slate-900 hover:bg-white"
+            className="mt-8 rounded-full border border-stone-900 px-7 py-3 text-sm tracking-wide text-stone-900 transition-colors hover:bg-stone-900 hover:text-white"
           >
             Message the seller on WhatsApp
           </a>
@@ -44,103 +65,101 @@ export default async function StorefrontLayout({
     )
   }
 
-  const headersList = await headers()
-    const host = headersList.get("host") || ""
-    const isPreview = host.includes("vercel.app") || host.includes("localhost:3000") || host === "shopora.space" || host === "www.shopora.space"
-    // If testing via Vercel preview or localhost, the base path is /storefront/[domain]
-    // Otherwise on the actual custom domain, the base path is just /
-    const basePath = isPreview ? `/storefront/${domain}` : ""
+  const basePath = await getStorefrontBasePath(domain)
+  const hasCategories =
+    (await db.category.count({
+      where: { storeId: store.id, products: { some: { status: "ACTIVE", visibility: "VISIBLE" } } },
+    })) > 0
+
+  const navLinks = [
+    { href: `${basePath}/products`, label: "Shop" },
+    ...(hasCategories ? [{ href: `${basePath}/categories`, label: "Collections" }] : []),
+    { href: `${basePath}/pages/shipping`, label: "Delivery" },
+  ]
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden w-full max-w-[100vw]">
-      {/* Storefront Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href={`${basePath}/`} className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                {store.logoUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={store.logoUrl} alt={`${store.name} Logo`} className="h-8 w-auto object-contain" />
-                )}
-                <span>{store.name}</span>
-              </Link>
-            </div>
-            
-            <nav className="hidden md:flex gap-6">
-              <Link href={`${basePath}/`} className="text-sm font-medium hover:text-slate-900 text-slate-600 transition-colors">
-                Home
-              </Link>
-              <Link href={`${basePath}/products`} className="text-sm font-medium hover:text-slate-900 text-slate-600 transition-colors">
-                All Products
-              </Link>
-              <Link href={`${basePath}/categories`} className="text-sm font-medium hover:text-slate-900 text-slate-600 transition-colors">
-                Categories
-              </Link>
-            </nav>
+    <div className={`${fontClasses} flex min-h-screen w-full max-w-[100vw] flex-col overflow-x-clip bg-[#faf8f5] text-stone-900`} style={themeStyle}>
+      <div className="bg-[var(--store-accent)] px-4 py-2 text-center text-[11px] uppercase tracking-[0.2em] text-white">
+        Delivery fee paid on arrival
+        {whatsappHref && (
+          <span className="hidden sm:inline">
+            <span className="mx-3 opacity-50">·</span>
+            <a href={whatsappHref} target="_blank" rel="noreferrer" className="underline-offset-4 hover:underline">
+              Order on WhatsApp
+            </a>
+          </span>
+        )}
+      </div>
 
-            <div className="flex items-center gap-4">
-              <CartDrawer 
-                currency={store.currency} 
-                primaryColor={store.primaryColor} 
-                basePath={basePath} 
-              />
-            </div>
+      <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-[#faf8f5]/90 backdrop-blur-md">
+        <div className="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-5 md:h-20 md:px-8">
+          <div className="flex items-center">
+            <MobileMenu storeName={store.name} basePath={basePath} hasCategories={hasCategories} whatsappHref={whatsappHref} />
+            <nav className="hidden items-center gap-8 lg:flex">
+              {navLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="text-[13px] uppercase tracking-[0.15em] text-stone-600 transition-colors hover:text-stone-900">
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          <Link href={`${basePath}/`} className="flex items-center gap-3 justify-self-center">
+            {store.logoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={store.logoUrl} alt="" className="h-9 w-9 rounded-full object-cover md:h-11 md:w-11" />
+            )}
+            <span className="max-w-[46vw] truncate font-display text-2xl leading-none tracking-tight md:max-w-none md:text-[32px]">
+              {store.name}
+            </span>
+          </Link>
+
+          <div className="flex items-center justify-end gap-2 md:gap-4">
+            <Link href={`${basePath}/products`} aria-label="Search products" className="hidden h-10 w-10 items-center justify-center text-stone-900 md:flex">
+              <Search className="h-5 w-5" strokeWidth={1.5} />
+            </Link>
+            <CartDrawer currency={store.currency} basePath={basePath} />
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 bg-slate-50 overflow-x-hidden">
-        {children}
-      </main>
+      <main className="flex-1">{children}</main>
 
-      <footer className="text-white" style={{ backgroundColor: store.primaryColor || "#0f172a" }}>
-        <div className="mx-auto max-w-6xl px-5 py-5">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm font-semibold">{store.name}</p>
-            <div className="flex gap-2">
-                {store.instagramHandle && (
-                  <a href={store.instagramHandle.startsWith('http') ? store.instagramHandle : `https://instagram.com/${store.instagramHandle.replace('@', '')}`} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                  </a>
-                )}
-                {store.whatsappNumber && (
-                  <a href={`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 0C5.393 0 0 5.385 0 12.022c0 2.128.552 4.195 1.6 6L.266 22.9l5.006-1.312C6.982 22.564 8.98 23.1 11.056 23.1 18.665 23.1 24 17.702 24 11.05 24 4.398 18.664 0 12.031 0zm.012 19.336c-1.802 0-3.56-.484-5.1-1.399l-.364-.218-3.791.995 1.01-3.692-.239-.38C2.658 13.2 2.148 11.455 2.148 9.61c0-5.467 4.455-9.92 9.926-9.92 5.47 0 9.92 4.453 9.92 9.92 0 5.467-4.45 9.92-9.922 9.92zm5.437-7.44c-.297-.15-1.761-.871-2.034-.972-.272-.102-.471-.152-.669.15-.198.301-.767.971-.94 1.171-.173.2-.345.225-.643.076-1.636-.81-2.808-1.554-3.882-3.376-.172-.293.17-.282.464-.863.099-.197.05-.37-.025-.52-.074-.15-.668-1.611-.914-2.205-.24-.582-.486-.504-.668-.513-.173-.01-.371-.01-.57-.01-.198 0-.52.074-.792.373-.272.302-1.04 1.018-1.04 2.482 0 1.464 1.064 2.879 1.213 3.079.148.2 2.094 3.196 5.077 4.48 2.016.865 2.827.942 3.82.783.743-.119 2.274-.933 2.596-1.836.321-.904.321-1.677.222-1.838-.098-.16-.37-.258-.667-.408z"/></svg>
-                  </a>
-                )}
-                {store.tiktokHandle && (
-                  <a href={store.tiktokHandle.startsWith('http') ? store.tiktokHandle : `https://tiktok.com/${store.tiktokHandle.startsWith('@') ? store.tiktokHandle : '@' + store.tiktokHandle}`} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 2.78-1.15 5.54-3.33 7.37-1.35 1.13-3.14 1.7-4.93 1.63-2.19-.07-4.32-.98-5.83-2.48-1.55-1.56-2.42-3.81-2.22-6.02.16-1.89.96-3.71 2.31-5.01 1.25-1.2 2.96-1.87 4.71-2.01.21-.02.43-.03.64-.03V14.4c-1.39.08-2.77.71-3.69 1.78-.7.83-1.12 1.95-1.07 3.03.04 1.11.51 2.22 1.34 2.98.92.83 2.21 1.25 3.48 1.13 1.29-.12 2.47-.79 3.25-1.8.84-1.1 1.21-2.52 1.18-3.92V.02z"/></svg>
-                  </a>
-                )}
-                {store.snapchatHandle && (
-                  <a href={store.snapchatHandle.startsWith('http') ? store.snapchatHandle : `https://snapchat.com/add/${store.snapchatHandle.replace('@', '')}`} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-1.742 0-3.238.452-4.485 1.356-1.184.858-2.072 2.214-2.664 4.07-.123.385-.226.786-.312 1.203-.049.239-.089.479-.12.72-.036.278-.184.341-.444.186a5.53 5.53 0 00-1.884-.707c-.457-.075-.828.18-1.02.66-.192.481-.118 1.05.215 1.614.544.922 1.378 1.69 2.503 2.302.26.14.363.38.309.72-.032.203-.133.376-.303.52-.395.334-.846.617-1.352.848-.302.138-.456.401-.461.79 0 .428.197.747.592.957.575.306 1.196.538 1.865.694a5.006 5.006 0 00.916.142c.311.021.468.186.471.494.004.385-.23.633-.701.745-.375.089-.787.218-1.236.388a1.597 1.597 0 00-1.058 1.656c.038.384.288.66.751.826.96.342 2.018.6 3.175.772a15.42 15.42 0 002.046.12c1.082-.016 1.839-.187 2.272-.511.096-.072.235-.108.417-.108.182 0 .321.036.417.108.432.324 1.19.495 2.272.511a15.42 15.42 0 002.046-.12c1.157-.172 2.215-.43 3.175-.772.463-.166.713-.442.75-.826a1.597 1.597 0 00-1.057-1.656c-.45-.17-.862-.299-1.236-.388-.471-.112-.705-.36-.701-.745.003-.308.16-.473.47-.494a5.005 5.005 0 00.917-.142c.669-.156 1.29-.388 1.865-.694.395-.21.592-.529.592-.957-.005-.389-.159-.652-.461-.79a7.618 7.618 0 00-1.352-.848c-.17-.144-.271-.317-.303-.52-.054-.34.049-.58.309-.72 1.125-.612 1.96-1.38 2.503-2.302.333-.564.407-1.133.215-1.614-.192-.48-.563-.735-1.02-.66a5.531 5.531 0 00-1.884.707c-.26.155-.408.092-.444-.186-.031-.241-.071-.481-.12-.72-.086-.417-.189-.818-.312-1.203-.592-1.856-1.48-3.212-2.664-4.07C15.238.452 13.742 0 12 0z"/></svg>
-                  </a>
-                )}
-                {store.contactEmail && (
-                  <a href={`mailto:${store.contactEmail}`} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5" /></svg>
-                  </a>
-                )}
+      <footer className="mt-20 border-t border-stone-200 bg-[#f3efe8]">
+        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 md:grid-cols-[1.4fr_1fr_1fr] md:px-8 md:py-16">
+          <div>
+            <p className="font-display text-3xl">{store.name}</p>
+            {store.description && <p className="mt-3 max-w-sm text-sm leading-relaxed text-stone-600">{store.description}</p>}
+            <div className="mt-6">
+              <SocialIcons store={store} />
             </div>
           </div>
 
-          <nav className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-white/80">
-            <Link href={`${basePath}/products`} className="hover:text-white">Shop</Link>
-            {store.whatsappNumber && (
-              <a href={`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, "")}`} target="_blank" rel="noreferrer" className="hover:text-white">WhatsApp</a>
-            )}
-            <Link href={`${basePath}/pages/faq`} className="hover:text-white">FAQs</Link>
-            <Link href={`${basePath}/pages/shipping`} className="hover:text-white">Shipping</Link>
-            <Link href={`${basePath}/pages/refunds`} className="hover:text-white">Returns</Link>
-          </nav>
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-stone-500">Shop</p>
+            <ul className="mt-4 space-y-3 text-sm text-stone-700">
+              <li><Link href={`${basePath}/products`} className="hover:text-stone-950">All products</Link></li>
+              {hasCategories && <li><Link href={`${basePath}/categories`} className="hover:text-stone-950">Collections</Link></li>}
+              {whatsappHref && <li><a href={whatsappHref} target="_blank" rel="noreferrer" className="hover:text-stone-950">Order on WhatsApp</a></li>}
+            </ul>
+          </div>
 
-          <div className="mt-4 flex items-center justify-between border-t border-white/15 pt-3 text-xs text-white/60">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-stone-500">Help</p>
+            <ul className="mt-4 space-y-3 text-sm text-stone-700">
+              <li><Link href={`${basePath}/pages/shipping`} className="hover:text-stone-950">Delivery</Link></li>
+              <li><Link href={`${basePath}/pages/refunds`} className="hover:text-stone-950">Returns</Link></li>
+              <li><Link href={`${basePath}/pages/faq`} className="hover:text-stone-950">FAQs</Link></li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="border-t border-stone-300/60">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 text-xs text-stone-500 md:px-8">
             <p>© {new Date().getFullYear()} {store.name}</p>
-            <a href="https://shopora.space" target="_blank" rel="noreferrer" className="hover:text-white">Shopora</a>
+            <a href="https://shopora.space" target="_blank" rel="noreferrer" className="hover:text-stone-900">
+              Powered by Shopora
+            </a>
           </div>
         </div>
       </footer>

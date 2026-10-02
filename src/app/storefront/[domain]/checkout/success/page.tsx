@@ -1,8 +1,9 @@
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Check } from "lucide-react"
 import { getStoreByHost } from "@/lib/tenant"
 import { notFound } from "next/navigation"
 import { db } from "@/lib/db"
+import { getStorefrontBasePath } from "@/lib/storefront"
 import { StorefrontReviewForm } from "@/components/storefront/StorefrontReviewForm"
 
 export default async function CheckoutSuccessPage({ 
@@ -16,6 +17,8 @@ export default async function CheckoutSuccessPage({
   const resolvedSearchParams = await searchParams
   const store = await getStoreByHost(resolvedParams.domain)
   if (!store) notFound()
+
+  const basePath = await getStorefrontBasePath(resolvedParams.domain)
 
   let order = null;
   if (resolvedSearchParams.orderId) {
@@ -32,36 +35,50 @@ export default async function CheckoutSuccessPage({
     })
   }
 
-  return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-      <div className="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-sm">
-        <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-          </svg>
-        </div>
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">Order Confirmed!</h1>
-        <p className="text-slate-600 mb-6">
-          Thank you for shopping at {store.name}. Your payment is being processed and your order will be shipped soon.
-        </p>
-        
-        {resolvedSearchParams.orderId && (
-          <div className="bg-slate-50 rounded-lg p-4 mb-6">
-            <p className="text-sm text-slate-500 font-medium">Order Reference</p>
-            <p className="font-mono text-slate-900">{resolvedSearchParams.orderId}</p>
-          </div>
-        )}
-        
-        {order && order.orderItems.length > 0 && (
-          <div className="mt-8 mb-6 pt-8 border-t border-slate-100">
-            <StorefrontReviewForm domain={resolvedParams.domain} productId={order.orderItems[0].variant.productId} />
-          </div>
-        )}
+  const whatsapp = store.whatsappNumber?.replace(/[^0-9]/g, "")
 
-        <Link href="/">
-          <Button className="w-full">Continue Shopping</Button>
-        </Link>
+  return (
+    <div className="mx-auto max-w-xl px-5 py-20 text-center md:py-28">
+      <div className="mx-auto mb-8 flex h-14 w-14 items-center justify-center rounded-full border border-stone-900">
+        <Check className="h-6 w-6" strokeWidth={1.25} />
       </div>
+      <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Thank you</p>
+      <h1 className="mt-4 font-display text-5xl md:text-6xl">Your order is in</h1>
+      <p className="mx-auto mt-5 max-w-md leading-relaxed text-stone-600">
+        {store.name} will check your payment and confirm your order shortly. Keep your order reference in case you need to ask about it.
+      </p>
+
+      {resolvedSearchParams.orderId && (
+        <div className="mx-auto mt-10 max-w-xs bg-[#f3efe8] px-6 py-5">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-stone-500">Order reference</p>
+          <p className="mt-1 font-display text-2xl tracking-wide">{resolvedSearchParams.orderId}</p>
+        </div>
+      )}
+
+      <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <Link
+          href={`${basePath}/products`}
+          className="inline-flex h-12 items-center rounded-full bg-[var(--store-accent)] px-8 text-sm tracking-wide text-white hover:opacity-90"
+        >
+          Continue shopping
+        </Link>
+        {whatsapp && (
+          <a
+            href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(`Hi ${store.name}, I just placed order ${resolvedSearchParams.orderId ?? ""}.`)}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex h-12 items-center rounded-full border border-stone-900 px-8 text-sm tracking-wide text-stone-900 hover:bg-stone-900 hover:text-white"
+          >
+            Message the store
+          </a>
+        )}
+      </div>
+
+      {order && order.orderItems.length > 0 && (
+        <div className="mt-16 border-t border-stone-200 pt-12">
+          <StorefrontReviewForm domain={resolvedParams.domain} productId={order.orderItems[0].variant.productId} />
+        </div>
+      )}
     </div>
   )
 }

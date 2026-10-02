@@ -1,8 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Heart, Eye, ShoppingBag } from "lucide-react"
+import { Heart, Plus } from "lucide-react"
 import { useCart } from "@/lib/cart"
 import { useFavorites } from "@/lib/favorites"
 
@@ -21,15 +20,21 @@ type ProductCardProps = {
   basePath: string
 }
 
+function money(currency: string, amount: number) {
+  return `${currency} ${amount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
 export function ProductCard({ product, currency, basePath }: ProductCardProps) {
-  const router = useRouter()
   const cart = useCart()
   const { isFavorite, toggleFavorite } = useFavorites()
-  
+
   const variant = product.variants?.[0]
   const price = variant?.price ?? product.price ?? 0
   const compareAtPrice = variant?.compareAtPrice ?? product.compareAtPrice ?? null
   const imageUrl = variant?.imageUrl || product.images?.[0] || null
+  const hoverImageUrl = product.images?.find((img) => img !== imageUrl) || null
+  const onSale = compareAtPrice !== null && compareAtPrice > price
+  const hasChoices = (product.variants?.length ?? 0) > 1
 
   const isFaved = isFavorite(product.id)
 
@@ -44,7 +49,7 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
       quantity: 1,
       imageUrl: imageUrl,
     })
-    alert("Added to cart!")
+    cart.openDrawer()
   }
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
@@ -53,73 +58,81 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
     toggleFavorite(product.id)
   }
 
-  const handleQuickView = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    router.push(`${basePath}/product/${product.id}`)
-  }
+  const productHref = `${basePath}/product/${product.id}`
 
   return (
-    <Link href={`${basePath}/product/${product.id}`} className="group block">
-      <div className="relative mb-4 aspect-[4/5] bg-[#f9f9f9] overflow-hidden rounded-md">
+    <Link href={productHref} className="group block">
+      <div className="relative aspect-[3/4] overflow-hidden bg-[#efebe4]">
         {imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img 
-            src={imageUrl} 
-            alt={product.name} 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
-          />
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imageUrl}
+              alt={product.name}
+              loading="lazy"
+              className={`absolute inset-0 h-full w-full object-cover transition duration-700 ease-out ${
+                hoverImageUrl ? "group-hover:opacity-0" : "group-hover:scale-[1.04]"
+              }`}
+            />
+            {hoverImageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={hoverImageUrl}
+                alt=""
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover opacity-0 transition duration-700 ease-out group-hover:opacity-100"
+              />
+            )}
+          </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-slate-300">
-            No Image
+          <div className="flex h-full w-full items-center justify-center font-display text-xl italic text-stone-400">
+            {product.name}
           </div>
         )}
-        
-        {/* Floating Actions */}
-        <div className="absolute top-3 right-3 hidden flex-col gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100 lg:flex">
-          <button 
-            onClick={handleToggleFavorite}
-            className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform text-slate-700 hover:text-red-500"
-            aria-label="Add to favorites"
-          >
-            <Heart className={`w-5 h-5 ${isFaved ? 'fill-red-500 text-red-500' : ''}`} />
-          </button>
-          <button 
-            onClick={handleQuickView}
-            className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform text-slate-700"
-            aria-label="Quick view"
-          >
-            <Eye className="w-5 h-5" />
-          </button>
-          <button 
-            onClick={handleAddToCart}
-            className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform text-slate-700 hover:text-green-600"
-            aria-label="Add to cart"
-          >
-            <ShoppingBag className="w-5 h-5" />
-          </button>
-        </div>
 
-        {compareAtPrice !== null && compareAtPrice > price && (
-          <div className="absolute top-4 left-4 bg-red-500 text-white text-[10px] uppercase font-bold px-3 py-1 tracking-widest rounded-sm">
-            SALE
-          </div>
+        {onSale && (
+          <span className="absolute left-3 top-3 bg-[#faf8f5] px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-stone-900">
+            Sale
+          </span>
+        )}
+
+        <button
+          onClick={handleToggleFavorite}
+          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#faf8f5]/90 text-stone-800 opacity-100 transition-opacity lg:opacity-0 lg:group-hover:opacity-100"
+          aria-label={isFaved ? "Remove from favourites" : "Add to favourites"}
+        >
+          <Heart className={`h-4 w-4 ${isFaved ? "fill-stone-900" : ""}`} strokeWidth={1.5} />
+        </button>
+
+        {hasChoices ? (
+          <span className="absolute inset-x-3 bottom-3 hidden translate-y-2 bg-[#faf8f5] py-3 text-center text-[11px] uppercase tracking-[0.2em] text-stone-900 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:block">
+            Choose options
+          </span>
+        ) : (
+          <button
+            onClick={handleAddToCart}
+            className="absolute inset-x-3 bottom-3 hidden translate-y-2 bg-[#faf8f5] py-3 text-[11px] uppercase tracking-[0.2em] text-stone-900 opacity-0 transition duration-300 hover:bg-stone-900 hover:text-white group-hover:translate-y-0 group-hover:opacity-100 lg:block"
+          >
+            Add to bag
+          </button>
+        )}
+
+        {!hasChoices && (
+          <button
+            onClick={handleAddToCart}
+            className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#faf8f5] text-stone-900 shadow-sm lg:hidden"
+            aria-label="Add to bag"
+          >
+            <Plus className="h-4 w-4" strokeWidth={1.75} />
+          </button>
         )}
       </div>
 
-      <div className="text-left px-1">
-        <h3 className="font-serif text-[15px] text-slate-900 mb-1 leading-snug truncate">
-          {product.name}
-        </h3>
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-[15px] text-slate-900">
-            {currency} {price.toFixed(2)}
-          </span>
-          {compareAtPrice !== null && compareAtPrice > price && (
-            <span className="text-xs text-slate-400 line-through">
-              {currency} {compareAtPrice.toFixed(2)}
-            </span>
-          )}
+      <div className="pt-4">
+        <h3 className="line-clamp-1 text-sm text-stone-800">{product.name}</h3>
+        <div className="mt-1.5 flex items-baseline gap-2 text-sm">
+          <span className={onSale ? "text-[var(--store-accent)]" : "text-stone-900"}>{money(currency, price)}</span>
+          {onSale && <span className="text-xs text-stone-400 line-through">{money(currency, compareAtPrice!)}</span>}
         </div>
       </div>
     </Link>
