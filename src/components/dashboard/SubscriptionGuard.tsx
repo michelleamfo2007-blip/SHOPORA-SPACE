@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation"
 import { AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { isSubscriptionLapsed } from "@/lib/subscription"
 
 export function SubscriptionGuard({ 
   storeId, 
@@ -18,23 +19,7 @@ export function SubscriptionGuard({
   const pathname = usePathname()
   const router = useRouter()
 
-  const isLocked = (() => {
-    if (status === "ACTIVE") return false
-    
-    // For TRIAL or PAST_DUE
-    if (trialEndDate) {
-      const end = new Date(trialEndDate)
-      const now = new Date()
-      // If today is past the end date, it's locked
-      if (now > end) {
-        return true
-      }
-    } else if (status === "PAST_DUE") {
-      return true
-    }
-
-    return false
-  })()
+  const isLocked = isSubscriptionLapsed({ status, currentPeriodEnd: trialEndDate })
 
   const isBillingPage = pathname.endsWith('/billing')
 
@@ -46,8 +31,8 @@ export function SubscriptionGuard({
         </div>
         <h2 className="text-3xl font-bold tracking-tight mb-3">Store Locked</h2>
         <p className="text-slate-600 max-w-md mb-8">
-          Your free trial has ended or your subscription is past due. 
-          Please make a payment to restore access to your dashboard and keep your storefront active.
+          Your free trial or subscription has ended, and your store is closed to customers.
+          Make a payment to reopen your store and restore access to your dashboard.
         </p>
         <Button size="lg" onClick={() => router.push(`/${storeId}/billing`)}>
           Go to Billing & Subscription

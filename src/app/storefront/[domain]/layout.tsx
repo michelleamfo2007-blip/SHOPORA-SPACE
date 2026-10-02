@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { getStoreByHost } from "@/lib/tenant"
+import { isSubscriptionLapsed } from "@/lib/subscription"
 import { CartDrawer } from "@/components/storefront/CartDrawer"
 import { StoreAnalyticsTracker } from "@/components/storefront/StoreAnalyticsTracker"
 
@@ -18,6 +19,29 @@ export default async function StorefrontLayout({
 
   if (!store) {
     notFound()
+  }
+
+  if (isSubscriptionLapsed(store.subscription)) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6 text-center">
+        {store.logoUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={store.logoUrl} alt={`${store.name} Logo`} className="mb-6 h-14 w-auto object-contain" />
+        )}
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{store.name}</h1>
+        <p className="mt-3 max-w-sm text-slate-600">This store is temporarily unavailable. Please check back soon.</p>
+        {store.whatsappNumber && (
+          <a
+            href={`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, "")}`}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-6 rounded-full border border-slate-300 px-6 py-2.5 text-sm font-semibold text-slate-900 hover:bg-white"
+          >
+            Message the seller on WhatsApp
+          </a>
+        )}
+      </div>
+    )
   }
 
   const headersList = await headers()

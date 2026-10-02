@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 
 import { resend } from "@/lib/resend"
+import { isSubscriptionLapsed } from "@/lib/subscription"
 
 export async function processCheckoutAction(formData: FormData) {
   const storeId = formData.get("storeId") as string
@@ -22,9 +23,10 @@ export async function processCheckoutAction(formData: FormData) {
 
   const store = await db.store.findUnique({ 
     where: { id: storeId },
-    include: { members: { include: { user: true } } }
+    include: { members: { include: { user: true } }, subscription: true }
   })
   if (!store) throw new Error("Store not found")
+  if (isSubscriptionLapsed(store.subscription)) throw new Error("This store is not taking orders right now")
 
   const cartItems = JSON.parse(cartDataStr) as Array<{
     variantId: string
