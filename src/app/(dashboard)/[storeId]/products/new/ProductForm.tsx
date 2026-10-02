@@ -436,9 +436,9 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t flex justify-end gap-4 z-10 lg:pl-64">
+      <div className="fixed bottom-0 left-0 right-0 z-30 flex justify-end gap-3 border-t border-stone-200 bg-white p-4 lg:left-60">
         <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-        <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white min-w-[120px]">
+        <Button type="submit" disabled={isLoading} className="min-w-[120px] bg-stone-950 text-white hover:bg-stone-800">
           {isLoading ? "Saving..." : "Save Product"}
         </Button>
       </div>

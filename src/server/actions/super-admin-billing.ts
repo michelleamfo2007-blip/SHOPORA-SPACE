@@ -4,6 +4,9 @@ import { db } from "@/lib/db"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { Resend } from "resend"
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function approvePaymentAction(paymentId: string) {
   const session = await getServerSession(authOptions)
@@ -16,7 +19,18 @@ export async function approvePaymentAction(paymentId: string) {
 
   const payment = await db.subscriptionPayment.findUnique({
     where: { id: paymentId },
-    include: { subscription: { include: { plan: true } } }
+    include: {
+      subscription: {
+        include: {
+          plan: true,
+          store: {
+            include: {
+              members: { where: { role: "OWNER" }, include: { user: true } },
+            },
+          },
+        },
+      },
+    },
   })
 
   if (!payment) throw new Error("Payment not found")
@@ -28,19 +42,13 @@ export async function approvePaymentAction(paymentId: string) {
   })
 
   // Update Subscription to ACTIVE
-  // Calculate new end date based on plan interval (assuming 1 month)
   const currentDate = new Date()
   const currentEnd = payment.subscription.currentPeriodEnd
-  
-  let nextEnd = new Date()
-  if (currentEnd && currentEnd > currentDate) {
-    // Add to existing
-    nextEnd = new Date(currentEnd)
-    nextEnd.setMonth(nextEnd.getMonth() + 1)
-  } else {
-    // Start from today
-    nextEnd.setMonth(nextEnd.getMonth() + 1)
-  }
+  const renewFrom =
+    payment.subscription.status === "ACTIVE" && currentEnd && currentEnd > currentDate ? currentEnd : currentDate
+
+  const nextEnd = new Date(renewFrom)
+  nextEnd.setMonth(nextEnd.getMonth() + 1)
 
   const isEarlyBirdActive = payment.subscription.isEarlyBird && payment.subscription.earlyBirdMonthsUsed < 2;
 
@@ -52,6 +60,27 @@ export async function approvePaymentAction(paymentId: string) {
       ...(isEarlyBirdActive ? { earlyBirdMonthsUsed: { increment: 1 } } : {})
     }
   })
+
+  const owner = payment.subscription.store.members[0]?.user
+  if (owner?.email) {
+    try {
+      await resend.emails.send({
+        from: "Shopora Billing <billing@shopora.space>",
+        to: owner.email,
+        subject: `Your ${payment.subscription.store.name} subscription is active`,
+        html: `
+          <p>Hi ${owner.name || "there"},</p>
+          <p>Your payment for <strong>${payment.subscription.store.name}</strong> has been approved.</p>
+          <p><strong>Plan:</strong> ${payment.subscription.plan.name}</p>
+          <p><strong>Amount:</strong> GHS ${payment.amount.toFixed(2)}</p>
+          <p><strong>Active until:</strong> ${nextEnd.toLocaleDateString()}</p>
+          <p>You can open your store dashboard here:<br><a href="https://shopora.space/dashboard">https://shopora.space/dashboard</a></p>
+        `,
+      })
+    } catch (error) {
+      console.error("Failed to send subscription approval email:", error)
+    }
+  }
 
   revalidatePath("/super-admin/subscriptions")
   return { success: true }

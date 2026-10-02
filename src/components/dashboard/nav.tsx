@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   LayoutDashboard,
   Package,
@@ -32,6 +32,15 @@ interface DashboardNavProps {
 export function DashboardNav({ storeId, isMobileMenu }: DashboardNavProps) {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
+
+  useEffect(() => {
+    if (!isOpen) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [isOpen])
 
   const groups = [
     {
@@ -101,7 +110,7 @@ export function DashboardNav({ storeId, isMobileMenu }: DashboardNavProps) {
           {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
         {isOpen && (
-          <div className="absolute left-0 right-0 top-14 z-50 max-h-[80vh] overflow-y-auto border-b border-stone-200 bg-stone-50 px-4 py-4">
+          <div className="fixed inset-x-0 bottom-0 top-14 z-50 overflow-y-auto overscroll-contain border-t border-stone-200 bg-stone-50 px-4 pb-10 pt-4">
             {nav}
           </div>
         )}
