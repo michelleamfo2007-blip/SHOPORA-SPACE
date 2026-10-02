@@ -153,6 +153,11 @@ export async function submitPaymentReference(storeId: string, formData: FormData
     throw new Error("No subscription found for this store.")
   }
 
+  const membership = await db.storeMember.findUnique({
+    where: { storeId_userId: { storeId, userId: session.user.id } },
+  })
+  if (!membership) throw new Error("Unauthorized")
+
   // Calculate the amount due
   const isEarlyBirdActive = store.subscription.isEarlyBird && store.subscription.earlyBirdMonthsUsed < 2
   const expectedAmount = isEarlyBirdActive ? 50 : store.subscription.plan.price
@@ -182,7 +187,7 @@ export async function submitPaymentReference(storeId: string, formData: FormData
           html: `
             <p>Hi there,</p>
             <p>We have successfully received your payment reference for your Shopora subscription.</p>
-            <p><strong>Amount:</strong> ${store.currency || "GHS"} ${store.subscription.plan.price}</p>
+            <p><strong>Amount:</strong> GHS ${expectedAmount.toFixed(2)}</p>
             <p><strong>Reference:</strong> ${reference}</p>
             <p>Our team is currently verifying the payment. Your subscription will be activated shortly.</p>
           `
@@ -200,6 +205,7 @@ export async function submitPaymentReference(storeId: string, formData: FormData
           <p>A tenant has submitted a manual payment reference for their subscription.</p>
           <p><strong>Store:</strong> ${store.name} (${store.slug})</p>
           <p><strong>Plan:</strong> ${store.subscription.plan.name}</p>
+          <p><strong>Amount due:</strong> GHS ${expectedAmount.toFixed(2)}</p>
           <p><strong>Reference:</strong> ${reference}</p>
           <p>Log in to the Super Admin dashboard (Subscriptions tab) to verify and approve the payment.</p>
         `

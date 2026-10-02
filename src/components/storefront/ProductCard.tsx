@@ -39,7 +39,7 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
     cart.addItem({
       variantId: variant?.id ?? product.id,
       productId: product.id,
-      name: variant ? `${product.name} - ${variant.name}` : product.name,
+      name: variant && variant.name !== "Default" ? `${product.name} - ${variant.name}` : product.name,
       price: price,
       quantity: 1,
       imageUrl: imageUrl,

@@ -18,25 +18,63 @@ export async function processCheckoutAction(formData: FormData) {
   const cartDataStr = formData.get("cartData") as string
 
   if (!storeId || !email || !phone || !firstName || !lastName || !exactLocation || !cartDataStr || !reference) {
-    throw new Error("Missing required fields")
+    return { error: "Please fill in all the required fields." }
   }
 
   const store = await db.store.findUnique({ 
     where: { id: storeId },
     include: { members: { include: { user: true } }, subscription: true }
   })
-  if (!store) throw new Error("Store not found")
-  if (isSubscriptionLapsed(store.subscription)) throw new Error("This store is not taking orders right now")
+  if (!store) return { error: "Store not found." }
+  if (isSubscriptionLapsed(store.subscription)) return { error: "This store is not taking orders right now." }
 
-  const cartItems = JSON.parse(cartDataStr) as Array<{
-    variantId: string
-    quantity: number
-    price: number
-  }>
-
-  if (cartItems.length === 0) {
-    throw new Error("Cart is empty")
+  let requestedItems: Array<{ variantId: string; quantity: number }>
+  try {
+    requestedItems = (JSON.parse(cartDataStr) as Array<{ variantId: string; quantity: number }>).map((item) => ({
+      variantId: String(item.variantId),
+      quantity: Math.floor(Number(item.quantity)),
+    }))
+  } catch {
+    return { error: "Your cart could not be read. Please refresh the page and try again." }
   }
+
+  if (requestedItems.length === 0) return { error: "Your cart is empty." }
+  if (requestedItems.some((item) => !Number.isFinite(item.quantity) || item.quantity < 1 || item.quantity > 1000)) {
+    return { error: "One of the quantities in your cart is not valid." }
+  }
+
+  // Prices always come from the database, never from the browser.
+  const requestedIds = [...new Set(requestedItems.map((item) => item.variantId))]
+  const variants = await db.productVariant.findMany({
+    where: { id: { in: requestedIds }, product: { storeId } },
+    select: { id: true, price: true },
+  })
+  const resolved = new Map(variants.map((v) => [v.id, v]))
+
+  // Older carts stored the product id for products that had no variant yet.
+  const unresolvedIds = requestedIds.filter((id) => !resolved.has(id))
+  if (unresolvedIds.length > 0) {
+    const products = await db.product.findMany({
+      where: { id: { in: unresolvedIds }, storeId },
+      select: { id: true, variants: { select: { id: true, price: true }, take: 1 } },
+    })
+    for (const product of products) {
+      if (product.variants[0]) resolved.set(product.id, product.variants[0])
+    }
+  }
+
+  if (requestedIds.some((id) => !resolved.has(id))) {
+    return { error: "Some items in your cart are no longer available. Please remove them and try again." }
+  }
+
+  const lineItems = new Map<string, { variantId: string; quantity: number; price: number }>()
+  for (const item of requestedItems) {
+    const variant = resolved.get(item.variantId)!
+    const existing = lineItems.get(variant.id)
+    if (existing) existing.quantity += item.quantity
+    else lineItems.set(variant.id, { variantId: variant.id, quantity: item.quantity, price: variant.price })
+  }
+  const cartItems = [...lineItems.values()]
 
   const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
 

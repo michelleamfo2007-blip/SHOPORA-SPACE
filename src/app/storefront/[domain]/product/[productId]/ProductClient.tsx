@@ -48,7 +48,7 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
     cart.addItem({
       variantId: activeVariant?.id ?? product.id,
       productId: product.id,
-      name: activeVariant ? `${product.name} - ${activeVariant.name}` : product.name,
+      name: activeVariant && activeVariant.name !== "Default" ? `${product.name} - ${activeVariant.name}` : product.name,
       price: price,
       quantity: 1,
       imageUrl: activeImageUrl || product.images?.[0],
@@ -174,7 +174,7 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
                   </div>
                 ))}
               </div>
-            ) : product.variants.length > 0 && (
+            ) : product.variants.length > 1 && (
               <div className="mb-10">
                 <div className="flex items-center gap-2 mb-3">
                   <h3 className="font-semibold text-slate-900 text-sm uppercase tracking-wide">Options</h3>

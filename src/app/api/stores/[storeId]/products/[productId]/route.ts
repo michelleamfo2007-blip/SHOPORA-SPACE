@@ -5,6 +5,7 @@ import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
 import { ProductStatus, ProductVisibility } from "@prisma/client"
 import { getStoreAccess } from "@/lib/store-access"
+import { buildVariantInputs, syncProductVariants } from "@/lib/product-variants"
 
 export async function PATCH(
   req: Request,
@@ -49,9 +50,8 @@ export async function PATCH(
       }
     })) || []
 
-    // Delete existing options and variants to rebuild them clean
+    // Options are rebuilt from scratch; variants are synced by name below so ordered ones survive
     await db.productOption.deleteMany({ where: { productId } })
-    await db.productVariant.deleteMany({ where: { productId } })
 
     // Update the main product fields and create new options
     const product = await db.product.update({
@@ -82,40 +82,7 @@ export async function PATCH(
       }
     })
 
-    // If variants exist, create them
-    if (variants && variants.length > 0) {
-      const variantData = variants.map((v: { name: string; price: number; compareAtPrice?: number | null; sku?: string; stockCount: number; imageBase64?: string }) => {
-        const variantValues = v.name.split(" / ")
-        const optionValueIds: { id: string }[] = []
-
-        product.options.forEach((opt: any, optIndex: number) => {
-          const valName = variantValues[optIndex]
-          const matchedVal = opt.values.find((ov: any) => ov.value === valName)
-          if (matchedVal) {
-            optionValueIds.push({ id: matchedVal.id })
-          }
-        })
-        
-        const generatedSku = `${name.substring(0,3).toUpperCase()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`
-
-        return {
-          productId: product.id,
-          name: v.name,
-          price: v.price,
-          compareAtPrice: v.compareAtPrice ? parseFloat(v.compareAtPrice as any) : null,
-          sku: v.sku || generatedSku,
-          stockCount: v.stockCount,
-          imageUrl: v.imageBase64 || null,
-          optionValues: optionValueIds.length > 0 ? { connect: optionValueIds } : undefined
-        }
-      })
-
-      for (const vData of variantData) {
-        await db.productVariant.create({
-          data: vData
-        })
-      }
-    }
+    await syncProductVariants(product.id, buildVariantInputs(product, variants))
 
     revalidatePath('/', 'layout') // Invalidate all cached pages to ensure storefront updates
 

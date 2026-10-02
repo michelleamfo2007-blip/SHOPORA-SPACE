@@ -3,6 +3,8 @@ import { Navbar } from "@/components/marketing/navbar"
 import { Footer } from "@/components/marketing/footer"
 import { ArrowUpRight } from "lucide-react"
 
+export const revalidate = 300
+
 export default async function ShowcasePage() {
   const stores = await db.store.findMany({
     where: { status: "ACTIVE" },

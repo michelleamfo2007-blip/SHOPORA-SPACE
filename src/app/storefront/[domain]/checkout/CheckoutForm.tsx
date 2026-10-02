@@ -47,10 +47,14 @@ export function CheckoutForm({
       formData.append("storeId", storeId)
       formData.append("cartData", JSON.stringify(items))
       
-      const { orderId } = await processCheckoutAction(formData)
-      
+      const result = await processCheckoutAction(formData)
+      if ("error" in result) {
+        alert(result.error)
+        return
+      }
+
       clearCart()
-      alert("Order placed successfully! We will verify your payment shortly. Order ID: " + orderId)
+      alert("Order placed successfully! We will verify your payment shortly. Order ID: " + result.orderId)
       router.push(getHomeUrl())
     } catch (error) {
       console.error(error)

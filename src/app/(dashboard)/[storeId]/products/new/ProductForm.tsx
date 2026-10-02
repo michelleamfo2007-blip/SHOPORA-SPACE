@@ -55,7 +55,7 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
     })) || []
   )
   const [variants, setVariants] = useState<{ id?: string; name: string; price: string; compareAtPrice: string; sku: string; stockCount: number; imageBase64: string }[]>(
-    initialData?.variants?.map((v: any) => ({
+    (initialData?.options?.length ? initialData.variants : [])?.map((v: any) => ({
       id: v.id,
       name: v.name,
       price: v.price?.toString() || "",
