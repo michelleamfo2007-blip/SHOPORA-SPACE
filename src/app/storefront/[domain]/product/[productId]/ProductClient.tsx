@@ -88,6 +88,8 @@ export function ProductClient({ product, store, basePath, related }: ProductClie
   return (
     <div className="mx-auto max-w-7xl px-5 pb-28 pt-6 md:px-8 md:pb-0 md:pt-10">
       <nav className="mb-6 text-[11px] uppercase tracking-[0.2em] text-stone-500 md:mb-10">
+        <Link href={`${basePath}/`} className="hover:text-stone-900">Home</Link>
+        <span className="mx-2">/</span>
         <Link href={`${basePath}/products`} className="hover:text-stone-900">Shop</Link>
         {product.categories?.[0] && (
           <>

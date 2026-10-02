@@ -72,6 +72,7 @@ export default async function StorefrontLayout({
     })) > 0
 
   const navLinks = [
+    { href: `${basePath}/`, label: "Home" },
     { href: `${basePath}/products`, label: "Shop" },
     ...(hasCategories ? [{ href: `${basePath}/categories`, label: "Collections" }] : []),
     { href: `${basePath}/pages/shipping`, label: "Delivery" },
@@ -81,21 +82,13 @@ export default async function StorefrontLayout({
     <div className={`${fontClasses} flex min-h-screen w-full max-w-[100vw] flex-col overflow-x-clip bg-[#faf8f5] text-stone-900`} style={themeStyle}>
       <div className="bg-[var(--store-accent)] px-4 py-2 text-center text-[11px] uppercase tracking-[0.2em] text-white">
         Delivery fee paid on arrival
-        {whatsappHref && (
-          <span className="hidden sm:inline">
-            <span className="mx-3 opacity-50">·</span>
-            <a href={whatsappHref} target="_blank" rel="noreferrer" className="underline-offset-4 hover:underline">
-              Order on WhatsApp
-            </a>
-          </span>
-        )}
       </div>
 
       <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-[#faf8f5]/90 backdrop-blur-md">
         <div className="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-5 md:h-20 md:px-8">
           <div className="flex items-center">
             <MobileMenu storeName={store.name} basePath={basePath} hasCategories={hasCategories} whatsappHref={whatsappHref} />
-            <nav className="hidden items-center gap-8 lg:flex">
+            <nav className="hidden items-center gap-6 lg:flex xl:gap-8">
               {navLinks.map((link) => (
                 <Link key={link.href} href={link.href} className="text-[13px] uppercase tracking-[0.15em] text-stone-600 transition-colors hover:text-stone-900">
                   {link.label}
