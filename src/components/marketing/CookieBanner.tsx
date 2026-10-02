@@ -27,16 +27,15 @@ export function CookieBanner() {
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-300">
-        <div className="mb-6">
-          <h3 className="text-xl font-bold text-slate-900 mb-2">Cookie Preferences</h3>
-          <p className="text-sm text-slate-600 leading-relaxed">
-            We use cookies to improve your experience on our platform, 
-            analyze traffic, and personalize content. By clicking &quot;Accept&quot;, you consent to our use of cookies.
+    <div className="fixed inset-x-0 bottom-0 z-50 p-4">
+      <div className="mx-auto flex max-w-3xl flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-5 shadow-xl sm:flex-row sm:items-center">
+        <div className="flex-1">
+          <h3 className="text-sm font-semibold text-stone-950">Cookies</h3>
+          <p className="mt-1 text-sm leading-relaxed text-stone-600">
+            We use cookies to improve the site and understand traffic. Accept to allow them, or decline to continue without them.
           </p>
         </div>
-        <div className="flex gap-3 justify-end">
+        <div className="flex gap-2 sm:shrink-0">
           <Button variant="outline" className="flex-1 sm:flex-none" onClick={handleDecline}>
             Decline
           </Button>

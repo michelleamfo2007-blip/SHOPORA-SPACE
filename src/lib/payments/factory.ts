@@ -1,7 +1,5 @@
 import { PaystackProvider } from "./providers/paystack";
 import { PaymentProviderStrategy } from "./types";
-import { db } from "../db";
-import { decrypt } from "../encryption";
 
 // getPaymentProvider removed as we use manual P2P payments
 export function getPlatformProvider(): PaymentProviderStrategy {

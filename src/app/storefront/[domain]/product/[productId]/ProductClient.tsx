@@ -1,14 +1,11 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useMemo } from "react"
 import { useCart } from "@/lib/cart"
 import { useFavorites } from "@/lib/favorites"
 import { Heart } from "lucide-react"
 
 export function ProductClient({ product, store }: { product: any, store: any }) {
-  const router = useRouter()
-  
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {}
     if (product.options && product.options.length > 0) {
@@ -31,15 +28,10 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
     return fallbackVariant
   }, [selectedOptions, fallbackVariant, product.options, product.variants])
 
-  const [activeImageUrl, setActiveImageUrl] = useState<string | null>(
-    activeVariant?.imageUrl || product.images?.[0] || null
-  )
-
-  useEffect(() => {
-    if (activeVariant?.imageUrl) {
-      setActiveImageUrl(activeVariant.imageUrl)
-    }
-  }, [activeVariant])
+  const variantKey = activeVariant?.id ?? "default"
+  const variantImage = activeVariant?.imageUrl || product.images?.[0] || null
+  const [pickedImage, setPickedImage] = useState<{ key: string; url: string } | null>(null)
+  const activeImageUrl = pickedImage && pickedImage.key === variantKey ? pickedImage.url : variantImage
 
   const price = activeVariant?.price ?? product.price ?? 0
   const compareAtPrice = activeVariant?.compareAtPrice ?? product.compareAtPrice
@@ -49,8 +41,6 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
     ...(product.images || []),
     ...(product.variants?.map((v: any) => v.imageUrl).filter(Boolean) || [])
   ])) as string[]
-
-  // No longer needed, activeImageUrl managed via useEffect
 
   const cart = useCart()
 
@@ -100,7 +90,7 @@ export function ProductClient({ product, store }: { product: any, store: any }) 
                 {allImages.map((img, idx) => (
                   <button 
                     key={idx}
-                    onClick={() => setActiveImageUrl(img)}
+                    onClick={() => setPickedImage({ key: variantKey, url: img })}
                     className={`relative w-20 h-24 shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
                       activeImageUrl === img ? 'border-blue-600 opacity-100' : 'border-transparent opacity-60 hover:opacity-100'
                     }`}

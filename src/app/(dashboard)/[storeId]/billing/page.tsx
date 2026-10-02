@@ -45,6 +45,9 @@ export default async function BillingPage({ params }: { params: Promise<{ storeI
   const trialEndsAt = subscription.currentPeriodEnd ? new Date(subscription.currentPeriodEnd) : null
   const trialEnded = trialEndsAt && trialEndsAt < new Date()
 
+  const isEarlyBirdActive = subscription.isEarlyBird && subscription.earlyBirdMonthsUsed < 2;
+  const currentPrice = isEarlyBirdActive ? 50 : plan.price;
+
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <div className="flex justify-between items-end">
@@ -69,7 +72,14 @@ export default async function BillingPage({ params }: { params: Promise<{ storeI
             </div>
             <div className="flex justify-between border-b pb-2">
               <span className="text-slate-500">Price</span>
-              <span className="font-semibold">GH₵ {plan.price.toFixed(2)} / {plan.interval}</span>
+              <span className="font-semibold">
+                GH₵ {currentPrice.toFixed(2)} / {plan.interval}
+                {isEarlyBirdActive && (
+                  <span className="ml-2 text-xs text-green-600 font-normal border border-green-200 bg-green-50 px-1.5 py-0.5 rounded">
+                    Early Bird
+                  </span>
+                )}
+              </span>
             </div>
             {trialEndsAt && (
               <div className="flex justify-between pb-2">
@@ -103,7 +113,7 @@ export default async function BillingPage({ params }: { params: Promise<{ storeI
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <BillingClient storeId={store.id} amount={plan.price} />
+              <BillingClient storeId={store.id} />
             </CardContent>
           </Card>
         )}

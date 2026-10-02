@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { submitPaymentReference } from "@/server/actions/subscription"
 
-export function BillingClient({ storeId, amount }: { storeId: string, amount: number }) {
+export function BillingClient({ storeId }: { storeId: string }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

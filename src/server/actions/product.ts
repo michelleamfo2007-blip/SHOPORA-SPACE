@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 import { redirect } from "next/navigation"
+import { getProductLimitMessage } from "@/lib/plan-limits"
 
 export async function createProductAction(formData: FormData) {
   const session = await getServerSession(authOptions)
@@ -46,6 +47,11 @@ export async function createProductAction(formData: FormData) {
     throw new Error("Unauthorized access to this store")
   }
 
+  const limitMessage = await getProductLimitMessage(storeId)
+  if (limitMessage) {
+    throw new Error(limitMessage)
+  }
+
   // Parse colors if any
   const colors = colorsStr ? colorsStr.split(',').map(c => c.trim()).filter(Boolean) : []
 
@@ -66,7 +72,7 @@ export async function createProductAction(formData: FormData) {
           }
         },
         variants: {
-          create: colors.map((color, index) => ({
+          create: colors.map((color) => ({
             name: color,
             price,
             compareAtPrice,

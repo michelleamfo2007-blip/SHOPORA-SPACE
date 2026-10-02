@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { Resend } from "resend"
 import { OrderAcceptedEmail } from "@/emails/OrderAcceptedEmail"
+import { OrderStatusEmail } from "@/emails/OrderStatusEmail"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -32,7 +33,38 @@ async function sendOrderAcceptedEmail(orderId: string, storeId: string) {
     })
   } catch (error) {
     console.error("Failed to send order accepted email:", error)
-    // We don't want to fail the status update if email fails
+  }
+}
+
+async function sendOrderStatusEmail(orderId: string, storeId: string, kind: "SHIPPED" | "DELIVERED" | "REFUNDED") {
+  try {
+    const order = await db.order.findUnique({
+      where: { id: orderId, storeId },
+      include: { customer: true, store: true },
+    })
+
+    if (!order || !order.customer.email) return
+
+    const subjects = {
+      SHIPPED: `Your order from ${order.store.name} is on the way`,
+      DELIVERED: `Your order from ${order.store.name} was delivered`,
+      REFUNDED: `Your order from ${order.store.name} was refunded`,
+    }
+
+    await resend.emails.send({
+      from: `Orders <orders@shopora.space>`,
+      to: order.customer.email,
+      subject: subjects[kind],
+      react: OrderStatusEmail({
+        kind,
+        customerName: order.customer.name,
+        orderNumber: order.orderNumber,
+        totalAmount: `${order.store.currency} ${order.totalAmount.toFixed(2)}`,
+        storeName: order.store.name,
+      }) as React.ReactElement,
+    })
+  } catch (error) {
+    console.error("Failed to send order status email:", error)
   }
 }
 
@@ -80,9 +112,15 @@ export async function updateOrderStatusAction(storeId: string, orderId: string, 
       data: { status: status as any }
     })
 
-    // If changing to PROCESSING, trigger email
     if (status === "PROCESSING" && order.status !== "PROCESSING") {
       await sendOrderAcceptedEmail(orderId, storeId)
+    }
+
+    if (
+      (status === "SHIPPED" || status === "DELIVERED" || status === "REFUNDED") &&
+      order.status !== status
+    ) {
+      await sendOrderStatusEmail(orderId, storeId, status)
     }
 
     revalidatePath(`/${storeId}/orders`)

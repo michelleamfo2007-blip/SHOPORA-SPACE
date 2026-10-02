@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react";
 import { ProductCard } from "@/components/storefront/ProductCard";
 

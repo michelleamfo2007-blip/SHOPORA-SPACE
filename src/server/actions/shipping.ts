@@ -4,7 +4,6 @@ import { db } from "@/lib/db"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/auth"
 import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
 
 export async function createShippingZoneAction(storeId: string, formData: FormData) {
   const session = await getServerSession(authOptions)

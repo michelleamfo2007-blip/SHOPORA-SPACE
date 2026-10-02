@@ -1,6 +1,5 @@
 import { db } from "@/lib/db"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { DollarSign, TrendingUp, CreditCard, Activity, Coins } from "lucide-react"
 
 export default async function FinancePage() {

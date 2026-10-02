@@ -23,31 +23,14 @@ export async function signUpAction(formData: FormData) {
       return { error: "User with this email already exists" }
     }
 
-    // ENFORCE WAITLIST: User must be invited before they can sign up
-    const waitlistEntry = await db.waitlistEntry.findUnique({
-      where: { email }
-    })
-
-    if (!waitlistEntry || waitlistEntry.status !== "INVITED") {
-      return { error: "You must be invited from the waitlist to create an account." }
-    }
-
-    // Hash password
     const passwordHash = await hash(password, 10)
 
-    // Create user
     await db.user.create({
       data: {
         name,
         email,
         passwordHash,
       }
-    })
-
-    // Update waitlist status to ONBOARDED
-    await db.waitlistEntry.update({
-      where: { email },
-      data: { status: "ONBOARDED" }
     })
 
     return { success: true }

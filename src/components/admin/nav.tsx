@@ -13,8 +13,7 @@ import {
   UserCog,
   FileText,
   LineChart,
-  Wallet,
-  ClipboardList
+  Wallet
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,11 +25,6 @@ const navItems = [
         title: "Overview",
         href: "/super-admin",
         icon: BarChart3,
-      },
-      {
-        title: "Waitlist",
-        href: "/super-admin/waitlist",
-        icon: ClipboardList,
       },
       {
         title: "Sellers",

@@ -10,7 +10,6 @@ export default async function SuperAdminOverview() {
   const [
     totalStores, 
     totalUsers, 
-    totalOrders, 
     pendingApprovals,
     activeSubs,
     trialSubs,
@@ -18,8 +17,7 @@ export default async function SuperAdminOverview() {
   ] = await Promise.all([
     db.store.count(),
     db.user.count(),
-    db.order.count(),
-    db.waitlistEntry.count({ where: { status: "PENDING" } }),
+    db.subscriptionPayment.count({ where: { status: "PENDING" } }),
     db.subscription.count({ where: { status: "ACTIVE" } }),
     db.subscription.count({ where: { status: "TRIAL" } }),
     db.subscriptionPayment.aggregate({
@@ -105,7 +103,7 @@ export default async function SuperAdminOverview() {
           </CardHeader>
           <CardContent className="px-6 pb-6">
             <div className="text-3xl font-extrabold text-slate-900">{pendingApprovals}</div>
-            <p className="text-xs font-medium text-slate-500 mt-1">Stores waiting for review</p>
+            <p className="text-xs font-medium text-slate-500 mt-1">Payments waiting for review</p>
           </CardContent>
         </Card>
 

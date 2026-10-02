@@ -2,8 +2,6 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
-import { Card, CardContent } from "@/components/ui/card"
-import { ShieldCheck, Truck, Clock, HeadphonesIcon, MessageCircle } from "lucide-react"
 import { ProductCard } from "@/components/storefront/ProductCard"
 
 import { headers } from "next/headers"
@@ -52,82 +50,100 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       include: { customer: true }
     })
 
-    const heroHeadline = store.heroHeadline || `Welcome to ${store.name}`
-    const heroSubtext = store.heroSubtext || "Discover our premium collections today."
-    const heroImage = store.heroImage || "https://images.unsplash.com/photo-1519725515250-9512f67664c1?q=80&w=2000&auto=format&fit=crop"
+    const heroImage = store.heroImage
+    const heroHeadline = store.heroHeadline
+    const heroSubtext = store.heroSubtext
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* 1. Premium Hero Section */}
-      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-          <img 
-            src={heroImage} 
-            alt="Hero Background" 
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black/50" /> {/* Dark Overlay */}
-        </div>
-
-        <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 drop-shadow-lg max-w-4xl mx-auto leading-tight">
-            {heroHeadline}
-          </h1>
-          <p className="text-xl md:text-2xl text-slate-200 max-w-2xl mx-auto mb-10 font-light drop-shadow-md">
-            {heroSubtext}
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link
-              href={`${basePath}/products`}
-              className="inline-block bg-white text-slate-900 rounded-full px-8 py-4 text-lg font-semibold shadow-xl transition-transform hover:scale-105"
-            >
-              Shop Now
-            </Link>
-            <Link
-              href="#categories"
-              className="inline-block border-2 border-white text-white rounded-full px-8 py-4 text-lg font-semibold transition-all hover:bg-white/10 hover:backdrop-blur-md"
-            >
-              Explore Collection
-            </Link>
+      <section className="bg-white">
+        {heroImage ? (
+          <div>
+            <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-6">
+              <div className="overflow-hidden rounded-2xl bg-neutral-950">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={heroImage}
+                  alt={heroHeadline || store.name}
+                  className="h-56 w-full object-cover object-center sm:h-72 md:h-80"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col items-center justify-center gap-3 px-6 py-6 sm:flex-row">
+              <Link
+                href={`${basePath}/products`}
+                className="inline-block rounded-full bg-slate-900 px-8 py-3 text-sm font-semibold text-white"
+              >
+                Shop Now
+              </Link>
+              <Link
+                href="#shop"
+                className="inline-block rounded-full border border-slate-300 px-8 py-3 text-sm font-semibold text-slate-900"
+              >
+                Explore Collection
+              </Link>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div
+            className="px-6 py-24 text-center text-white"
+            style={{ backgroundColor: store.primaryColor || "#0f172a" }}
+          >
+            <h1 className="mx-auto max-w-3xl text-4xl font-semibold tracking-tight md:text-6xl">
+              {heroHeadline || `Welcome to ${store.name}`}
+            </h1>
+            {(heroSubtext || store.description) && (
+              <p className="mx-auto mt-4 max-w-xl text-lg text-white/80">
+                {heroSubtext || store.description}
+              </p>
+            )}
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link
+                href={`${basePath}/products`}
+                className="inline-block rounded-full bg-white px-8 py-3.5 text-base font-semibold text-slate-900"
+              >
+                Shop Now
+              </Link>
+              <Link
+                href="#shop"
+                className="inline-block rounded-full border border-white px-8 py-3.5 text-base font-semibold text-white"
+              >
+                Explore Collection
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {heroImage && (heroHeadline || heroSubtext) && (
+          <div className="px-6 py-8 text-center">
+            {heroHeadline && (
+              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-5xl">{heroHeadline}</h1>
+            )}
+            {heroSubtext && (
+              <p className="mx-auto mt-3 max-w-xl text-slate-600">{heroSubtext}</p>
+            )}
+          </div>
+        )}
       </section>
 
-      {/* 2. Shop by Category */}
-      <section id="categories" className="py-20 bg-white">
+      {categories.length > 0 && (
+      <section id="categories" className="bg-white py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-4">Shop by Category</h2>
-            <div className="h-1 w-20 bg-slate-900 mx-auto rounded-full" style={{ backgroundColor: store.primaryColor || '#0f172a' }}></div>
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">Shop by Category</h2>
           </div>
-
-          {categories.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
-              {categories.map((cat) => (
-                <Link key={cat.id} href={`${basePath}/categories/${cat.slug}`} className="group relative h-64 overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all">
-                  <div className="absolute inset-0 bg-slate-200">
-                    <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400">
-                      <span className="text-sm font-medium">{cat.name}</span>
-                    </div>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white text-center">
-                    <h3 className="text-xl font-bold">{cat.name}</h3>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-10 bg-slate-50 rounded-2xl">
-              <p className="text-slate-500">Categories coming soon.</p>
-            </div>
-          )}
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-6">
+            {categories.map((cat) => (
+              <Link key={cat.id} href={`${basePath}/categories/${cat.slug}`} className="flex h-28 items-end rounded-2xl bg-slate-100 p-4">
+                <h3 className="text-base font-semibold text-slate-900">{cat.name}</h3>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
+      )}
 
-      {/* 3. Featured Collection */}
-      <section id="shop" className="py-20 bg-slate-50">
+      <section id="shop" className="bg-slate-50 py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-end mb-12">
             <div>

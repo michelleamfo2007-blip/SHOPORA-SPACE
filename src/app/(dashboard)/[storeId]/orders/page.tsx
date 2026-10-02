@@ -1,7 +1,5 @@
 import { db } from "@/lib/db"
 import { OrderRow } from "./OrderRow"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ShoppingBag } from "lucide-react"
 import { OrderStatus } from "@prisma/client"
@@ -34,17 +32,6 @@ export default async function OrdersPage({
   })
 
   if (!store) return null
-
-  const ORDER_STATUSES = [
-    "ALL",
-    "PENDING",
-    "PENDING_VERIFICATION",
-    "PROCESSING",
-    "SHIPPED",
-    "DELIVERED",
-    "CANCELLED",
-    "REFUNDED"
-  ]
 
   return (
     <div className="space-y-8 pb-10">

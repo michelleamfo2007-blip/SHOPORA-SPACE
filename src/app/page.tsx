@@ -7,7 +7,7 @@ import { PlatformAnalyticsTracker } from "@/components/marketing/PlatformAnalyti
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-stone-50 text-stone-950 selection:bg-stone-950 selection:text-white">
       <PlatformAnalyticsTracker />
       <Navbar />
       

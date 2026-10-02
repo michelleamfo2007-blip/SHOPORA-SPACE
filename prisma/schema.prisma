@@ -94,6 +94,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -102,6 +103,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model VerificationToken {
@@ -109,7 +112,7 @@ model VerificationToken {
   token      String   @unique
   expires    DateTime
 
-  @@unique([identifier, token])
+  @@id([identifier, token])
 }
 
 model Store {
@@ -163,6 +166,7 @@ model StoreMember {
   user      User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([storeId, userId])
+  @@index([userId])
 }
 
 model Domain {
@@ -173,20 +177,26 @@ model Domain {
   createdAt  DateTime @default(now())
 
   store      Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
 }
 
 model Subscription {
-  id               String             @id @default(cuid())
-  storeId          String             @unique
-  planId           String
-  status           SubscriptionStatus @default(TRIAL)
-  currentPeriodEnd DateTime?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id                  String             @id @default(cuid())
+  storeId             String             @unique
+  planId              String
+  status              SubscriptionStatus @default(TRIAL)
+  currentPeriodEnd    DateTime?
+  isEarlyBird         Boolean            @default(false)
+  earlyBirdMonthsUsed Int                @default(0)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
 
   store            Store              @relation(fields: [storeId], references: [id], onDelete: Cascade)
   plan             SubscriptionPlan   @relation(fields: [planId], references: [id])
   payments         SubscriptionPayment[]
+
+  @@index([planId])
 }
 
 model SubscriptionPayment {
@@ -200,6 +210,8 @@ model SubscriptionPayment {
   updatedAt       DateTime @updatedAt
 
   subscription    Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
 }
 
 model SubscriptionPlan {
@@ -262,6 +274,8 @@ model Product {
   options     ProductOption[]
   categories  Category[]     @relation("ProductToCategory")
   reviews     Review[]
+
+  @@index([storeId])
 }
 
 model ProductOption {
@@ -301,6 +315,8 @@ model ProductVariant {
   orderItems     OrderItem[]
   optionValues   ProductOptionValue[] @relation("VariantToOptionValue")
   inventoryHistory InventoryHistory[]
+
+  @@index([productId])
 }
 
 enum InventoryChangeReason {
@@ -320,6 +336,8 @@ model InventoryHistory {
   createdAt   DateTime @default(now())
 
   variant     ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@index([variantId])
 }
 
 model Category {
@@ -368,6 +386,9 @@ model Order {
   customer        Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
   orderItems      OrderItem[]
   payments        Payment[]
+
+  @@index([storeId])
+  @@index([customerId])
 }
 
 model OrderItem {
@@ -379,6 +400,9 @@ model OrderItem {
 
   order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   variant   ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@index([orderId])
+  @@index([variantId])
 }
 
 model Payment {
@@ -391,6 +415,8 @@ model Payment {
   createdAt DateTime        @default(now())
 
   order     Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
 }
 
 model StorePaymentSetting {
@@ -443,6 +469,8 @@ model ShippingZone {
   
   store         Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
   rates         ShippingRate[]
+
+  @@index([storeId])
 }
 
 model ShippingRate {
@@ -453,6 +481,8 @@ model ShippingRate {
   estimatedDays  String?  
   
   zone           ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@index([zoneId])
 }
 
 model Review {
@@ -468,6 +498,10 @@ model Review {
   store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   customer  Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([storeId])
+  @@index([productId])
+  @@index([customerId])
 }
 
 model SupportTicket {
@@ -481,6 +515,9 @@ model SupportTicket {
 
   store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
   customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([storeId])
+  @@index([customerId])
 }
 
 model StoreAnalytics {
@@ -495,7 +532,6 @@ model StoreAnalytics {
   updatedAt   DateTime @updatedAt
 
   @@unique([storeId, date])
-  @@index([storeId])
 }
 
 model PlatformAnalytics {

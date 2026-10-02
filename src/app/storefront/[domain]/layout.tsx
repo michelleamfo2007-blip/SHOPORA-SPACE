@@ -1,9 +1,6 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { getStoreByHost } from "@/lib/tenant"
-import { db } from "@/lib/db"
-import { ShoppingCart } from "lucide-react"
-import { AIAssistant } from "@/components/storefront/AIAssistant"
 import { CartDrawer } from "@/components/storefront/CartDrawer"
 import { StoreAnalyticsTracker } from "@/components/storefront/StoreAnalyticsTracker"
 
@@ -39,6 +36,7 @@ export default async function StorefrontLayout({
             <div className="flex items-center gap-4">
               <Link href={`${basePath}/`} className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
                 {store.logoUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={store.logoUrl} alt={`${store.name} Logo`} className="h-8 w-auto object-contain" />
                 )}
                 <span>{store.name}</span>
@@ -73,16 +71,11 @@ export default async function StorefrontLayout({
         {children}
       </main>
 
-      {/* Storefront Footer */}
-      <footer className="bg-slate-900 text-white pt-10 pb-6 border-t border-slate-800" style={{ backgroundColor: store.primaryColor || '#0f172a' }}>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-8 md:gap-12 md:grid-cols-2 lg:grid-cols-4 mb-8">
-            <div>
-              <h3 className="text-xl font-bold tracking-tight mb-4">{store.name}</h3>
-              <p className="text-white/70 text-sm leading-relaxed mb-6">
-                {store.description || "Premium quality products delivered right to your door."}
-              </p>
-              <div className="flex gap-3">
+      <footer className="text-white" style={{ backgroundColor: store.primaryColor || "#0f172a" }}>
+        <div className="mx-auto max-w-6xl px-5 py-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm font-semibold">{store.name}</p>
+            <div className="flex gap-2">
                 {store.instagramHandle && (
                   <a href={store.instagramHandle.startsWith('http') ? store.instagramHandle : `https://instagram.com/${store.instagramHandle.replace('@', '')}`} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
@@ -108,49 +101,22 @@ export default async function StorefrontLayout({
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5" /></svg>
                   </a>
                 )}
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="text-base font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2.5 text-sm text-white/70">
-                <li><Link href={`${basePath}/`} className="hover:text-white transition-colors">Home</Link></li>
-                <li><Link href={`${basePath}/#shop`} className="hover:text-white transition-colors">Shop</Link></li>
-                <li><Link href={`${basePath}/#categories`} className="hover:text-white transition-colors">Categories</Link></li>
-                <li><Link href={`${basePath}/#about`} className="hover:text-white transition-colors">About Us</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-base font-semibold mb-4">Customer Support</h4>
-              <ul className="space-y-2.5 text-sm text-white/70">
-                {store.whatsappNumber ? (
-                  <li><a href={`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Contact Us</a></li>
-                ) : (
-                  <li><Link href={`${basePath}/pages/faq`} className="hover:text-white transition-colors">Contact</Link></li>
-                )}
-                <li><Link href={`${basePath}/pages/faq`} className="hover:text-white transition-colors">FAQs</Link></li>
-                <li><Link href={`${basePath}/pages/shipping`} className="hover:text-white transition-colors">Shipping Policy</Link></li>
-                <li><Link href={`${basePath}/pages/refunds`} className="hover:text-white transition-colors">Returns Policy</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-base font-semibold mb-4">Shopora Space</h4>
-              <p className="text-white/70 text-xs mb-3">
-                This store is proudly powered by Shopora Space. Discover more amazing stores on our platform.
-              </p>
-              <a href="https://shopora.space" target="_blank" rel="noreferrer" className="inline-flex items-center text-xs font-semibold text-white hover:underline">
-                Explore Shopora Space &rarr;
-              </a>
             </div>
           </div>
-          
-          <div className="pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-3 text-white/50 text-xs">
-            <p>© {new Date().getFullYear()} {store.name}. All rights reserved.</p>
-            <div className="flex gap-4">
-              <span>Powered by Shopora</span>
-            </div>
+
+          <nav className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-white/80">
+            <Link href={`${basePath}/products`} className="hover:text-white">Shop</Link>
+            {store.whatsappNumber && (
+              <a href={`https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, "")}`} target="_blank" rel="noreferrer" className="hover:text-white">WhatsApp</a>
+            )}
+            <Link href={`${basePath}/pages/faq`} className="hover:text-white">FAQs</Link>
+            <Link href={`${basePath}/pages/shipping`} className="hover:text-white">Shipping</Link>
+            <Link href={`${basePath}/pages/refunds`} className="hover:text-white">Returns</Link>
+          </nav>
+
+          <div className="mt-4 flex items-center justify-between border-t border-white/15 pt-3 text-xs text-white/60">
+            <p>© {new Date().getFullYear()} {store.name}</p>
+            <a href="https://shopora.space" target="_blank" rel="noreferrer" className="hover:text-white">Shopora</a>
           </div>
         </div>
       </footer>

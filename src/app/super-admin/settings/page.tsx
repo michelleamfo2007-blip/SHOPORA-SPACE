@@ -73,13 +73,6 @@ export default function SettingsPage() {
               <Switch id="maintenance-mode" />
             </div>
 
-            <div className="flex items-center justify-between space-x-2">
-              <div className="space-y-1">
-                <Label htmlFor="waitlist-mode" className="font-bold text-slate-700">Enforce Waitlist</Label>
-                <p className="text-sm font-medium text-slate-500">Require users to be invited from the waitlist before creating a store.</p>
-              </div>
-              <Switch id="waitlist-mode" />
-            </div>
           </CardContent>
           <CardFooter className="border-t border-slate-100 bg-slate-50/50 px-6 py-4">
             <Button onClick={handleSave} disabled={loading} className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg px-6">

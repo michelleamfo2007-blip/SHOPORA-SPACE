@@ -10,11 +10,11 @@ import { Label } from "@/components/ui/label"
 const packages = [
   {
     name: "Starter",
-    priceMonthly: 150,
-    priceYearly: 1650,
+    priceMonthly: 100,
+    priceYearly: 1100,
     description: "Perfect for new merchants starting their online journey.",
     features: [
-      "Up to 50 Products",
+      "Up to 25 Products",
       "Basic Storefront Theme",
       "Order Management",
       "Standard Support"
@@ -22,11 +22,11 @@ const packages = [
   },
   {
     name: "Professional",
-    priceMonthly: 250,
-    priceYearly: 2750,
+    priceMonthly: 200,
+    priceYearly: 2200,
     description: "For growing businesses that need more power.",
     features: [
-      "Unlimited Products",
+      "Up to 50 Products",
       "Custom Domain Support",
       "Advanced Analytics",
       "Priority Support"
@@ -34,13 +34,13 @@ const packages = [
   },
   {
     name: "Business",
-    priceMonthly: 350,
-    priceYearly: 3850,
+    priceMonthly: 300,
+    priceYearly: 3300,
     description: "Enterprise-grade features for high-volume stores.",
     features: [
-      "Everything in Professional",
+      "Unlimited Products",
+      "Custom Domain Support",
       "Multiple Staff Accounts",
-      "Custom Integrations",
       "24/7 Dedicated Manager"
     ]
   }
@@ -54,7 +54,7 @@ export default function PackagesPage() {
       <div className="max-w-6xl mx-auto text-center mb-10">
         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Choose Your Package</h1>
         <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-8">
-          Select a plan to start your 7-day free trial. You can upgrade or downgrade at any time.
+          Select a plan to start your 1-month free trial. You can upgrade or downgrade at any time.
         </p>
 
         <div className="flex items-center justify-center space-x-3 mb-8">
@@ -123,7 +123,7 @@ function SubmitButton() {
           Processing...
         </>
       ) : (
-        "Start 7-Day Free Trial"
+        "Start 1-Month Free Trial"
       )}
     </Button>
   )

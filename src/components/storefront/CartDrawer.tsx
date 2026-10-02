@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useCart } from "@/lib/cart";
 import { ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+function subscribeToNothing() {
+  return () => {};
+}
 
 interface CartDrawerProps {
   currency: string;
@@ -14,14 +17,9 @@ interface CartDrawerProps {
 
 export function CartDrawer({ currency, primaryColor, basePath }: CartDrawerProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  const isMounted = useSyncExternalStore(subscribeToNothing, () => true, () => false);
   const cart = useCart();
   const router = useRouter();
-
-  // Prevent hydration mismatch
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   if (!isMounted) {
     return (
@@ -107,6 +105,7 @@ export function CartDrawer({ currency, primaryColor, basePath }: CartDrawerProps
                 <li key={item.variantId} className="flex gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
                   <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100 border border-slate-100">
                     {item.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={item.imageUrl}
                         alt={item.name}

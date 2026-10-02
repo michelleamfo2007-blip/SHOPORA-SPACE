@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
 import { ProductStatus, ProductVisibility } from "@prisma/client"
+import { getProductLimitMessage } from "@/lib/plan-limits"
 
 export async function POST(
   req: Request,
@@ -40,6 +41,11 @@ export async function POST(
 
     if (!storeMember) {
       return new NextResponse("Unauthorized access to this store", { status: 403 })
+    }
+
+    const limitMessage = await getProductLimitMessage(storeId)
+    if (limitMessage) {
+      return new NextResponse(limitMessage, { status: 403 })
     }
 
     // Process Option mapping

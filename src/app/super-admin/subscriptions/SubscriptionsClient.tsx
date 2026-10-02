@@ -12,7 +12,7 @@ export function SubscriptionsClient({ payments }: { payments: any[] }) {
     setLoadingId(id)
     try {
       await approvePaymentAction(id)
-    } catch (e) {
+    } catch {
       alert("Failed to approve")
     }
     setLoadingId(null)
@@ -23,7 +23,7 @@ export function SubscriptionsClient({ payments }: { payments: any[] }) {
     setLoadingId(id)
     try {
       await rejectPaymentAction(id)
-    } catch (e) {
+    } catch {
       alert("Failed to reject")
     }
     setLoadingId(null)

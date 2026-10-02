@@ -28,9 +28,9 @@ export async function startTrialAction(planName: string, interval: string = "mon
 
   if (!plan) {
     const defaultPrices: Record<string, Record<string, number>> = {
-      Starter: { month: 150, year: 1650 },
-      Professional: { month: 250, year: 2750 },
-      Business: { month: 350, year: 3850 }
+      Starter: { month: 100, year: 1100 },
+      Professional: { month: 200, year: 2200 },
+      Business: { month: 300, year: 3300 }
     }
     const safeInterval = interval === "year" ? "year" : "month"
     
@@ -75,9 +75,15 @@ export async function startTrialAction(planName: string, interval: string = "mon
     }
   })
 
-  // 3. Create Subscription (7-day trial)
+  // 3. Create Subscription (1-month trial)
   const endDate = new Date()
-  endDate.setDate(endDate.getDate() + 7)
+  endDate.setMonth(endDate.getMonth() + 1)
+
+  // Check for Early Bird availability
+  const earlyBirdCount = await db.subscription.count({
+    where: { isEarlyBird: true }
+  })
+  const isEarlyBird = earlyBirdCount < 15
 
   await db.subscription.create({
     data: {
@@ -85,6 +91,7 @@ export async function startTrialAction(planName: string, interval: string = "mon
       planId: plan.id,
       status: "TRIAL",
       currentPeriodEnd: endDate,
+      isEarlyBird: isEarlyBird,
     }
   })
 
@@ -93,12 +100,12 @@ export async function startTrialAction(planName: string, interval: string = "mon
     await resend.emails.send({
       from: "Michelle from Shopora <billing@shopora.space>",
       to: user.email,
-      subject: "Your Shopora 7-day free trial has started",
+      subject: "Your Shopora 1-month free trial has started",
       html: `
         <p>Hi ${user.name || user.email.split('@')[0]},</p>
-        <p>Your Shopora 7-day free trial has started!</p>
+        <p>Your Shopora 1-month free trial has started!</p>
         <p>You currently have access to the ${planName} plan.</p>
-        <p>Your trial ends on ${endDate.toLocaleDateString()}. After your 7-day trial, your subscription will need to be renewed manually to keep your store active.</p>
+        <p>Your trial ends on ${endDate.toLocaleDateString()}. After your 1-month trial, your subscription will need to be renewed manually to keep your store active.</p>
         <p>Click here to finish setting up your store:<br><a href="https://shopora.space/onboarding">https://shopora.space/onboarding</a></p>
         <p>Best,<br>Michelle</p>
       `
@@ -145,11 +152,15 @@ export async function submitPaymentReference(storeId: string, formData: FormData
     throw new Error("No subscription found for this store.")
   }
 
+  // Calculate the amount due
+  const isEarlyBirdActive = store.subscription.isEarlyBird && store.subscription.earlyBirdMonthsUsed < 2
+  const expectedAmount = isEarlyBirdActive ? 50 : store.subscription.plan.price
+
   // Create the payment record
   await db.subscriptionPayment.create({
     data: {
       subscriptionId: store.subscription.id,
-      amount: store.subscription.plan.price,
+      amount: expectedAmount,
       status: "PENDING",
       paymentMethod: method,
       reference: reference,

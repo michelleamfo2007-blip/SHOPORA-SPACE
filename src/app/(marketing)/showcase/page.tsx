@@ -1,66 +1,91 @@
-import { db } from "@/lib/db";
-import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
+import { db } from "@/lib/db"
+import { Navbar } from "@/components/marketing/navbar"
+import { Footer } from "@/components/marketing/footer"
+import { ArrowUpRight } from "lucide-react"
 
 export default async function ShowcasePage() {
   const stores = await db.store.findMany({
     where: { status: "ACTIVE" },
     take: 12,
-    orderBy: { createdAt: "desc" }
-  });
+    orderBy: { createdAt: "desc" },
+  })
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-6 py-24">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6">Discover Our Merchants</h1>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-            Explore beautiful storefronts built on Shopora by incredible entrepreneurs around the world.
+    <div className="min-h-screen bg-stone-50 text-stone-950">
+      <Navbar />
+      <main className="mx-auto max-w-6xl px-5 pb-20 pt-28">
+        <div className="max-w-2xl">
+          <p className="text-sm font-medium text-stone-500">Shops on Shopora</p>
+          <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">Discover our merchants</h1>
+          <p className="mt-4 text-base leading-relaxed text-stone-600 md:text-lg">
+            Real storefronts from sellers on Shopora. Open a shop to see what they sell.
           </p>
         </div>
 
         {stores.length === 0 ? (
-          <div className="text-center py-20 text-slate-500 bg-slate-50 rounded-2xl">
-            No stores to showcase yet. Be the first!
+          <div className="mt-16 rounded-3xl border border-stone-200 bg-white px-6 py-16 text-center text-stone-500">
+            No stores to showcase yet.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {stores.map((store) => (
-              <a 
-                key={store.id} 
-                href={`https://${store.slug}.shopora.space`} 
-                target="_blank" 
+              <a
+                key={store.id}
+                href={`https://${store.slug}.shopora.space`}
+                target="_blank"
                 rel="noopener noreferrer"
-                className="group block"
+                className="group flex flex-col overflow-hidden rounded-3xl border border-stone-200 bg-white transition-colors hover:border-stone-400"
               >
-                <Card className="h-full overflow-hidden hover:shadow-xl transition-all duration-300 border-slate-100 group-hover:-translate-y-1">
-                  <div 
-                    className="h-40 w-full relative flex items-center justify-center p-6"
-                    style={{ backgroundColor: store.primaryColor || "#0f172a" }}
-                  >
-                    {store.logoUrl ? (
-                      <img src={store.logoUrl} alt={store.name} className="max-h-full max-w-full object-contain drop-shadow-md" />
-                    ) : (
-                      <h2 className="text-2xl font-bold text-white drop-shadow-md">{store.name}</h2>
-                    )}
-                  </div>
-                  <CardContent className="p-6 bg-white">
-                    <h3 className="font-semibold text-lg text-slate-900 group-hover:text-blue-600 transition-colors mb-2">
-                      {store.name}
-                    </h3>
-                    <p className="text-sm text-slate-500 line-clamp-2">
-                      {store.description || "A beautiful store built on Shopora."}
-                    </p>
-                    <p className="text-xs text-slate-400 mt-4 uppercase tracking-widest font-medium">
-                      {store.country} • {store.currency}
-                    </p>
-                  </CardContent>
-                </Card>
+                <div
+                  className="relative h-44 overflow-hidden"
+                  style={{ backgroundColor: store.primaryColor || "#0a0a0a" }}
+                >
+                  {store.heroImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={store.heroImage}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : store.logoUrl ? (
+                    <div className="flex h-full items-center justify-center bg-stone-100">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={store.logoUrl}
+                        alt=""
+                        className="h-28 w-28 object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex h-full items-end p-5">
+                      <p className="text-2xl font-semibold text-white">{store.name}</p>
+                    </div>
+                  )}
+                  {store.heroImage && store.logoUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={store.logoUrl}
+                      alt=""
+                      className="absolute bottom-3 left-3 h-12 w-12 rounded-xl bg-white object-contain p-1"
+                    />
+                  )}
+                </div>
+                <div className="flex flex-1 flex-col p-5">
+                  <h2 className="text-lg font-semibold tracking-tight">{store.name}</h2>
+                  <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-stone-500">
+                    {store.description || "Shop this store on Shopora."}
+                  </p>
+                  <p className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-stone-950">
+                    {store.slug}.shopora.space
+                    <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  </p>
+                </div>
               </a>
             ))}
           </div>
         )}
-      </div>
+      </main>
+      <Footer />
     </div>
   )
 }

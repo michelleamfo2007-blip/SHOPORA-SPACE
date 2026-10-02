@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -13,8 +12,7 @@ import {
   AlertTriangle,
   Clock, 
   TrendingUp, 
-  Calendar,
-  ChevronRight
+  Calendar
 } from "lucide-react"
 
 interface SuperAdminOverviewClientProps {
@@ -55,7 +53,7 @@ export function SuperAdminOverviewClient({
   chartData
 }: SuperAdminOverviewClientProps) {
   const router = useRouter()
-  const [timeRange, setTimeRange] = useState("Last 7 Days")
+  const timeRange = "Last 7 Days"
 
   // Generate SVG path for smooth bezier curve chart
   const generateSvgPath = (data: Array<{ amount: number }>, width: number, height: number, closePath: boolean = false) => {
@@ -194,7 +192,7 @@ export function SuperAdminOverviewClient({
         </div>
 
         {/* Card 5: Pending Approvals */}
-        <div onClick={() => router.push('/super-admin/waitlist')} className="block h-full cursor-pointer">
+        <div onClick={() => router.push('/super-admin/subscriptions')} className="block h-full cursor-pointer">
           <Card className={`border-0 shadow-sm bg-gradient-to-br hover:shadow-md  transition-all cursor-pointer h-full ${stats.pendingApprovals > 0 ? 'from-orange-50/50 to-orange-100/10' : 'from-emerald-50/40 to-emerald-100/10'}`}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -206,7 +204,7 @@ export function SuperAdminOverviewClient({
               <div className="mt-4">
                 <h3 className="text-2xl font-extrabold text-slate-900">{stats.pendingApprovals}</h3>
                 <p className="text-xs font-medium text-slate-500 mt-1.5">
-                  Stores/Payments awaiting review
+                  Payments awaiting review
                 </p>
               </div>
             </CardContent>
@@ -291,7 +289,7 @@ export function SuperAdminOverviewClient({
         <Card className="border-0 shadow-sm bg-white">
           <CardHeader className="px-6 py-5 border-b border-slate-100 flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-bold text-slate-900">Pending Subscriptions</CardTitle>
-            <Button variant="ghost" size="sm" className="text-slate-500 font-bold hover:text-slate-900" onClick={() => window.location.href=`/super-admin/subscriptions`}>
+            <Button variant="ghost" size="sm" className="text-slate-500 font-bold hover:text-slate-900" onClick={() => router.push("/super-admin/subscriptions")}>
               View All
             </Button>
           </CardHeader>
@@ -326,7 +324,7 @@ export function SuperAdminOverviewClient({
       <Card className="border-0 shadow-sm bg-white">
         <CardHeader className="px-6 py-5 border-b border-slate-100 flex flex-row items-center justify-between">
           <CardTitle className="text-lg font-bold text-slate-900">Recent Storefronts</CardTitle>
-          <Button variant="ghost" size="sm" className="text-slate-500 font-bold hover:text-slate-900" onClick={() => window.location.href=`/super-admin/sellers`}>
+          <Button variant="ghost" size="sm" className="text-slate-500 font-bold hover:text-slate-900" onClick={() => router.push("/super-admin/sellers")}>
             View All
           </Button>
         </CardHeader>

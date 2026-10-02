@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -155,12 +155,15 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
           }))
         })
       })
-      if (!response.ok) throw new Error("Failed to save product")
+      if (!response.ok) {
+        const message = await response.text()
+        throw new Error(message || "Failed to save product")
+      }
       router.push(`/${storeId}/products`)
       router.refresh()
     } catch (error) {
       console.error(error)
-      alert("Something went wrong.")
+      alert(error instanceof Error && error.message ? error.message : "Something went wrong.")
     } finally {
       setIsLoading(false)
     }

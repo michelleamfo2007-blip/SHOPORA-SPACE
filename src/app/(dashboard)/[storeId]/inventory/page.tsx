@@ -2,7 +2,7 @@ import { db } from "@/lib/db"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { AlertCircle, ArrowUpRight, CheckCircle2, Box } from "lucide-react"
+import { ArrowUpRight, CheckCircle2, Box } from "lucide-react"
 
 export default async function InventoryPage({ params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params;

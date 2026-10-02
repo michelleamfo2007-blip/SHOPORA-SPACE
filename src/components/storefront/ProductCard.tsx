@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Heart, Eye, ShoppingBag } from "lucide-react"
 import { useCart } from "@/lib/cart"
 import { useFavorites } from "@/lib/favorites"
@@ -21,6 +22,7 @@ type ProductCardProps = {
 }
 
 export function ProductCard({ product, currency, basePath }: ProductCardProps) {
+  const router = useRouter()
   const cart = useCart()
   const { isFavorite, toggleFavorite } = useFavorites()
   
@@ -54,7 +56,7 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
   const handleQuickView = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    window.location.href = `${basePath}/product/${product.id}`
+    router.push(`${basePath}/product/${product.id}`)
   }
 
   return (
@@ -74,7 +76,7 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
         )}
         
         {/* Floating Actions */}
-        <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">
+        <div className="absolute top-3 right-3 hidden flex-col gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100 lg:flex">
           <button 
             onClick={handleToggleFavorite}
             className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform text-slate-700 hover:text-red-500"

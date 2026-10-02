@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { CheckCircle2 } from "lucide-react"
 
 export default function GuidePage() {
@@ -20,9 +20,11 @@ export default function GuidePage() {
           <h3>1. Choose Your Shopora Package</h3>
           <p>Before creating your store, select the package that works best for your business.</p>
           <ul>
-            <li><strong>Shopora Space — GHS 150/month</strong></li>
+            <li><strong>Starter — GHS 100/month</strong> — up to 25 products</li>
+            <li><strong>Professional — GHS 200/month</strong> — up to 50 products</li>
+            <li><strong>Business — GHS 300/month</strong> — unlimited products</li>
           </ul>
-          <p>Your subscription gives you access to your Shopora store and vendor dashboard. You'll also receive a 7-day free trial when you start.</p>
+          <p>Every plan includes your store, the vendor dashboard, and a 1-month free trial that starts when the store is created.</p>
 
           <hr className="my-8 border-slate-200" />
 
@@ -152,9 +154,9 @@ export default function GuidePage() {
 
           <hr className="my-8 border-slate-200" />
 
-          <h3>13. Your 7-Day Free Trial ⏳</h3>
-          <p>When you create your Shopora store, your 7-day free trial begins. During your trial, you can set up your store, add your products, customize your storefront, test your dashboard, and prepare your store for customers.</p>
-          <p>After your 7-day trial ends, your selected Shopora package will need to be paid for to continue using the service.</p>
+          <h3>13. Your 1-Month Free Trial</h3>
+          <p>When you create your Shopora store, your 1-month free trial begins. During your trial, you can set up your store, add your products, customize your storefront, test your dashboard, and prepare your store for customers.</p>
+          <p>After your 1-month trial ends, your selected Shopora package will need to be paid for to continue using the service.</p>
 
           <hr className="my-8 border-slate-200" />
 

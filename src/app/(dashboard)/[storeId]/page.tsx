@@ -157,6 +157,7 @@ export default async function DashboardOverview({ params }: { params: Promise<{ 
 
   return (
     <DashboardOverviewClient
+      storeId={storeId}
       storeName={store.name}
       userName={session.user.name || session.user.email?.split("@")[0] || "Merchant"}
       currency={store.currency}

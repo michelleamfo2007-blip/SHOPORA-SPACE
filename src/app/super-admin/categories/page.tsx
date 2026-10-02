@@ -1,8 +1,6 @@
 import { db } from "@/lib/db"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { LayoutList } from "lucide-react"
-import Link from "next/link"
 
 export default async function CategoriesPage() {
   const categories = await db.category.findMany({

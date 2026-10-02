@@ -1,8 +1,12 @@
 const { Client } = require('pg');
 
-const client = new Client({
-  connectionString: "postgresql://postgres.pyatrfilqudblubixdwz:Splash%402420!.@aws-0-eu-west-2.pooler.supabase.com:5432/postgres"
-});
+const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL
+if (!connectionString) {
+  console.error("Set DIRECT_URL or DATABASE_URL before running this script.")
+  process.exit(1)
+}
+
+const client = new Client({ connectionString });
 
 async function run() {
   await client.connect();

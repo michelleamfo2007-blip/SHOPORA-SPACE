@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation"
 import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
-import { Button } from "@/components/ui/button"
 import { ProductClient } from "./ProductClient"
 
 export default async function ProductPage({ 

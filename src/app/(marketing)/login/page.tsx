@@ -2,13 +2,7 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { signIn } from "next-auth/react"
@@ -40,20 +34,18 @@ export default function LoginPage() {
         setError("Invalid email or password")
         setLoading(false)
       } else {
-        window.location.href = "/dashboard"
+        router.push("/dashboard")
+        router.refresh()
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred")
       setLoading(false)
     }
   }
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen bg-slate-50 overflow-hidden selection:bg-black selection:text-white">
+    <div className="relative flex items-center justify-center min-h-screen bg-stone-50 overflow-hidden selection:bg-black selection:text-white">
       {/* Decorative Background Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-100/50 blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-100/50 blur-[100px] pointer-events-none" />
-      
       <div className="w-full max-w-[400px] px-4 z-10">
         <div className="mb-8 text-center space-y-2">
           <Link href="/" className="inline-block transition-transform hover:scale-105">
@@ -89,7 +81,7 @@ export default function LoginPage() {
               <div className="grid gap-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="text-slate-600">Password</Label>
-                  <Link href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors">
+                  <Link href="#" className="text-sm font-medium text-stone-900 hover:underline transition-colors">
                     Forgot password?
                   </Link>
                 </div>

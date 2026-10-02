@@ -1,7 +1,6 @@
 "use client"
 
 import { usePathname, useRouter } from "next/navigation"
-import { useEffect } from "react"
 import { AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 

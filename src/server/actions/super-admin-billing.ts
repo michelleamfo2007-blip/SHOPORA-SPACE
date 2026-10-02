@@ -42,11 +42,14 @@ export async function approvePaymentAction(paymentId: string) {
     nextEnd.setMonth(nextEnd.getMonth() + 1)
   }
 
+  const isEarlyBirdActive = payment.subscription.isEarlyBird && payment.subscription.earlyBirdMonthsUsed < 2;
+
   await db.subscription.update({
     where: { id: payment.subscriptionId },
     data: {
       status: "ACTIVE",
-      currentPeriodEnd: nextEnd
+      currentPeriodEnd: nextEnd,
+      ...(isEarlyBirdActive ? { earlyBirdMonthsUsed: { increment: 1 } } : {})
     }
   })
 

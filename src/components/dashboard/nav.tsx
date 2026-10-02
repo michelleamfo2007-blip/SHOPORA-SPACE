@@ -2,7 +2,25 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Package, LayoutGrid, Box, ShoppingCart, Truck, Users, CreditCard, Ticket, BarChart3, Star, LifeBuoy, Settings, Wallet } from "lucide-react"
+import { useState } from "react"
+import {
+  LayoutDashboard,
+  Package,
+  LayoutGrid,
+  Box,
+  ShoppingCart,
+  Truck,
+  Users,
+  CreditCard,
+  Ticket,
+  BarChart3,
+  Star,
+  LifeBuoy,
+  Settings,
+  Wallet,
+  Menu,
+  X,
+} from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -11,159 +29,85 @@ interface DashboardNavProps {
   isMobileMenu?: boolean
 }
 
-import { useState } from "react"
-import { Menu, X } from "lucide-react"
-
 export function DashboardNav({ storeId, isMobileMenu }: DashboardNavProps) {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
 
-  const routes = [
+  const groups = [
     {
-      href: `/${storeId}`,
-      label: "Overview",
-      icon: LayoutDashboard,
-      color: "text-blue-500",
-      active: pathname === `/${storeId}`,
+      label: "Shop",
+      routes: [
+        { href: `/${storeId}`, label: "Overview", icon: LayoutDashboard, active: pathname === `/${storeId}` },
+        { href: `/${storeId}/products`, label: "Products", icon: Package, active: pathname === `/${storeId}/products` },
+        { href: `/${storeId}/categories`, label: "Categories", icon: LayoutGrid, active: pathname === `/${storeId}/categories` },
+        { href: `/${storeId}/inventory`, label: "Inventory", icon: Box, active: pathname === `/${storeId}/inventory` },
+      ],
     },
     {
-      href: `/${storeId}/products`,
-      label: "Products",
-      icon: Package,
-      color: "text-emerald-500",
-      active: pathname === `/${storeId}/products`,
+      label: "Sales",
+      routes: [
+        { href: `/${storeId}/orders`, label: "Orders", icon: ShoppingCart, active: pathname === `/${storeId}/orders` },
+        { href: `/${storeId}/customers`, label: "Customers", icon: Users, active: pathname === `/${storeId}/customers` },
+        { href: `/${storeId}/shipping`, label: "Delivery", icon: Truck, active: pathname === `/${storeId}/shipping` },
+        { href: `/${storeId}/discounts`, label: "Discounts", icon: Ticket, active: pathname === `/${storeId}/discounts` },
+        { href: `/${storeId}/reviews`, label: "Reviews", icon: Star, active: pathname === `/${storeId}/reviews` },
+      ],
     },
     {
-      href: `/${storeId}/categories`,
-      label: "Categories",
-      icon: LayoutGrid,
-      color: "text-pink-500",
-      active: pathname === `/${storeId}/categories`,
-    },
-    {
-      href: `/${storeId}/inventory`,
-      label: "Inventory",
-      icon: Box,
-      color: "text-indigo-500",
-      active: pathname === `/${storeId}/inventory`,
-    },
-    {
-      href: `/${storeId}/orders`,
-      label: "Orders",
-      icon: ShoppingCart,
-      color: "text-amber-500",
-      active: pathname === `/${storeId}/orders`,
-    },
-    {
-      href: `/${storeId}/shipping`,
-      label: "Delivery",
-      icon: Truck,
-      color: "text-teal-500",
-      active: pathname === `/${storeId}/shipping`,
-    },
-    {
-      href: `/${storeId}/customers`,
-      label: "Customers",
-      icon: Users,
-      color: "text-purple-500",
-      active: pathname === `/${storeId}/customers`,
-    },
-    {
-      href: `/${storeId}/settings/payments`,
-      label: "Payments",
-      icon: CreditCard,
-      color: "text-green-500",
-      active: pathname === `/${storeId}/settings/payments`,
-    },
-    {
-      href: `/${storeId}/discounts`,
-      label: "Discounts",
-      icon: Ticket,
-      color: "text-rose-500",
-      active: pathname === `/${storeId}/discounts`,
-    },
-    {
-      href: `/${storeId}/analytics`,
-      label: "Analytics",
-      icon: BarChart3,
-      color: "text-cyan-500",
-      active: pathname === `/${storeId}/analytics`,
-    },
-    {
-      href: `/${storeId}/reviews`,
-      label: "Reviews",
-      icon: Star,
-      color: "text-amber-500",
-      active: pathname === `/${storeId}/reviews`,
-    },
-    {
-      href: `/${storeId}/support`,
-      label: "Support",
-      icon: LifeBuoy,
-      color: "text-indigo-500",
-      active: pathname === `/${storeId}/support`,
-    },
-    {
-      href: `/${storeId}/billing`,
-      label: "Billing",
-      icon: Wallet,
-      color: "text-blue-500",
-      active: pathname === `/${storeId}/billing`,
-    },
-    {
-      href: `/${storeId}/settings`,
-      label: "Settings",
-      icon: Settings,
-      color: "text-slate-500",
-      active: pathname === `/${storeId}/settings`,
+      label: "Account",
+      routes: [
+        { href: `/${storeId}/settings/payments`, label: "Payments", icon: CreditCard, active: pathname === `/${storeId}/settings/payments` },
+        { href: `/${storeId}/analytics`, label: "Analytics", icon: BarChart3, active: pathname === `/${storeId}/analytics` },
+        { href: `/${storeId}/billing`, label: "Billing", icon: Wallet, active: pathname === `/${storeId}/billing` },
+        { href: `/${storeId}/support`, label: "Support", icon: LifeBuoy, active: pathname === `/${storeId}/support` },
+        { href: `/${storeId}/settings`, label: "Settings", icon: Settings, active: pathname === `/${storeId}/settings` },
+      ],
     },
   ]
+
+  const linkClass = (active: boolean) =>
+    cn(
+      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+      active ? "bg-stone-950 text-white" : "text-stone-600 hover:bg-stone-100 hover:text-stone-950"
+    )
+
+  const nav = (
+    <div className="grid gap-5">
+      {groups.map((group) => (
+        <div key={group.label}>
+          <p className="px-3 pb-1 text-[11px] font-medium uppercase tracking-wider text-stone-400">{group.label}</p>
+          <div className="grid gap-0.5">
+            {group.routes.map((route) => (
+              <Link
+                key={route.href}
+                href={route.href}
+                onClick={() => setIsOpen(false)}
+                className={linkClass(route.active)}
+              >
+                <route.icon className="h-4 w-4" />
+                {route.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
 
   if (isMobileMenu) {
     return (
       <div className="lg:hidden">
-        <button onClick={() => setIsOpen(!isOpen)} className="text-slate-900 p-2">
-          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        <button type="button" onClick={() => setIsOpen(!isOpen)} className="rounded-lg p-2 text-stone-950" aria-label={isOpen ? "Close menu" : "Open menu"}>
+          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
         {isOpen && (
-          <div className="absolute top-[60px] left-0 right-0 bg-white border-b shadow-lg z-50 px-4 py-4 max-h-[80vh] overflow-y-auto">
-            <nav className="grid items-start gap-2">
-              {routes.map((route) => (
-                <Link
-                  key={route.href}
-                  href={route.href}
-                  onClick={() => setIsOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-slate-100 hover:text-slate-900",
-                    route.active ? "bg-slate-100 text-slate-900" : "text-slate-500"
-                  )}
-                >
-                  <route.icon className={cn("h-4 w-4", route.color)} />
-                  {route.label}
-                </Link>
-              ))}
-            </nav>
+          <div className="absolute left-0 right-0 top-14 z-50 max-h-[80vh] overflow-y-auto border-b border-stone-200 bg-stone-50 px-4 py-4">
+            {nav}
           </div>
         )}
       </div>
     )
   }
 
-  return (
-    <nav className="grid items-start gap-2">
-      {routes.map((route) => (
-        <Link
-          key={route.href}
-          href={route.href}
-          className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-slate-100 hover:text-slate-900",
-            route.active ? "bg-slate-100 text-slate-900" : "text-slate-500"
-          )}
-        >
-          <route.icon className={cn("h-4 w-4", route.color)} />
-          {route.label}
-        </Link>
-      ))}
-    </nav>
-  )
+  return nav
 }

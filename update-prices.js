@@ -6,9 +6,12 @@ async function main() {
   const plans = await prisma.subscriptionPlan.findMany()
   for (const plan of plans) {
     let newPrice = plan.price
-    if (plan.name === 'Starter' && plan.price < 150) newPrice = 150
-    if (plan.name === 'Professional' && plan.price < 250) newPrice = 250
-    if (plan.name === 'Business' && plan.price < 350) newPrice = 350
+    if (plan.name === 'Starter' && plan.interval === 'month') newPrice = 100
+    if (plan.name === 'Starter' && plan.interval === 'year') newPrice = 1100
+    if (plan.name === 'Professional' && plan.interval === 'month') newPrice = 200
+    if (plan.name === 'Professional' && plan.interval === 'year') newPrice = 2200
+    if (plan.name === 'Business' && plan.interval === 'month') newPrice = 300
+    if (plan.name === 'Business' && plan.interval === 'year') newPrice = 3300
     
     await prisma.subscriptionPlan.update({
       where: { id: plan.id },

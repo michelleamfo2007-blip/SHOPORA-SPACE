@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
 import { DashboardNav } from "@/components/dashboard/nav"
-import { Store as StoreIcon, ExternalLink } from "lucide-react"
+import { ExternalLink } from "lucide-react"
 import { SubscriptionGuard } from "@/components/dashboard/SubscriptionGuard"
 import { Toaster } from "sonner"
 
@@ -50,59 +50,38 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen">
-      {/* Sidebar - Desktop */}
-      <div className="hidden lg:block w-64 border-r bg-slate-50/50">
-        <div className="flex h-full max-h-screen flex-col gap-2">
-          <div className="flex h-[60px] items-center justify-between border-b px-6">
-            <div className="flex items-center gap-2 font-semibold">
-              <StoreIcon className="h-6 w-6" />
-              <span className="truncate w-32">{storeMember.store.name}</span>
-            </div>
-            <a
-              href={`/storefront/${storeMember.store.slug}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-slate-400 hover:text-blue-600 transition-colors"
-              title="View Storefront"
-            >
-              <ExternalLink className="h-4 w-4" />
-            </a>
+    <div className="flex min-h-screen flex-col bg-stone-50 text-stone-950 lg:flex-row">
+      <div className="hidden w-60 border-r border-stone-200 bg-stone-50 lg:block">
+        <div className="flex h-full max-h-screen flex-col">
+          <div className="flex h-14 items-center px-5">
+            <p className="truncate text-sm font-semibold">{storeMember.store.name}</p>
           </div>
-          <div className="flex-1 overflow-auto py-2">
-            <div className="grid items-start px-4 text-sm font-medium">
-              <DashboardNav storeId={storeId} />
-            </div>
+          <div className="flex-1 overflow-auto px-3 pb-6">
+            <DashboardNav storeId={storeId} />
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex flex-1 w-full max-w-full flex-col min-h-screen overflow-x-hidden">
-        {/* Top Header */}
-        <header className="flex h-[60px] flex-shrink-0 items-center justify-between border-b bg-slate-50/50 px-4 md:px-6">
-          <div className="flex items-center gap-3">
+      <div className="flex min-h-screen w-full max-w-full flex-1 flex-col overflow-x-hidden">
+        <header className="flex h-14 flex-shrink-0 items-center justify-between border-b border-stone-200 bg-stone-50 px-4 md:px-6">
+          <div className="flex items-center gap-2">
             <DashboardNav storeId={storeId} isMobileMenu />
-            <h1 className="font-semibold text-lg hidden md:block">Dashboard</h1>
-            <h1 className="font-semibold text-lg md:hidden">{storeMember.store.name}</h1>
+            <p className="text-sm font-semibold lg:hidden">{storeMember.store.name}</p>
+          </div>
+          <div className="flex items-center gap-4">
             <a
               href={`/storefront/${storeMember.store.slug}`}
               target="_blank"
               rel="noreferrer"
-              className="text-slate-400 hover:text-blue-600 transition-colors md:hidden"
-              title="View Storefront"
+              className="inline-flex items-center gap-1.5 text-sm text-stone-600 hover:text-stone-950"
             >
-              <ExternalLink className="h-4 w-4" />
+              View store <ExternalLink className="h-3.5 w-3.5" />
             </a>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-500 hidden md:block">{session.user.email}</span>
-            <div className="h-8 w-8 rounded-full bg-slate-200" />
+            <span className="hidden text-sm text-stone-500 md:block">{session.user.email}</span>
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 p-4 md:p-6 overflow-x-hidden overflow-y-auto">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6">
           <SubscriptionGuard
             storeId={storeId}
             status={storeMember.store.subscription?.status || "TRIAL"}
