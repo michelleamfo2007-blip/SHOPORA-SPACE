@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { Cormorant_Garamond, DM_Sans } from "next/font/google"
@@ -22,6 +23,27 @@ const sans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-store-sans",
 })
+
+export async function generateMetadata({ params }: { params: Promise<{ domain: string }> }): Promise<Metadata> {
+  const { domain } = await params
+  const store = await getStoreByHost(domain)
+  if (!store) return {}
+
+  const description = store.description || store.heroSubtext || `Shop ${store.name} online.`
+  const image = store.heroImage || store.logoUrl
+
+  return {
+    title: { default: store.name, template: `%s · ${store.name}` },
+    description,
+    openGraph: {
+      title: store.name,
+      description,
+      siteName: store.name,
+      type: "website",
+      ...(image ? { images: [image] } : {}),
+    },
+  }
+}
 
 export default async function StorefrontLayout({
   children,

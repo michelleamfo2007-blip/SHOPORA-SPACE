@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { db } from "./db";
 
 /**
@@ -20,7 +21,7 @@ export function getSubdomain(host: string | null): string | null {
  * Checks subdomain first, then falls back to treating host as a raw slug
  * (for /storefront/[slug] routes via vercel.app or direct access).
  */
-export async function getStoreByHost(host: string | null) {
+export const getStoreByHost = cache(async (host: string | null) => {
   if (!host) return null;
 
   const subdomain = getSubdomain(host);
@@ -34,5 +35,5 @@ export async function getStoreByHost(host: string | null) {
       subscription: true,
     }
   });
-}
+});
 

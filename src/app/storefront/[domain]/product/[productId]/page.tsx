@@ -1,22 +1,18 @@
+import { cache } from "react"
+import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
 import { getStorefrontBasePath } from "@/lib/storefront"
 import { ProductClient } from "./ProductClient"
 
-export default async function ProductPage({ 
-  params 
-}: { 
-  params: Promise<{ domain: string; productId: string }> 
-}) {
-  const { domain, productId } = await params;
-  const store = await getStoreByHost(domain)
-  if (!store) notFound()
+type Props = { params: Promise<{ domain: string; productId: string }> }
 
-  const product = await db.product.findFirst({
-    where: { 
+const getProduct = cache((storeId: string, productId: string) =>
+  db.product.findFirst({
+    where: {
       id: productId,
-      storeId: store.id,
+      storeId,
       status: {
         notIn: ["DRAFT", "ARCHIVED"]
       }
@@ -31,6 +27,36 @@ export default async function ProductPage({
       }
     }
   })
+)
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { domain, productId } = await params
+  const store = await getStoreByHost(domain)
+  if (!store) return {}
+  const product = await getProduct(store.id, productId)
+  if (!product) return {}
+
+  const description = product.description?.replace(/\s+/g, " ").trim().slice(0, 200) || `${product.name} from ${store.name}.`
+  const image = product.images[0] || product.variants.find((v) => v.imageUrl)?.imageUrl
+
+  return {
+    title: product.name,
+    description,
+    openGraph: {
+      title: `${product.name} · ${store.name}`,
+      description,
+      siteName: store.name,
+      ...(image ? { images: [image] } : {}),
+    },
+  }
+}
+
+export default async function ProductPage({ params }: Props) {
+  const { domain, productId } = await params;
+  const store = await getStoreByHost(domain)
+  if (!store) notFound()
+
+  const product = await getProduct(store.id, productId)
 
   if (!product) notFound()
 
