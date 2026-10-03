@@ -3,69 +3,64 @@
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { Resend } from "resend"
-import { OrderAcceptedEmail } from "@/emails/OrderAcceptedEmail"
-import { OrderStatusEmail } from "@/emails/OrderStatusEmail"
+import { OrderStatusEmail, type OrderStatusKind } from "@/emails/OrderStatusEmail"
 import { getStoreAccess } from "@/lib/store-access"
+import { DEFAULT_VARIANT_NAME } from "@/lib/product-variants"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-async function sendOrderAcceptedEmail(orderId: string, storeId: string) {
+async function sendOrderStatusEmail(orderId: string, storeId: string, kind: OrderStatusKind) {
   try {
     const order = await db.order.findUnique({
       where: { id: orderId, storeId },
       include: {
         customer: true,
-        store: true
-      }
+        store: { include: { members: { include: { user: { select: { email: true } } } } } },
+        orderItems: { include: { variant: { select: { name: true, product: { select: { name: true } } } } } },
+      },
     })
 
     if (!order || !order.customer.email) return
 
-    await resend.emails.send({
-      from: `Orders <orders@shopora.space>`,
-      to: order.customer.email,
-      subject: `Your order from ${order.store.name} has been accepted!`,
-      react: OrderAcceptedEmail({
-        customerName: order.customer.name,
-        orderNumber: order.orderNumber,
-        totalAmount: `${order.store.currency} ${order.totalAmount.toFixed(2)}`,
-        storeName: order.store.name
-      }) as React.ReactElement
-    })
-  } catch (error) {
-    console.error("Failed to send order accepted email:", error)
-  }
-}
+    const { store } = order
+    const fromName = store.name.replace(/[<>"\\,;:@]/g, "").trim() || "Shopora"
+    const storeReplyTo = store.contactEmail || store.members.find((m) => m.user?.email)?.user?.email
 
-async function sendOrderStatusEmail(orderId: string, storeId: string, kind: "SHIPPED" | "DELIVERED" | "REFUNDED") {
-  try {
-    const order = await db.order.findUnique({
-      where: { id: orderId, storeId },
-      include: { customer: true, store: true },
-    })
-
-    if (!order || !order.customer.email) return
-
-    const subjects = {
-      SHIPPED: `Your order from ${order.store.name} is on the way`,
-      DELIVERED: `Your order from ${order.store.name} was delivered`,
-      REFUNDED: `Your order from ${order.store.name} was refunded`,
+    const subjects: Record<OrderStatusKind, string> = {
+      ACCEPTED: `Your order ${order.orderNumber} is confirmed`,
+      SHIPPED: `Your order ${order.orderNumber} is on the way`,
+      DELIVERED: `Your order ${order.orderNumber} has arrived`,
+      REFUNDED: `Your order ${order.orderNumber} has been refunded`,
     }
 
     await resend.emails.send({
-      from: `Orders <orders@shopora.space>`,
+      from: `${fromName} <orders@shopora.space>`,
       to: order.customer.email,
+      ...(storeReplyTo ? { replyTo: storeReplyTo } : {}),
       subject: subjects[kind],
       react: OrderStatusEmail({
         kind,
-        customerName: order.customer.name,
+        customerFirstName: order.customer.name.trim().split(/\s+/)[0] || "there",
+        storeName: store.name,
         orderNumber: order.orderNumber,
-        totalAmount: `${order.store.currency} ${order.totalAmount.toFixed(2)}`,
-        storeName: order.store.name,
-      }) as React.ReactElement,
+        currency: store.currency,
+        totalAmount: order.totalAmount,
+        items: order.orderItems.map(({ variant, quantity, price }) => ({
+          name:
+            variant.name && variant.name !== DEFAULT_VARIANT_NAME
+              ? `${variant.product.name} (${variant.name})`
+              : variant.product.name,
+          quantity,
+          price,
+        })),
+        shippingAddress: order.shippingAddress,
+        storeUrl: `https://www.shopora.space/storefront/${store.slug}`,
+        storeWhatsapp: store.whatsappNumber,
+        storeEmail: store.contactEmail,
+      }),
     })
   } catch (error) {
-    console.error("Failed to send order status email:", error)
+    console.error(`Failed to send order ${kind.toLowerCase()} email:`, error)
   }
 }
 
@@ -90,7 +85,7 @@ export async function verifyOrderPaymentAction(storeId: string, orderId: string)
     })
 
     if (order.status !== "PROCESSING") {
-      await sendOrderAcceptedEmail(orderId, storeId)
+      await sendOrderStatusEmail(orderId, storeId, "ACCEPTED")
     }
 
     revalidatePath(`/${storeId}/orders`)
@@ -120,7 +115,7 @@ export async function updateOrderStatusAction(storeId: string, orderId: string, 
     })
 
     if (status === "PROCESSING" && order.status !== "PROCESSING") {
-      await sendOrderAcceptedEmail(orderId, storeId)
+      await sendOrderStatusEmail(orderId, storeId, "ACCEPTED")
     }
 
     if (
