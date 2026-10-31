@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Cormorant_Garamond } from "next/font/google";
 import { Menu, X } from "lucide-react";
-
-const displayFont = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-store-display",
-});
 
 const links = [
   { href: "/#features", label: "Features" },
@@ -78,7 +71,7 @@ export function Navbar() {
       </header>
 
       {open && (
-        <div className={`${displayFont.variable} fixed inset-0 z-[60] flex flex-col bg-[#faf8f5] md:hidden`}>
+        <div className="fixed inset-0 z-[60] flex flex-col bg-[#faf8f5] md:hidden">
           <div className="flex h-16 items-center justify-between border-b border-stone-200 px-5">
             <Logo />
             <button
