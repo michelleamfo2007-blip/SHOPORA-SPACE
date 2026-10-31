@@ -7,6 +7,7 @@ import { isSubscriptionLapsed } from "@/lib/subscription"
 import { DEFAULT_VARIANT_NAME } from "@/lib/product-variants"
 import { NewOrderEmail } from "@/emails/NewOrderEmail"
 import { OrderReceivedEmail } from "@/emails/OrderReceivedEmail"
+import { isAccraArea, quoteShoporaDelivery } from "@/lib/shopora-delivery"
 
 const variantSelect = { id: true, price: true, name: true, product: { select: { name: true } } } as const
 
@@ -25,6 +26,8 @@ export async function processCheckoutAction(formData: FormData) {
   const country = formData.get("country") as string
   const reference = formData.get("paymentReference") as string
   const cartDataStr = formData.get("cartData") as string
+  const deliveryMethodRaw = String(formData.get("deliveryMethod") || "VENDOR").toUpperCase()
+  const deliveryMethod = deliveryMethodRaw === "SHOPORA" ? "SHOPORA" : "VENDOR"
 
   if (!storeId || !email || !phone || !firstName || !lastName || !exactLocation || !cartDataStr || !reference) {
     return { error: "Please fill in all the required fields." }
@@ -36,6 +39,33 @@ export async function processCheckoutAction(formData: FormData) {
   })
   if (!store) return { error: "Store not found." }
   if (isSubscriptionLapsed(store.subscription)) return { error: "This store is not taking orders right now." }
+
+  let shippingAmount = 0
+  let deliveryDistanceKm: number | null = null
+  let deliveryDurationMin: number | null = null
+  let shoporaCutAmount: number | null = null
+  let deliveryQuotedAt: Date | null = null
+  let riderPayout = 0
+
+  if (deliveryMethod === "SHOPORA") {
+    if (!store.shoporaDeliveryEnabled || store.pickupLat == null || store.pickupLng == null) {
+      return { error: "Shopora Delivery is not available for this store right now." }
+    }
+    if (!isAccraArea(city, exactLocation)) {
+      return { error: "Shopora Delivery is only available for Accra addresses right now." }
+    }
+    const quoted = await quoteShoporaDelivery({
+      pickup: { lat: store.pickupLat, lng: store.pickupLng },
+      dropoffAddress: { exactLocation, city, country },
+    })
+    if (!quoted.ok) return { error: quoted.error }
+    shippingAmount = quoted.quote.fee
+    deliveryDistanceKm = quoted.quote.distanceKm
+    deliveryDurationMin = quoted.quote.durationMin
+    shoporaCutAmount = quoted.quote.shoporaCut
+    riderPayout = quoted.quote.riderPayout
+    deliveryQuotedAt = new Date()
+  }
 
   let requestedItems: Array<{ variantId: string; quantity: number }>
   try {
@@ -110,15 +140,23 @@ export async function processCheckoutAction(formData: FormData) {
   }
 
   // 2. Create Order with PENDING_VERIFICATION status
+  // Product total is paid to the vendor. Delivery fee (if Shopora) is paid to the rider on arrival.
   const orderNumber = `ORD-${Date.now().toString().slice(-6)}`
+  const shippingAddress = `${exactLocation}, ${city}, ${country}`
   const order = await db.order.create({
     data: {
       storeId,
       customerId: customer.id,
       orderNumber,
       totalAmount,
-      status: "PENDING_VERIFICATION", 
-      shippingAddress: `${exactLocation}, ${city}, ${country}`,
+      shippingAmount,
+      status: "PENDING_VERIFICATION",
+      shippingAddress,
+      deliveryMethod,
+      deliveryDistanceKm,
+      deliveryDurationMin,
+      shoporaCutAmount,
+      deliveryQuotedAt,
       orderItems: {
         create: cartItems.map(item => ({
           variantId: item.variantId,
@@ -133,7 +171,23 @@ export async function processCheckoutAction(formData: FormData) {
           amount: totalAmount,
           reference: reference
         }
-      }
+      },
+      ...(deliveryMethod === "SHOPORA"
+        ? {
+            deliveryJob: {
+              create: {
+                status: "PENDING",
+                feeAmount: shippingAmount,
+                riderPayout,
+                shoporaCut: shoporaCutAmount ?? 0,
+                pickupAddress: [store.pickupAddress, store.pickupCity].filter(Boolean).join(", ") || "Accra",
+                dropoffAddress: shippingAddress,
+                distanceKm: deliveryDistanceKm,
+                durationMin: deliveryDurationMin,
+              },
+            },
+          }
+        : {}),
     }
   })
 
@@ -144,7 +198,6 @@ export async function processCheckoutAction(formData: FormData) {
     const totalLabel = `${store.currency} ${totalAmount.toFixed(2)}`
     const fromName = store.name.replace(/[<>"\\,;:@]/g, "").trim() || "Shopora"
     const emailItems = cartItems.map(({ name, quantity, price }) => ({ name, quantity, price }))
-    const shippingAddress = order.shippingAddress ?? `${exactLocation}, ${city}, ${country}`
     const storeReplyTo = store.contactEmail || store.members.find((m) => m.user?.email)?.user?.email
 
     emailPromises.push(
@@ -203,6 +256,7 @@ export async function processCheckoutAction(formData: FormData) {
           <p>A new order was placed on a tenant's store.</p>
           <p><strong>Store:</strong> ${escapeHtml(store.name)} (${escapeHtml(store.slug)})</p>
           <p><strong>Amount:</strong> ${escapeHtml(totalLabel)}</p>
+          <p><strong>Delivery:</strong> ${escapeHtml(deliveryMethod === "SHOPORA" ? `Shopora · GHS ${shippingAmount.toFixed(2)} (pay rider on arrival)` : "Vendor arranges")}</p>
           <p><strong>Reference:</strong> ${escapeHtml(reference)}</p>
         `
       })

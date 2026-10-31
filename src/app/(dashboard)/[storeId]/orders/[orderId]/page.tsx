@@ -94,7 +94,9 @@ export default async function OrderDetailsPage({
                     <span>{store.currency} {(order.totalAmount - order.taxAmount - order.shippingAmount).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Delivery</span>
+                    <span className="text-slate-500">
+                      {order.deliveryMethod === "SHOPORA" ? "Shopora Delivery (rider)" : "Delivery"}
+                    </span>
                     <span>{store.currency} {order.shippingAmount.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
@@ -102,9 +104,14 @@ export default async function OrderDetailsPage({
                     <span>{store.currency} {order.taxAmount.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-bold text-lg pt-3 border-t">
-                    <span>Total</span>
+                    <span>{order.deliveryMethod === "SHOPORA" ? "Paid to you" : "Total"}</span>
                     <span>{store.currency} {order.totalAmount.toFixed(2)}</span>
                   </div>
+                  {order.deliveryMethod === "SHOPORA" && order.shippingAmount > 0 && (
+                    <p className="text-xs text-slate-500 pt-1">
+                      Customer pays {store.currency} {order.shippingAmount.toFixed(2)} to the Shopora rider on arrival.
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -129,15 +136,25 @@ export default async function OrderDetailsPage({
             <CardHeader>
               <CardTitle className="text-lg font-bold">Delivery Details</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
+              <p className="text-sm font-medium text-slate-900">
+                {order.deliveryMethod === "SHOPORA" ? "Shopora Delivery" : "Store arranges delivery"}
+              </p>
+              {order.deliveryMethod === "SHOPORA" && (
+                <p className="text-sm text-slate-500">
+                  Live quote: {store.currency} {order.shippingAmount.toFixed(2)}
+                  {order.deliveryDistanceKm != null && ` · ${order.deliveryDistanceKm} km`}
+                  {order.deliveryDurationMin != null && ` · ~${Math.round(order.deliveryDurationMin)} mins`}
+                </p>
+              )}
               {order.shippingAddress ? (
-                <div className="space-y-1 text-sm text-slate-600 font-medium">
+                <div className="space-y-1 text-sm font-medium text-slate-600">
                   {order.shippingAddress.split(', ').map((line, i) => (
                     <p key={i}>{line}</p>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-500 italic">No delivery details provided</p>
+                <p className="text-sm italic text-slate-500">No delivery details provided</p>
               )}
             </CardContent>
           </Card>

@@ -1,10 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useCart } from "@/lib/cart"
 import { processCheckoutAction } from "@/server/actions/checkout"
+import { quoteShoporaDeliveryAction } from "@/server/actions/shopora-delivery"
 
 const COUNTRIES = [
   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
@@ -45,23 +46,79 @@ function money(currency: string, amount: number) {
   return `${currency} ${amount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
+type DeliveryQuoteView = {
+  fee: number
+  distanceKm: number
+  durationMin: number
+  currency: string
+}
+
 export function CheckoutForm({
   storeId,
   currency,
   paymentSetting,
   deliveryPolicy,
   basePath,
+  shoporaDeliveryEnabled,
 }: {
   storeId: string
   currency: string
   paymentSetting: any
   deliveryPolicy?: string | null
   basePath: string
+  shoporaDeliveryEnabled?: boolean
 }) {
   const { items, getTotalPrice, clearCart } = useCart()
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [deliveryMethod, setDeliveryMethod] = useState<"VENDOR" | "SHOPORA">(
+    shoporaDeliveryEnabled ? "SHOPORA" : "VENDOR"
+  )
+  const [exactLocation, setExactLocation] = useState("")
+  const [city, setCity] = useState(shoporaDeliveryEnabled ? "Accra" : "")
+  const [country, setCountry] = useState("Ghana")
+  const [quote, setQuote] = useState<DeliveryQuoteView | null>(null)
+  const [quoteError, setQuoteError] = useState<string | null>(null)
+  const [quoting, startQuote] = useTransition()
+
+  useEffect(() => {
+    if (!shoporaDeliveryEnabled || deliveryMethod !== "SHOPORA") return
+    if (exactLocation.trim().length < 4 || city.trim().length < 2) return
+
+    const handle = setTimeout(() => {
+      startQuote(async () => {
+        const result = await quoteShoporaDeliveryAction({
+          storeId,
+          exactLocation,
+          city,
+          country,
+        })
+        if ("error" in result) {
+          setQuote(null)
+          setQuoteError(result.error)
+          return
+        }
+        setQuoteError(null)
+        setQuote({
+          fee: result.quote.fee,
+          distanceKm: result.quote.distanceKm,
+          durationMin: result.quote.durationMin,
+          currency: result.quote.currency,
+        })
+      })
+    }, 700)
+
+    return () => clearTimeout(handle)
+  }, [shoporaDeliveryEnabled, deliveryMethod, exactLocation, city, country, storeId])
+
+  const canQuote =
+    !!shoporaDeliveryEnabled &&
+    deliveryMethod === "SHOPORA" &&
+    exactLocation.trim().length >= 4 &&
+    city.trim().length >= 2
+  const activeQuote = canQuote ? quote : null
+  const activeQuoteError = canQuote ? quoteError : null
 
   if (items.length === 0) {
     return (
@@ -83,6 +140,10 @@ export function CheckoutForm({
     try {
       formData.append("storeId", storeId)
       formData.append("cartData", JSON.stringify(items))
+      formData.set("deliveryMethod", deliveryMethod)
+      formData.set("exactLocation", exactLocation)
+      formData.set("city", city)
+      formData.set("country", country)
 
       const result = await processCheckoutAction(formData)
       if ("error" in result) {
@@ -100,7 +161,7 @@ export function CheckoutForm({
     }
   }
 
-  const total = getTotalPrice()
+  const productTotal = getTotalPrice()
 
   return (
     <div className="grid gap-12 lg:grid-cols-[1.2fr_1fr] lg:gap-16">
@@ -124,6 +185,43 @@ export function CheckoutForm({
               {deliveryPolicy}
             </p>
           )}
+
+          {shoporaDeliveryEnabled && (
+            <div className="grid gap-3">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-stone-500">Delivery option</p>
+              <label className={`flex cursor-pointer gap-3 border p-4 ${deliveryMethod === "SHOPORA" ? "border-stone-900 bg-[#faf8f5]" : "border-stone-300"}`}>
+                <input
+                  type="radio"
+                  name="deliveryMethodChoice"
+                  className="mt-1"
+                  checked={deliveryMethod === "SHOPORA"}
+                  onChange={() => setDeliveryMethod("SHOPORA")}
+                />
+                <span>
+                  <span className="block text-sm font-medium text-stone-900">Shopora Delivery (Accra)</span>
+                  <span className="mt-1 block text-sm text-stone-600">
+                    Live rate at checkout. Pay the rider when your order arrives. Pay the store for your items only.
+                  </span>
+                </span>
+              </label>
+              <label className={`flex cursor-pointer gap-3 border p-4 ${deliveryMethod === "VENDOR" ? "border-stone-900 bg-[#faf8f5]" : "border-stone-300"}`}>
+                <input
+                  type="radio"
+                  name="deliveryMethodChoice"
+                  className="mt-1"
+                  checked={deliveryMethod === "VENDOR"}
+                  onChange={() => setDeliveryMethod("VENDOR")}
+                />
+                <span>
+                  <span className="block text-sm font-medium text-stone-900">Store arranges delivery</span>
+                  <span className="mt-1 block text-sm text-stone-600">
+                    The store will contact you to arrange a rider. Delivery fee is agreed separately.
+                  </span>
+                </span>
+              </label>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-4">
             <Field id="firstName" label="First name">
               <input id="firstName" name="firstName" required className={inputClass} />
@@ -133,26 +231,65 @@ export function CheckoutForm({
             </Field>
           </div>
           <Field id="exactLocation" label="Exact location">
-            <input id="exactLocation" name="exactLocation" required placeholder="Area, street, landmark" className={inputClass} />
+            <input
+              id="exactLocation"
+              name="exactLocation"
+              required
+              placeholder="Area, street, landmark"
+              className={inputClass}
+              value={exactLocation}
+              onChange={(e) => setExactLocation(e.target.value)}
+            />
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field id="city" label="City">
-              <input id="city" name="city" required className={inputClass} />
+              <input
+                id="city"
+                name="city"
+                required
+                className={inputClass}
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              />
             </Field>
             <Field id="country" label="Country">
-              <select id="country" name="country" required defaultValue="Ghana" className={`${inputClass} cursor-pointer`}>
-                {COUNTRIES.map((country) => (
-                  <option key={country} value={country}>{country}</option>
+              <select
+                id="country"
+                name="country"
+                required
+                className={`${inputClass} cursor-pointer`}
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+              >
+                {COUNTRIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
                 ))}
               </select>
             </Field>
           </div>
+
+          {shoporaDeliveryEnabled && deliveryMethod === "SHOPORA" && (
+            <div className="border border-stone-300 bg-[#faf8f5] px-4 py-4 text-sm text-stone-700">
+              {quoting && <p>Getting live delivery rate…</p>}
+              {!quoting && activeQuote && (
+                <p>
+                  <strong className="text-stone-900">Live rate: {money(activeQuote.currency, activeQuote.fee)}</strong>
+                  {" · "}~{activeQuote.durationMin} mins · {activeQuote.distanceKm} km
+                  <span className="mt-1 block text-stone-500">
+                    Pay this to the Shopora rider on arrival. It is not included in what you send the store.
+                  </span>
+                </p>
+              )}
+              {!quoting && activeQuoteError && <p className="text-red-700">{activeQuoteError}</p>}
+            </div>
+          )}
         </section>
 
         <section className="grid gap-5">
           <h2 className="font-display text-3xl">Payment</h2>
           <p className="text-sm leading-relaxed text-stone-600">
-            Send the total using the payment details on this page, then enter your transaction ID or reference below.
+            Send the product total using the payment details on this page, then enter your transaction ID or reference below.
+            {deliveryMethod === "SHOPORA" && " Delivery is paid to the rider when they arrive."}
           </p>
           <Field id="paymentReference" label="Transaction ID or reference">
             <input id="paymentReference" name="paymentReference" required placeholder="e.g. 0541234567 or TXN-999" className={inputClass} />
@@ -165,10 +302,10 @@ export function CheckoutForm({
 
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || (deliveryMethod === "SHOPORA" && !!shoporaDeliveryEnabled && !activeQuote)}
           className="h-13 w-full rounded-full bg-[var(--store-accent)] text-sm tracking-wide text-white transition-opacity hover:opacity-90 disabled:opacity-60"
         >
-          {isSubmitting ? "Placing your order..." : `Place order · ${money(currency, total)}`}
+          {isSubmitting ? "Placing your order..." : `Place order · ${money(currency, productTotal)}`}
         </button>
       </form>
 
@@ -193,19 +330,27 @@ export function CheckoutForm({
                 </li>
               ))}
             </ul>
+            {activeQuote && (
+              <div className="mt-4 flex items-baseline justify-between text-sm">
+                <span className="text-stone-600">Shopora Delivery (pay rider)</span>
+                <span className="text-stone-900">{money(activeQuote.currency, activeQuote.fee)}</span>
+              </div>
+            )}
             <div className="mt-6 flex items-baseline justify-between border-t border-stone-300/60 pt-6">
-              <span className="text-sm text-stone-600">Total</span>
-              <span className="font-display text-3xl">{money(currency, total)}</span>
+              <span className="text-sm text-stone-600">Pay store now</span>
+              <span className="font-display text-3xl">{money(currency, productTotal)}</span>
             </div>
             <p className="mt-3 text-xs leading-relaxed text-stone-500">
-              Delivery is not included. You pay the rider when your order arrives.
+              {deliveryMethod === "SHOPORA"
+                ? "Product total goes to the store. Delivery fee is paid to the Shopora rider on arrival."
+                : "Delivery is not included. You pay the rider when your order arrives."}
             </p>
           </div>
 
           <div className="border border-stone-300 p-6 md:p-8">
             <h2 className="text-[11px] uppercase tracking-[0.2em] text-stone-500">How to pay</h2>
             <p className="mt-3 text-sm text-stone-700">
-              Send exactly <strong className="font-medium text-stone-900">{money(currency, total)}</strong> to:
+              Send exactly <strong className="font-medium text-stone-900">{money(currency, productTotal)}</strong> to:
             </p>
             {!paymentSetting ? (
               <p className="mt-4 text-sm text-red-700">This store has not added its payment details yet. Please contact the store before paying.</p>

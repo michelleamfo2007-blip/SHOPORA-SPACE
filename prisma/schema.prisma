@@ -136,6 +136,13 @@ model Store {
   contactEmail   String?
   deliveryPolicy String?
 
+  // Shopora Delivery (Accra v1)
+  shoporaDeliveryEnabled Boolean @default(false)
+  pickupAddress          String?
+  pickupCity             String?
+  pickupLat              Float?
+  pickupLng              Float?
+
   status         StoreStatus @default(ACTIVE)
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -369,6 +376,35 @@ model Customer {
   @@unique([storeId, email])
 }
 
+enum DeliveryMethod {
+  VENDOR
+  SHOPORA
+}
+
+enum RiderType {
+  MANAGED
+  INDEPENDENT
+}
+
+enum RiderStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum DeliveryJobStatus {
+  PENDING
+  ASSIGNED
+  PICKED_UP
+  DELIVERED
+  CANCELLED
+}
+
+enum RiderWalletEntryType {
+  DELIVERY_CUT
+  SETTLEMENT
+}
+
 model Order {
   id              String      @id @default(cuid())
   storeId         String
@@ -378,7 +414,12 @@ model Order {
   taxAmount       Float       @default(0)
   shippingAmount  Float       @default(0)
   status          OrderStatus @default(PENDING)
-  shippingAddress String?     
+  shippingAddress String?
+  deliveryMethod  DeliveryMethod @default(VENDOR)
+  deliveryDistanceKm Float?
+  deliveryDurationMin Float?
+  shoporaCutAmount Float?
+  deliveryQuotedAt DateTime?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
@@ -386,9 +427,71 @@ model Order {
   customer        Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
   orderItems      OrderItem[]
   payments        Payment[]
+  deliveryJob     DeliveryJob?
 
   @@index([storeId])
   @@index([customerId])
+}
+
+model Rider {
+  id              String      @id @default(cuid())
+  name            String
+  phone           String
+  email           String?
+  momoNumber      String?
+  type            RiderType   @default(MANAGED)
+  status          RiderStatus @default(PENDING)
+  city            String      @default("Accra")
+  /// Running amount this rider owes Shopora (platform cut not yet settled)
+  walletOwed      Float       @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  jobs            DeliveryJob[]
+  walletEntries   RiderWalletEntry[]
+}
+
+model DeliveryJob {
+  id              String            @id @default(cuid())
+  orderId         String            @unique
+  riderId         String?
+  status          DeliveryJobStatus @default(PENDING)
+  feeAmount       Float
+  riderPayout     Float
+  shoporaCut      Float
+  pickupAddress   String
+  dropoffAddress  String
+  distanceKm      Float?
+  durationMin     Float?
+  assignedAt      DateTime?
+  pickedUpAt      DateTime?
+  deliveredAt     DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  order           Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  rider           Rider?            @relation(fields: [riderId], references: [id])
+  walletEntries   RiderWalletEntry[]
+
+  @@index([riderId])
+  @@index([status])
+}
+
+model RiderWalletEntry {
+  id            String               @id @default(cuid())
+  riderId       String
+  deliveryJobId String?
+  type          RiderWalletEntryType
+  /// Positive = rider owes Shopora more; negative = settlement payment
+  amount        Float
+  note          String?
+  createdAt     DateTime             @default(now())
+
+  rider         Rider                @relation(fields: [riderId], references: [id], onDelete: Cascade)
+  deliveryJob   DeliveryJob?         @relation(fields: [deliveryJobId], references: [id])
+
+  @@index([riderId])
+  @@index([deliveryJobId])
 }
 
 model OrderItem {

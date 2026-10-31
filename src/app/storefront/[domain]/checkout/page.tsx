@@ -24,6 +24,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ domai
         paymentSetting={paymentSetting} 
         deliveryPolicy={store.deliveryPolicy}
         basePath={basePath}
+        shoporaDeliveryEnabled={store.shoporaDeliveryEnabled}
       />
     </div>
   )
