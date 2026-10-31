@@ -27,6 +27,8 @@ interface OrderReceivedEmailProps {
   storeUrl: string;
   storeWhatsapp?: string | null;
   storeEmail?: string | null;
+  trackingUrl?: string | null;
+  shoporaDeliveryFee?: number | null;
 }
 
 function money(currency: string, amount: number) {
@@ -45,6 +47,8 @@ export const OrderReceivedEmail = ({
   storeUrl,
   storeWhatsapp,
   storeEmail,
+  trackingUrl,
+  shoporaDeliveryFee,
 }: OrderReceivedEmailProps) => {
   const total = money(currency, totalAmount);
   const waNumber = storeWhatsapp?.replace(/[^0-9]/g, '');
@@ -97,26 +101,44 @@ export const OrderReceivedEmail = ({
           <Text style={sectionTitle}>What happens next</Text>
           <Text style={step}>1. {storeName} checks that your payment has arrived.</Text>
           <Text style={step}>2. You get an email when your order is confirmed.</Text>
-          <Text style={step}>3. The store contacts you to arrange delivery.</Text>
-
-          {(waHref || storeEmail) && (
-            <Section style={{ textAlign: 'center', margin: '32px 0 8px' }}>
-              {waHref ? (
-                <Button href={waHref} style={button}>
-                  Message {storeName}
-                </Button>
-              ) : (
-                <Button href={`mailto:${storeEmail}`} style={button}>
-                  Email {storeName}
-                </Button>
-              )}
-            </Section>
+          {trackingUrl ? (
+            <>
+              <Text style={step}>3. A Shopora rider picks up and delivers (usually same day in Accra).</Text>
+              <Text style={step}>
+                4. Pay the rider {shoporaDeliveryFee != null ? money(currency, shoporaDeliveryFee) : "the delivery fee"} on arrival.
+              </Text>
+            </>
+          ) : (
+            <Text style={step}>3. The store contacts you to arrange delivery.</Text>
           )}
+
+          <Section style={{ textAlign: 'center', margin: '32px 0 8px' }}>
+            {trackingUrl && (
+              <Button href={trackingUrl} style={{ ...button, marginRight: '8px' }}>
+                Track delivery
+              </Button>
+            )}
+            {waHref ? (
+              <Button href={waHref} style={trackingUrl ? { ...button, backgroundColor: '#44403c' } : button}>
+                Message {storeName}
+              </Button>
+            ) : storeEmail ? (
+              <Button href={`mailto:${storeEmail}`} style={trackingUrl ? { ...button, backgroundColor: '#44403c' } : button}>
+                Email {storeName}
+              </Button>
+            ) : null}
+          </Section>
 
           <Hr style={hr} />
           <Text style={footer}>
             Keep this email for your records. You can reply to it to reach {storeName}.
             <br />
+            {trackingUrl && (
+              <>
+                <Link href={trackingUrl} style={footerLink}>Track your delivery</Link>
+                <br />
+              </>
+            )}
             <Link href={storeUrl} style={footerLink}>Visit the store</Link>
           </Text>
         </Container>

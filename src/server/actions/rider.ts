@@ -149,12 +149,16 @@ export async function createRiderAction(formData: FormData) {
 
   const name = String(formData.get("name") || "").trim()
   const phone = normalizePhone(String(formData.get("phone") || ""))
+  const email = String(formData.get("email") || "").trim().toLowerCase() || null
   const password = String(formData.get("password") || "")
   const momoNumber = String(formData.get("momoNumber") || "").trim() || null
   const type = String(formData.get("type") || "MANAGED") === "INDEPENDENT" ? "INDEPENDENT" : "MANAGED"
 
   if (!name || !phone || password.length < 6) {
     return { error: "Name, phone, and a password (6+ characters) are required." }
+  }
+  if (!email || !email.includes("@")) {
+    return { error: "Email is required so riders get new-job alerts." }
   }
 
   const existing = await db.rider.findUnique({ where: { phone } })
@@ -164,6 +168,7 @@ export async function createRiderAction(formData: FormData) {
     data: {
       name,
       phone,
+      email,
       momoNumber,
       type,
       status: "ACTIVE",
@@ -186,5 +191,54 @@ export async function setRiderStatusAction(riderId: string, status: "ACTIVE" | "
 
   await db.rider.update({ where: { id: riderId }, data: { status } })
   revalidatePath("/super-admin/riders")
+  return { success: true }
+}
+
+async function requireSuperAdmin() {
+  const { getServerSession } = await import("next-auth/next")
+  const { authOptions } = await import("@/auth")
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) return { error: "Unauthorized" as const }
+  const admin = await db.user.findUnique({ where: { id: session.user.id }, select: { platformRole: true } })
+  if (admin?.platformRole !== "SUPER_ADMIN") return { error: "Unauthorized" as const }
+  return { ok: true as const }
+}
+
+/** Record that a rider MoMo'd Shopora their platform cut. */
+export async function settleRiderWalletAction(formData: FormData) {
+  const auth = await requireSuperAdmin()
+  if ("error" in auth) return { error: auth.error }
+
+  const riderId = String(formData.get("riderId") || "")
+  const amount = Number(formData.get("amount"))
+  const note = String(formData.get("note") || "").trim() || "MoMo settlement"
+
+  if (!riderId || !Number.isFinite(amount) || amount <= 0) {
+    return { error: "Enter a valid settlement amount." }
+  }
+
+  const rider = await db.rider.findUnique({ where: { id: riderId } })
+  if (!rider) return { error: "Rider not found." }
+  if (amount > rider.walletOwed + 0.001) {
+    return { error: `They only owe GHS ${rider.walletOwed.toFixed(2)} right now.` }
+  }
+
+  await db.$transaction([
+    db.riderWalletEntry.create({
+      data: {
+        riderId,
+        type: "SETTLEMENT",
+        amount: -amount,
+        note,
+      },
+    }),
+    db.rider.update({
+      where: { id: riderId },
+      data: { walletOwed: { decrement: amount } },
+    }),
+  ])
+
+  revalidatePath("/super-admin/riders")
+  revalidatePath("/super-admin/deliveries")
   return { success: true }
 }

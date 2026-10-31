@@ -29,6 +29,7 @@ interface OrderStatusEmailProps {
   storeUrl: string;
   storeWhatsapp?: string | null;
   storeEmail?: string | null;
+  trackingUrl?: string | null;
 }
 
 const copy: Record<
@@ -77,12 +78,17 @@ export const OrderStatusEmail = ({
   storeUrl,
   storeWhatsapp,
   storeEmail,
+  trackingUrl,
 }: OrderStatusEmailProps) => {
   const details = copy[kind];
   const waNumber = storeWhatsapp?.replace(/[^0-9]/g, '');
   const waHref = waNumber
     ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hi ${storeName}, I'm asking about my order ${orderNumber}.`)}`
     : null;
+  const acceptedWithTrack =
+    kind === 'ACCEPTED' && trackingUrl
+      ? `${storeName} has received your payment and confirmed order ${orderNumber}. A Shopora rider will pick it up for Accra delivery — usually same day. You can track progress with the button below.`
+      : details.message(storeName, orderNumber);
 
   return (
     <Html>
@@ -93,7 +99,7 @@ export const OrderStatusEmail = ({
           <Text style={eyebrow}>{storeName}</Text>
           <Heading style={h1}>{details.heading}</Heading>
           <Text style={text}>
-            Hi {customerFirstName}, {details.message(storeName, orderNumber)}
+            Hi {customerFirstName}, {acceptedWithTrack}
           </Text>
 
           <Section style={totalBox}>
@@ -133,6 +139,10 @@ export const OrderStatusEmail = ({
               <Button href={storeUrl} style={button}>
                 Shop {storeName} again
               </Button>
+            ) : trackingUrl ? (
+              <Button href={trackingUrl} style={button}>
+                Track delivery
+              </Button>
             ) : waHref ? (
               <Button href={waHref} style={button}>
                 Message {storeName}
@@ -152,6 +162,12 @@ export const OrderStatusEmail = ({
           <Text style={footer}>
             Order {orderNumber}. You can reply to this email to reach {storeName}.
             <br />
+            {trackingUrl && (
+              <>
+                <Link href={trackingUrl} style={footerLink}>Track your delivery</Link>
+                <br />
+              </>
+            )}
             <Link href={storeUrl} style={footerLink}>Visit the store</Link>
           </Text>
         </Container>

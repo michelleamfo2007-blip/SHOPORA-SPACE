@@ -221,6 +221,8 @@ export async function processCheckoutAction(formData: FormData) {
           storeUrl: `https://www.shopora.space/storefront/${store.slug}`,
           storeWhatsapp: store.whatsappNumber,
           storeEmail: store.contactEmail,
+          trackingUrl: trackingToken ? `https://www.shopora.space/track/${trackingToken}` : null,
+          shoporaDeliveryFee: deliveryMethod === "SHOPORA" ? shippingAmount : null,
         }),
       })
     )

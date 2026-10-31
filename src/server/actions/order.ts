@@ -6,6 +6,7 @@ import { Resend } from "resend"
 import { OrderStatusEmail, type OrderStatusKind } from "@/emails/OrderStatusEmail"
 import { getStoreAccess } from "@/lib/store-access"
 import { DEFAULT_VARIANT_NAME } from "@/lib/product-variants"
+import { notifyRidersOfOpenJob } from "@/lib/notify-riders"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -25,6 +26,10 @@ async function sendOrderStatusEmail(orderId: string, storeId: string, kind: Orde
     const { store } = order
     const fromName = store.name.replace(/[<>"\\,;:@]/g, "").trim() || "Shopora"
     const storeReplyTo = store.contactEmail || store.members.find((m) => m.user?.email)?.user?.email
+    const trackingUrl =
+      order.deliveryMethod === "SHOPORA" && order.trackingToken
+        ? `https://www.shopora.space/track/${order.trackingToken}`
+        : null
 
     const subjects: Record<OrderStatusKind, string> = {
       ACCEPTED: `Your order ${order.orderNumber} is confirmed`,
@@ -57,6 +62,7 @@ async function sendOrderStatusEmail(orderId: string, storeId: string, kind: Orde
         storeUrl: `https://www.shopora.space/storefront/${store.slug}`,
         storeWhatsapp: store.whatsappNumber,
         storeEmail: store.contactEmail,
+        trackingUrl,
       }),
     })
   } catch (error) {
@@ -89,8 +95,17 @@ export async function verifyOrderPaymentAction(storeId: string, orderId: string)
     }
 
     // Shopora Delivery jobs become available for riders once payment is confirmed.
+    if (order.deliveryMethod === "SHOPORA") {
+      try {
+        await notifyRidersOfOpenJob(orderId)
+      } catch (err) {
+        console.error("Failed to email riders about open job:", err)
+      }
+    }
+
     revalidatePath(`/${storeId}/orders`)
     revalidatePath("/rider")
+    revalidatePath("/super-admin/deliveries")
     return { success: true }
   } catch (error) {
     console.error("Failed to verify payment:", error)

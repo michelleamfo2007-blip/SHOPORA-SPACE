@@ -29,6 +29,7 @@ export function CreateRiderForm() {
       <h2 className="md:col-span-2 text-lg font-bold text-slate-900">Add rider</h2>
       <input name="name" required placeholder="Full name" className="h-11 rounded-lg border border-slate-200 px-3 text-sm" />
       <input name="phone" required placeholder="Phone (login)" className="h-11 rounded-lg border border-slate-200 px-3 text-sm" />
+      <input name="email" type="email" required placeholder="Email (for new-job alerts)" className="h-11 rounded-lg border border-slate-200 px-3 text-sm" />
       <input name="momoNumber" placeholder="MoMo number (optional)" className="h-11 rounded-lg border border-slate-200 px-3 text-sm" />
       <input name="password" type="password" required minLength={6} placeholder="Password (6+ chars)" className="h-11 rounded-lg border border-slate-200 px-3 text-sm" />
       <select name="type" className="h-11 rounded-lg border border-slate-200 px-3 text-sm">

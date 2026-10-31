@@ -40,6 +40,7 @@ const groups = [
       { title: "Subscriptions", href: "/super-admin/subscriptions", icon: CreditCard },
       { title: "Finance", href: "/super-admin/finance", icon: Wallet },
       { title: "Riders", href: "/super-admin/riders", icon: Truck },
+      { title: "Deliveries", href: "/super-admin/deliveries", icon: Package },
     ],
   },
   {
