@@ -1,5 +1,6 @@
 "use server"
 
+import { randomBytes } from "crypto"
 import { db } from "@/lib/db"
 
 import { resend } from "@/lib/resend"
@@ -143,6 +144,7 @@ export async function processCheckoutAction(formData: FormData) {
   // Product total is paid to the vendor. Delivery fee (if Shopora) is paid to the rider on arrival.
   const orderNumber = `ORD-${Date.now().toString().slice(-6)}`
   const shippingAddress = `${exactLocation}, ${city}, ${country}`
+  const trackingToken = deliveryMethod === "SHOPORA" ? randomBytes(16).toString("hex") : null
   const order = await db.order.create({
     data: {
       storeId,
@@ -157,6 +159,7 @@ export async function processCheckoutAction(formData: FormData) {
       deliveryDurationMin,
       shoporaCutAmount,
       deliveryQuotedAt,
+      trackingToken,
       orderItems: {
         create: cartItems.map(item => ({
           variantId: item.variantId,
@@ -267,5 +270,5 @@ export async function processCheckoutAction(formData: FormData) {
     console.error("Failed to send order notification emails", err)
   }
 
-  return { orderId: order.id, orderNumber }
+  return { orderId: order.id, orderNumber, trackingToken }
 }

@@ -88,7 +88,9 @@ export async function verifyOrderPaymentAction(storeId: string, orderId: string)
       await sendOrderStatusEmail(orderId, storeId, "ACCEPTED")
     }
 
+    // Shopora Delivery jobs become available for riders once payment is confirmed.
     revalidatePath(`/${storeId}/orders`)
+    revalidatePath("/rider")
     return { success: true }
   } catch (error) {
     console.error("Failed to verify payment:", error)

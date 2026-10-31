@@ -18,6 +18,7 @@ import {
   CreditCard,
   LayoutGrid,
   Menu,
+  Truck,
   X,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -38,6 +39,7 @@ const groups = [
     items: [
       { title: "Subscriptions", href: "/super-admin/subscriptions", icon: CreditCard },
       { title: "Finance", href: "/super-admin/finance", icon: Wallet },
+      { title: "Riders", href: "/super-admin/riders", icon: Truck },
     ],
   },
   {

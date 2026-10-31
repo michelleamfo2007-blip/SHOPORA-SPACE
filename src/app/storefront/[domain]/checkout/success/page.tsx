@@ -11,7 +11,7 @@ export default async function CheckoutSuccessPage({
   searchParams 
 }: { 
   params: Promise<{ domain: string }>,
-  searchParams: Promise<{ orderId?: string }>
+  searchParams: Promise<{ orderId?: string; track?: string }>
 }) {
   const resolvedParams = await params
   const resolvedSearchParams = await searchParams
@@ -35,6 +35,7 @@ export default async function CheckoutSuccessPage({
     })
   }
 
+  const trackingToken = resolvedSearchParams.track || order?.trackingToken
   const whatsapp = store.whatsappNumber?.replace(/[^0-9]/g, "")
 
   return (
@@ -56,9 +57,21 @@ export default async function CheckoutSuccessPage({
       )}
 
       <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        {trackingToken && (
+          <Link
+            href={`/track/${trackingToken}`}
+            className="inline-flex h-12 items-center rounded-full bg-[var(--store-accent)] px-8 text-sm tracking-wide text-white hover:opacity-90"
+          >
+            Track delivery
+          </Link>
+        )}
         <Link
           href={`${basePath}/products`}
-          className="inline-flex h-12 items-center rounded-full bg-[var(--store-accent)] px-8 text-sm tracking-wide text-white hover:opacity-90"
+          className={`inline-flex h-12 items-center rounded-full px-8 text-sm tracking-wide ${
+            trackingToken
+              ? "border border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white"
+              : "bg-[var(--store-accent)] text-white hover:opacity-90"
+          }`}
         >
           Continue shopping
         </Link>

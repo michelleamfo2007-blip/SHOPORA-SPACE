@@ -152,7 +152,11 @@ export function CheckoutForm({
       }
 
       clearCart()
-      router.push(`${basePath}/checkout/success?orderId=${encodeURIComponent(result.orderNumber)}`)
+      const track =
+        "trackingToken" in result && result.trackingToken
+          ? `&track=${encodeURIComponent(result.trackingToken)}`
+          : ""
+      router.push(`${basePath}/checkout/success?orderId=${encodeURIComponent(result.orderNumber)}${track}`)
     } catch (err) {
       console.error(err)
       setError("Checkout failed. Please try again.")
