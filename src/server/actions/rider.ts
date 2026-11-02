@@ -65,12 +65,14 @@ export async function riderLoginAction(formData: FormData) {
 
 /** Public rider self-signup. Starts as PENDING until super-admin activates. */
 export async function riderSignupAction(formData: FormData) {
+  const { RIDER_TERMS_VERSION, RIDER_PLATFORM_CUT_PERCENT } = await import("@/lib/rider-terms")
   const name = String(formData.get("name") || "").trim()
   const phone = normalizePhone(String(formData.get("phone") || ""))
   const email = String(formData.get("email") || "").trim().toLowerCase()
   const momoNumber = String(formData.get("momoNumber") || "").trim() || null
   const password = String(formData.get("password") || "")
   const confirm = String(formData.get("confirmPassword") || "")
+  const acceptedTerms = String(formData.get("acceptTerms") || "") === "on" || String(formData.get("acceptTerms") || "") === "true"
 
   if (!name || name.length < 2) return { error: "Enter your full name." }
   if (!phone || phone.replace(/\D/g, "").length < 9) {
@@ -81,6 +83,11 @@ export async function riderSignupAction(formData: FormData) {
   }
   if (password.length < 6) return { error: "Password must be at least 6 characters." }
   if (password !== confirm) return { error: "Passwords do not match." }
+  if (!acceptedTerms) {
+    return {
+      error: `You must accept the rider terms, including Shopora’s ${RIDER_PLATFORM_CUT_PERCENT}% platform fee on each delivery.`,
+    }
+  }
 
   const existing = await db.rider.findUnique({ where: { phone } })
   if (existing) {
@@ -98,6 +105,8 @@ export async function riderSignupAction(formData: FormData) {
         status: "PENDING",
         isOnline: false,
         city: "Accra",
+        termsAcceptedAt: new Date(),
+        termsVersion: RIDER_TERMS_VERSION,
         passwordHash: await hash(password, 10),
       },
     })
@@ -527,6 +536,8 @@ export async function createRiderAction(formData: FormData) {
   const existing = await db.rider.findUnique({ where: { phone } })
   if (existing) return { error: "A rider with this phone number already exists." }
 
+  const { RIDER_TERMS_VERSION } = await import("@/lib/rider-terms")
+
   try {
     await db.rider.create({
       data: {
@@ -538,6 +549,8 @@ export async function createRiderAction(formData: FormData) {
         status: "ACTIVE",
         isOnline: false,
         city: "Accra",
+        termsAcceptedAt: new Date(),
+        termsVersion: RIDER_TERMS_VERSION,
         passwordHash: await hash(password, 10),
       },
     })

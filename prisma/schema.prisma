@@ -469,6 +469,9 @@ model Rider {
   /// Available for new Accra jobs
   isOnline        Boolean     @default(false)
   lastOnlineAt    DateTime?
+  /// When the rider accepted Shopora rider terms
+  termsAcceptedAt DateTime?
+  termsVersion    String?
   /// Running amount this rider owes Shopora (platform cut not yet settled)
   walletOwed      Float       @default(0)
   createdAt       DateTime    @default(now())

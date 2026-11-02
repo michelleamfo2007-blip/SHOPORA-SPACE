@@ -15,7 +15,7 @@ export const SHOPORA_DELIVERY_CONFIG = {
   minFee: 20,
   maxFee: 80,
   /** Share of delivery fee owed to Shopora (rider remits later). */
-  platformCutRate: 0.2,
+  platformCutRate: 0.15,
   /** Rough Accra metro bounding box for v1. */
   bounds: {
     minLat: 5.48,
