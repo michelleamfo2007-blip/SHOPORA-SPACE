@@ -43,7 +43,10 @@ export default async function SuperAdminRidersPage() {
             )}
             {riders.map((rider) => (
               <tr key={rider.id} className="border-b border-slate-100 last:border-0">
-                <td className="px-4 py-3 font-medium text-slate-900">{rider.name}</td>
+                <td className="px-4 py-3">
+                  <p className="font-medium text-slate-900">{rider.name}</p>
+                  {rider.email && <p className="text-xs text-slate-500">{rider.email}</p>}
+                </td>
                 <td className="px-4 py-3 text-slate-600">{rider.phone}</td>
                 <td className="px-4 py-3 text-slate-600">{rider.type}</td>
                 <td className="px-4 py-3 text-slate-600">GHS {rider.walletOwed.toFixed(2)}</td>

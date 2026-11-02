@@ -8,20 +8,32 @@ import { toast } from "sonner"
 export function CreateRiderForm() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
-    const formData = new FormData(e.currentTarget)
-    const result = await createRiderAction(formData)
-    setLoading(false)
-    if (result.error) {
-      toast.error(result.error)
-      return
+    setError(null)
+    const form = e.currentTarget
+    const formData = new FormData(form)
+    try {
+      const result = await createRiderAction(formData)
+      if (result.error) {
+        setError(result.error)
+        toast.error(result.error)
+        return
+      }
+      toast.success("Rider created — they can log in at /rider/login")
+      form.reset()
+      router.refresh()
+    } catch (err) {
+      console.error(err)
+      const message = "Could not create rider. Try again."
+      setError(message)
+      toast.error(message)
+    } finally {
+      setLoading(false)
     }
-    toast.success("Rider created")
-    e.currentTarget.reset()
-    router.refresh()
   }
 
   return (
@@ -36,6 +48,11 @@ export function CreateRiderForm() {
         <option value="MANAGED">Shopora managed</option>
         <option value="INDEPENDENT">Independent</option>
       </select>
+      {error && (
+        <p className="md:col-span-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </p>
+      )}
       <button
         type="submit"
         disabled={loading}

@@ -459,19 +459,28 @@ export async function createRiderAction(formData: FormData) {
   const existing = await db.rider.findUnique({ where: { phone } })
   if (existing) return { error: "A rider with this phone number already exists." }
 
-  await db.rider.create({
-    data: {
-      name,
-      phone,
-      email,
-      momoNumber,
-      type,
-      status: "ACTIVE",
-      isOnline: false,
-      city: "Accra",
-      passwordHash: await hash(password, 10),
-    },
-  })
+  try {
+    await db.rider.create({
+      data: {
+        name,
+        phone,
+        email,
+        momoNumber,
+        type,
+        status: "ACTIVE",
+        isOnline: false,
+        city: "Accra",
+        passwordHash: await hash(password, 10),
+      },
+    })
+  } catch (err) {
+    console.error("createRiderAction", err)
+    const msg = err instanceof Error ? err.message : ""
+    if (msg.includes("Unique constraint") || msg.includes("unique")) {
+      return { error: "A rider with this phone number already exists." }
+    }
+    return { error: "Could not save this rider. Check the details and try again." }
+  }
 
   revalidatePath("/super-admin/riders")
   return { success: true }

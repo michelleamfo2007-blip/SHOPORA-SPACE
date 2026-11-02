@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 import { db } from "@/lib/db";
 import { SuperAdminNav } from "@/components/admin/nav";
+import { Toaster } from "sonner";
 
 export default async function SuperAdminLayout({
   children,
@@ -29,6 +30,7 @@ export default async function SuperAdminLayout({
       <main className="flex-1 overflow-y-auto p-4 md:p-8">
         {children}
       </main>
+      <Toaster position="bottom-right" richColors />
     </div>
   );
 }
