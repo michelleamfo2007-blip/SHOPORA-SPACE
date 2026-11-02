@@ -123,8 +123,24 @@ export async function updateOrderStatusAction(storeId: string, orderId: string, 
       return { error: "Invalid status" }
     }
 
-    const order = await db.order.findUnique({ where: { id: orderId, storeId } })
+    const order = await db.order.findUnique({
+      where: { id: orderId, storeId },
+      include: { deliveryJob: { select: { id: true, status: true } } },
+    })
     if (!order) return { error: "Order not found" }
+
+    // Shopora Delivery owns ship/deliver status via the rider app.
+    if (
+      order.deliveryMethod === "SHOPORA" &&
+      order.deliveryJob &&
+      (status === "SHIPPED" || status === "DELIVERED") &&
+      !["DELIVERED", "CANCELLED"].includes(order.deliveryJob.status)
+    ) {
+      return {
+        error:
+          "This order uses Shopora Delivery. Wait for a rider to pick up and complete delivery (OTP). Don’t mark it shipped/delivered from the store dashboard.",
+      }
+    }
 
     await db.order.update({
       where: { id: orderId, storeId },
@@ -133,6 +149,13 @@ export async function updateOrderStatusAction(storeId: string, orderId: string, 
 
     if (status === "PROCESSING" && order.status !== "PROCESSING") {
       await sendOrderStatusEmail(orderId, storeId, "ACCEPTED")
+      if (order.deliveryMethod === "SHOPORA" && order.deliveryJob?.status === "PENDING") {
+        try {
+          await notifyRidersOfOpenJob(orderId)
+        } catch (err) {
+          console.error("Failed to email riders about open job:", err)
+        }
+      }
     }
 
     if (
@@ -144,6 +167,8 @@ export async function updateOrderStatusAction(storeId: string, orderId: string, 
 
     revalidatePath(`/${storeId}/orders`)
     revalidatePath(`/${storeId}/orders/${orderId}`)
+    revalidatePath("/rider")
+    revalidatePath("/super-admin/deliveries")
     return { success: true }
   } catch (error) {
     console.error("Failed to update order status:", error)
