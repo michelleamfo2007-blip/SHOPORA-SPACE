@@ -595,6 +595,102 @@ export async function createRiderAction(formData: FormData) {
   return { success: true }
 }
 
+export async function resetRiderPasswordAction(formData: FormData) {
+  const auth = await requireSuperAdmin()
+  if ("error" in auth) return { error: auth.error }
+
+  const riderId = String(formData.get("riderId") || "")
+  const password = String(formData.get("password") || "")
+  if (!riderId) return { error: "Rider not found." }
+  if (password.length < 6) return { error: "Password must be at least 6 characters." }
+
+  const rider = await db.rider.findUnique({ where: { id: riderId }, select: { id: true, email: true, name: true } })
+  if (!rider) return { error: "Rider not found." }
+
+  await db.rider.update({
+    where: { id: riderId },
+    data: { passwordHash: await hash(password, 10) },
+  })
+
+  if (rider.email) {
+    try {
+      await resend.emails.send({
+        from: "Shopora Delivery <orders@shopora.space>",
+        to: rider.email,
+        subject: "Your Shopora rider password was reset",
+        html: `
+          <p>Hi ${rider.name.split(/\s+/)[0] || "there"},</p>
+          <p>A Shopora admin reset your rider login password.</p>
+          <p><strong>New password:</strong> ${password}</p>
+          <p>Log in at <a href="https://www.shopora.space/rider/login">https://www.shopora.space/rider/login</a> and keep this password private.</p>
+        `,
+      })
+    } catch (err) {
+      console.error("reset rider password email:", err)
+    }
+  }
+
+  revalidatePath("/super-admin/riders")
+  return { success: true as const }
+}
+
+export async function rateRiderAction(formData: FormData) {
+  const trackingToken = String(formData.get("trackingToken") || "").trim()
+  const stars = Number(formData.get("stars"))
+  const comment = String(formData.get("comment") || "").trim() || null
+
+  if (!trackingToken) return { error: "Missing tracking link." }
+  if (!Number.isInteger(stars) || stars < 1 || stars > 5) {
+    return { error: "Choose a rating from 1 to 5 stars." }
+  }
+
+  const order = await db.order.findUnique({
+    where: { trackingToken },
+    include: {
+      deliveryJob: {
+        include: { rating: true },
+      },
+    },
+  })
+  if (!order?.deliveryJob || order.deliveryMethod !== "SHOPORA") {
+    return { error: "Delivery not found." }
+  }
+  if (order.deliveryJob.status !== "DELIVERED" || !order.deliveryJob.riderId) {
+    return { error: "You can rate only after the delivery is completed." }
+  }
+  if (order.deliveryJob.rating) {
+    return { error: "You already rated this delivery." }
+  }
+
+  await db.$transaction(async (tx) => {
+    await tx.riderRating.create({
+      data: {
+        deliveryJobId: order.deliveryJob!.id,
+        riderId: order.deliveryJob!.riderId!,
+        orderId: order.id,
+        stars,
+        comment,
+      },
+    })
+    const agg = await tx.riderRating.aggregate({
+      where: { riderId: order.deliveryJob!.riderId! },
+      _avg: { stars: true },
+      _count: { _all: true },
+    })
+    await tx.rider.update({
+      where: { id: order.deliveryJob!.riderId! },
+      data: {
+        ratingAvg: Math.round((agg._avg.stars || stars) * 10) / 10,
+        ratingCount: agg._count._all,
+      },
+    })
+  })
+
+  if (order.trackingToken) revalidatePath(`/track/${order.trackingToken}`)
+  revalidatePath("/super-admin/riders")
+  return { success: true as const }
+}
+
 export async function setRiderStatusAction(riderId: string, status: "ACTIVE" | "SUSPENDED" | "PENDING") {
   const { getServerSession } = await import("next-auth/next")
   const { authOptions } = await import("@/auth")

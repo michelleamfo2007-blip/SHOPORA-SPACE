@@ -45,6 +45,7 @@ export type DeliveryQuote = {
   source: "google" | "osrm" | "estimated"
   /** True when we could not pin the address exactly and used the Accra fallback fee. */
   estimated?: boolean
+  zoneName?: string
   pickup: LatLng
   dropoff: LatLng
 }
@@ -370,21 +371,27 @@ export async function geocodeAddress(parts: {
   return geocodeNominatim(query)
 }
 
-function estimatedAccraQuote(pickup: LatLng): DeliveryQuote {
-  const { fallbackFee, fallbackDistanceKm, fallbackDurationMin, currency } = SHOPORA_DELIVERY_CONFIG
-  const shoporaCut = Math.round(fallbackFee * SHOPORA_DELIVERY_CONFIG.platformCutRate * 100) / 100
-  const riderPayout = Math.round((fallbackFee - shoporaCut) * 100) / 100
+async function estimatedAccraQuote(
+  pickup: LatLng,
+  dropoffText: string
+): Promise<DeliveryQuote> {
+  const { fallbackFee, fallbackDistanceKm, fallbackDurationMin, currency, platformCutRate } =
+    SHOPORA_DELIVERY_CONFIG
+  const { matchDeliveryZone, applyZoneToFee } = await import("@/lib/delivery-zones")
+  const zone = await matchDeliveryZone(dropoffText)
+  const priced = applyZoneToFee(fallbackFee, zone, platformCutRate)
   // Accra CBD — used only as a placeholder pin when the typed address is unmapped
   const dropoff = { lat: 5.6037, lng: -0.187 }
   return {
-    fee: fallbackFee,
+    fee: priced.fee,
     distanceKm: fallbackDistanceKm,
     durationMin: fallbackDurationMin,
-    shoporaCut,
-    riderPayout,
+    shoporaCut: priced.shoporaCut,
+    riderPayout: priced.riderPayout,
     currency,
     source: "estimated",
     estimated: true,
+    zoneName: priced.zoneName,
     pickup,
     dropoff,
   }
@@ -403,9 +410,10 @@ export async function quoteShoporaDelivery(input: {
     return { ok: false, error: "Shopora Delivery is only available for Accra addresses right now." }
   }
 
+  const dropoffText = `${input.dropoffAddress.exactLocation} ${input.dropoffAddress.city}`
   const dropoff = await geocodeAddress(input.dropoffAddress)
   if (!dropoff || !inAccraBounds(dropoff)) {
-    return { ok: true, quote: estimatedAccraQuote(input.pickup) }
+    return { ok: true, quote: await estimatedAccraQuote(input.pickup, dropoffText) }
   }
 
   const apiKey = process.env.GOOGLE_MAPS_API_KEY
@@ -421,21 +429,27 @@ export async function quoteShoporaDelivery(input: {
     source = "osrm"
   }
   if (!route) {
-    return { ok: true, quote: estimatedAccraQuote(input.pickup) }
+    return { ok: true, quote: await estimatedAccraQuote(input.pickup, dropoffText) }
   }
 
-  const { fee, shoporaCut, riderPayout } = calculateDeliveryFee(route.distanceKm, route.durationMin)
+  const base = calculateDeliveryFee(route.distanceKm, route.durationMin)
+  const { matchDeliveryZone, applyZoneToFee } = await import("@/lib/delivery-zones")
+  const zone = await matchDeliveryZone(
+    `${input.dropoffAddress.exactLocation} ${input.dropoffAddress.city}`
+  )
+  const priced = applyZoneToFee(base.fee, zone, SHOPORA_DELIVERY_CONFIG.platformCutRate)
 
   return {
     ok: true,
     quote: {
-      fee,
+      fee: priced.fee,
       distanceKm: Math.round(route.distanceKm * 10) / 10,
       durationMin: Math.round(route.durationMin),
-      shoporaCut,
-      riderPayout,
+      shoporaCut: priced.shoporaCut,
+      riderPayout: priced.riderPayout,
       currency: SHOPORA_DELIVERY_CONFIG.currency,
       source,
+      zoneName: priced.zoneName,
       pickup: input.pickup,
       dropoff,
     },

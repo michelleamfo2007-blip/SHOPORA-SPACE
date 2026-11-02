@@ -53,6 +53,7 @@ type DeliveryQuoteView = {
   durationMin: number
   currency: string
   estimated?: boolean
+  zoneName?: string
 }
 
 export function CheckoutForm({
@@ -108,6 +109,7 @@ export function CheckoutForm({
           durationMin: result.quote.durationMin,
           currency: result.quote.currency,
           estimated: result.quote.estimated === true || result.quote.source === "estimated",
+          zoneName: result.quote.zoneName,
         })
       })
     }, 700)
@@ -296,6 +298,9 @@ export function CheckoutForm({
                     <>
                       {" · "}~{activeQuote.durationMin} mins · {activeQuote.distanceKm} km
                     </>
+                  )}
+                  {activeQuote.zoneName && (
+                    <span className="mt-1 block text-stone-600">Zone: {activeQuote.zoneName}</span>
                   )}
                   <span className="mt-1 block text-stone-500">
                     {activeQuote.estimated

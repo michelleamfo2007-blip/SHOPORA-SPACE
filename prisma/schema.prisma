@@ -474,12 +474,50 @@ model Rider {
   termsVersion    String?
   /// Running amount this rider owes Shopora (platform cut not yet settled)
   walletOwed      Float       @default(0)
+  /// Cached average of customer ratings (1–5)
+  ratingAvg       Float       @default(0)
+  ratingCount     Int         @default(0)
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
   jobs            DeliveryJob[]
   walletEntries   RiderWalletEntry[]
   auditLogs       DeliveryAuditLog[]
+  ratings         RiderRating[]
+}
+
+model RiderRating {
+  id            String   @id @default(cuid())
+  deliveryJobId String   @unique
+  riderId       String
+  orderId       String
+  stars         Int
+  comment       String?
+  createdAt     DateTime @default(now())
+
+  deliveryJob   DeliveryJob @relation(fields: [deliveryJobId], references: [id], onDelete: Cascade)
+  rider         Rider       @relation(fields: [riderId], references: [id], onDelete: Cascade)
+
+  @@index([riderId])
+  @@index([orderId])
+}
+
+/// Accra delivery zones — keyword match on dropoff address adjusts live fee.
+model DeliveryZone {
+  id            String   @id @default(cuid())
+  name          String
+  /// Comma-separated area keywords, e.g. "east legon,airport residential"
+  keywords      String
+  isActive      Boolean  @default(true)
+  /// Multiply calculated fee (1 = no change, 1.2 = +20%)
+  feeMultiplier Float    @default(1)
+  /// Extra GHS added after multiplier
+  flatAdd       Float    @default(0)
+  minFee        Float?
+  maxFee        Float?
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model DeliveryJob {
@@ -514,6 +552,7 @@ model DeliveryJob {
   rider           Rider?            @relation(fields: [riderId], references: [id])
   walletEntries   RiderWalletEntry[]
   auditLogs       DeliveryAuditLog[]
+  rating          RiderRating?
 
   @@index([riderId])
   @@index([status])

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { db } from "@/lib/db"
+import { RateRiderForm } from "./RateRiderForm"
 
 const STEPS = [
   { key: "placed", label: "Order placed" },
@@ -33,6 +34,8 @@ export default async function TrackPage({ params }: { params: Promise<{ token: s
           deliveryOtpExpiresAt: true,
           failedReason: true,
           failedNotes: true,
+          rider: { select: { name: true } },
+          rating: { select: { id: true, stars: true } },
         },
       },
     },
@@ -45,6 +48,7 @@ export default async function TrackPage({ params }: { params: Promise<{ token: s
     job?.status === "PICKED_UP" &&
     job.deliveryOtpCode &&
     (!job.deliveryOtpExpiresAt || job.deliveryOtpExpiresAt > new Date())
+  const canRate = job?.status === "DELIVERED" && !!job.rider && !job.rating && !!order.trackingToken
 
   const etaNote =
     job?.status === "DELIVERED"
@@ -129,6 +133,15 @@ export default async function TrackPage({ params }: { params: Promise<{ token: s
             </p>
           )}
         </div>
+
+        {canRate && order.trackingToken && job?.rider && (
+          <RateRiderForm trackingToken={order.trackingToken} riderName={job.rider.name.split(/\s+/)[0] || "your rider"} />
+        )}
+        {job?.rating && (
+          <p className="mt-6 text-center text-sm text-stone-600">
+            You rated this delivery {job.rating.stars}/5. Thank you.
+          </p>
+        )}
 
         <div className="mt-8 flex flex-wrap gap-4 text-sm text-stone-600">
           <Link href={`/storefront/${order.store.slug}`} className="underline">

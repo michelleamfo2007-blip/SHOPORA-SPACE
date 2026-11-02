@@ -1,6 +1,7 @@
 import { db } from "@/lib/db"
 import { CreateRiderForm } from "./CreateRiderForm"
 import { RiderStatusButton } from "./RiderStatusButton"
+import { ResetRiderPasswordForm } from "./ResetRiderPasswordForm"
 
 export default async function SuperAdminRidersPage() {
   const riders = await db.rider.findMany({
@@ -11,11 +12,11 @@ export default async function SuperAdminRidersPage() {
   })
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
+    <div className="mx-auto max-w-5xl space-y-8">
       <div>
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Riders</h1>
         <p className="mt-1 text-slate-500">
-          Riders can self-signup at /rider/signup (starts as PENDING). Activate them here. You can still add managed riders below with an immediate ACTIVE account.
+          Riders can self-signup at /rider/signup (starts as PENDING). Activate them here. Reset passwords when they forget login.
         </p>
       </div>
 
@@ -27,7 +28,7 @@ export default async function SuperAdminRidersPage() {
             <tr>
               <th className="px-4 py-3 font-medium">Rider</th>
               <th className="px-4 py-3 font-medium">Phone</th>
-              <th className="px-4 py-3 font-medium">Type</th>
+              <th className="px-4 py-3 font-medium">Rating</th>
               <th className="px-4 py-3 font-medium">Owed</th>
               <th className="px-4 py-3 font-medium">Jobs</th>
               <th className="px-4 py-3 font-medium">Status</th>
@@ -42,13 +43,24 @@ export default async function SuperAdminRidersPage() {
               </tr>
             )}
             {riders.map((rider) => (
-              <tr key={rider.id} className="border-b border-slate-100 last:border-0">
+              <tr key={rider.id} className="border-b border-slate-100 last:border-0 align-top">
                 <td className="px-4 py-3">
                   <p className="font-medium text-slate-900">{rider.name}</p>
                   {rider.email && <p className="text-xs text-slate-500">{rider.email}</p>}
+                  <p className="mt-1 text-xs text-slate-500">{rider.type}</p>
+                  <ResetRiderPasswordForm riderId={rider.id} riderName={rider.name} />
                 </td>
                 <td className="px-4 py-3 text-slate-600">{rider.phone}</td>
-                <td className="px-4 py-3 text-slate-600">{rider.type}</td>
+                <td className="px-4 py-3 text-slate-600">
+                  {rider.ratingCount > 0 ? (
+                    <>
+                      {rider.ratingAvg.toFixed(1)}★
+                      <span className="text-xs text-slate-400"> ({rider.ratingCount})</span>
+                    </>
+                  ) : (
+                    <span className="text-slate-400">—</span>
+                  )}
+                </td>
                 <td className="px-4 py-3 text-slate-600">GHS {rider.walletOwed.toFixed(2)}</td>
                 <td className="px-4 py-3 text-slate-600">{rider._count.jobs}</td>
                 <td className="px-4 py-3">
