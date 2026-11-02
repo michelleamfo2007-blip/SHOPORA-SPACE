@@ -315,7 +315,7 @@ export const RIDER_TERMS = {
         "For delivery-related enquiries, complaints, payment disputes or assistance, riders may contact Shopora through the official support channels provided on the platform.",
       ],
     },
-  ] as const satisfies readonly RiderTermsSection[],
+  ] satisfies RiderTermsSection[],
   acceptance: {
     title: "Rider Acceptance and Agreement",
     intro:

@@ -29,21 +29,21 @@ export default function RiderTermsPage() {
                   {p}
                 </p>
               ))}
-              {section.numbered && (
+              {"numbered" in section && section.numbered && (
                 <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-stone-700">
-                  {section.numbered.map((item) => (
+                  {section.numbered.map((item: string) => (
                     <li key={item}>{item}</li>
                   ))}
                 </ol>
               )}
-              {section.bullets && (
+              {"bullets" in section && section.bullets && (
                 <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-stone-700">
-                  {section.bullets.map((item) => (
+                  {section.bullets.map((item: string) => (
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
               )}
-              {section.note && (
+              {"note" in section && section.note && (
                 <p className="mt-3 text-sm leading-relaxed text-stone-700">{section.note}</p>
               )}
             </section>
