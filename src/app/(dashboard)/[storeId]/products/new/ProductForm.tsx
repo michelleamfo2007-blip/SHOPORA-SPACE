@@ -7,9 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Trash2, RefreshCw, Globe, Lock, ImageIcon } from "lucide-react"
+import { Plus, Trash2, RefreshCw, Globe, Lock, ImageIcon, Sparkles } from "lucide-react"
 import { MediaUploader } from "@/components/dashboard/MediaUploader"
 import { MultiImageUploader } from "@/components/dashboard/MultiImageUploader"
+import { generateProductDescriptionAction } from "@/server/actions/generate-product-description"
+import { toast } from "sonner"
 
 interface ProductFormProps {
   storeId: string
@@ -19,6 +21,7 @@ interface ProductFormProps {
 export function ProductForm({ storeId, initialData }: ProductFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [generatingDescription, setGeneratingDescription] = useState(false)
   
   // Basic
   const [name, setName] = useState(initialData?.name || "")
@@ -126,6 +129,38 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
     setVariants(newVars)
   }
 
+  const generateDescription = async () => {
+    if (!name.trim()) {
+      toast.error("Add a product name first.")
+      return
+    }
+    setGeneratingDescription(true)
+    try {
+      const result = await generateProductDescriptionAction({
+        storeId,
+        name,
+        price,
+        existingDescription: description,
+        categoryHint: options
+          .map((o) => `${o.name}: ${o.values.join(", ")}`)
+          .filter((s) => !s.endsWith(": "))
+          .join(" · "),
+      })
+      if (result.error) {
+        toast.error(result.error)
+        return
+      }
+      if (result.description) {
+        setDescription(result.description)
+        toast.success("Description generated — edit anything you want.")
+      }
+    } catch {
+      toast.error("Could not generate description.")
+    } finally {
+      setGeneratingDescription(false)
+    }
+  }
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -186,8 +221,28 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
                 <Input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Vintage Leather Jacket" required />
               </div>
               <div className="grid gap-2">
-                <Label>Description</Label>
-                <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe the product..." rows={5} className="resize-none" />
+                <div className="flex items-center justify-between gap-3">
+                  <Label>Description</Label>
+                  <button
+                    type="button"
+                    onClick={generateDescription}
+                    disabled={generatingDescription || isLoading}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-60"
+                  >
+                    <Sparkles className={`h-3.5 w-3.5 ${generatingDescription ? "animate-pulse" : ""}`} />
+                    {generatingDescription ? "Generating…" : description.trim() ? "Rewrite with AI" : "Generate with AI"}
+                  </button>
+                </div>
+                <Textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe the product, or generate one from the product name…"
+                  rows={5}
+                  className="resize-none"
+                />
+                <p className="text-xs text-slate-400">
+                  Tip: type a rough note first, then use Rewrite with AI to polish it.
+                </p>
               </div>
             </CardContent>
           </Card>
