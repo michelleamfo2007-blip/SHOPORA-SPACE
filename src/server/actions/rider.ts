@@ -11,9 +11,10 @@ import { DeliveryOtpEmail } from "@/emails/DeliveryOtpEmail"
 import { DeliveryFailedEmail } from "@/emails/DeliveryFailedEmail"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { normalizeRiderPhone, riderPhoneLookupVariants } from "@/lib/rider-phone"
 
 function normalizePhone(phone: string) {
-  return phone.replace(/[^\d+]/g, "").trim()
+  return normalizeRiderPhone(phone)
 }
 
 function failReasonLabel(reason: string) {
@@ -44,13 +45,21 @@ async function audit(
 }
 
 export async function riderLoginAction(formData: FormData) {
-  const phone = normalizePhone(String(formData.get("phone") || ""))
+  const phoneInput = String(formData.get("phone") || "")
   const password = String(formData.get("password") || "")
-  if (!phone || !password) return { error: "Enter your phone number and password." }
+  const variants = riderPhoneLookupVariants(phoneInput)
+  if (!variants.length || !password) return { error: "Enter your phone number and password." }
 
-  const rider = await db.rider.findUnique({ where: { phone } })
+  const riders = await db.rider.findMany({ where: { phone: { in: variants } }, take: 5 })
+  let rider = riders[0] ?? null
+  if (riders.length > 1) {
+    // Prefer exact normalized match when duplicates somehow exist
+    const preferred = normalizePhone(phoneInput)
+    rider = riders.find((r) => r.phone === preferred) || riders[0]
+  }
+
   if (!rider || !(await compare(password, rider.passwordHash))) {
-    return { error: "Wrong phone number or password." }
+    return { error: "Wrong phone number or password. Try 0XXXXXXXXX or +233XXXXXXXXX." }
   }
   if (rider.status === "PENDING") {
     return { error: "Your account is waiting for Shopora approval. We’ll activate you soon." }
@@ -59,8 +68,17 @@ export async function riderLoginAction(formData: FormData) {
     return { error: "Your rider account is not active. Contact Shopora." }
   }
 
+  // Canonicalize stored phone to +233… so future logins are consistent
+  const canonical = normalizePhone(phoneInput) || normalizePhone(rider.phone)
+  if (canonical && rider.phone !== canonical) {
+    const clash = await db.rider.findUnique({ where: { phone: canonical } })
+    if (!clash) {
+      await db.rider.update({ where: { id: rider.id }, data: { phone: canonical } })
+    }
+  }
+
   await setRiderSession(rider.id)
-  redirect("/rider")
+  return { success: true as const }
 }
 
 /** Public rider self-signup. Starts as PENDING until super-admin activates. */

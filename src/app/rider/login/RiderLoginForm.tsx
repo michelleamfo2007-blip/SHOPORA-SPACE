@@ -1,31 +1,42 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { riderLoginAction } from "@/server/actions/rider"
 
 export function RiderLoginForm() {
+  const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  async function onSubmit(formData: FormData) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
     setLoading(true)
     setError(null)
-    const result = await riderLoginAction(formData)
-    if (result?.error) {
-      setError(result.error)
+    try {
+      const result = await riderLoginAction(new FormData(e.currentTarget))
+      if (result?.error) {
+        setError(result.error)
+        setLoading(false)
+        return
+      }
+      router.replace("/rider")
+      router.refresh()
+    } catch {
+      setError("Could not sign in. Try again.")
       setLoading(false)
     }
   }
 
   return (
-    <form action={onSubmit} className="mt-8 grid gap-4">
+    <form onSubmit={onSubmit} className="mt-8 grid gap-4">
       <label className="grid gap-1.5 text-sm">
         <span className="text-stone-600">Phone number</span>
         <input
           name="phone"
           type="tel"
           required
-          placeholder="024XXXXXXX"
+          placeholder="053XXXXXXX or +233XXXXXXXXX"
           className="h-11 border border-stone-300 px-3 focus:border-stone-900 focus:outline-none"
         />
       </label>
@@ -46,6 +57,9 @@ export function RiderLoginForm() {
       >
         {loading ? "Signing in…" : "Sign in"}
       </button>
+      <p className="text-center text-xs text-stone-500">
+        Use the phone and password from signup. New accounts must be activated by Shopora first.
+      </p>
     </form>
   )
 }
