@@ -6,6 +6,7 @@ import { ProductStatus, ProductVisibility } from "@prisma/client"
 import { getProductLimitMessage } from "@/lib/plan-limits"
 import { getStoreAccess } from "@/lib/store-access"
 import { buildVariantInputs, syncProductVariants } from "@/lib/product-variants"
+import { MAX_PRODUCT_IMAGES } from "@/lib/compress-image"
 
 export async function POST(
   req: Request,
@@ -41,6 +42,8 @@ export async function POST(
       return new NextResponse(limitMessage, { status: 403 })
     }
 
+    const productImages = Array.isArray(images) ? images.filter(Boolean).slice(0, MAX_PRODUCT_IMAGES) : []
+
     // Process Option mapping
     const optionData = options?.map((opt: { name: string; values: string[] }, index: number) => ({
       name: opt.name,
@@ -63,7 +66,7 @@ export async function POST(
         sku,
         stockCount,
         lowStockThreshold,
-        images,
+        images: productImages,
         sizeGuideUrl,
         videoUrl,
         seoTitle,

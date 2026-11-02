@@ -6,6 +6,7 @@ import { db } from "@/lib/db"
 import { ProductStatus, ProductVisibility } from "@prisma/client"
 import { getStoreAccess } from "@/lib/store-access"
 import { buildVariantInputs, syncProductVariants } from "@/lib/product-variants"
+import { MAX_PRODUCT_IMAGES } from "@/lib/compress-image"
 
 export async function PATCH(
   req: Request,
@@ -41,6 +42,8 @@ export async function PATCH(
       return new NextResponse("Product not found", { status: 404 })
     }
 
+    const productImages = Array.isArray(images) ? images.filter(Boolean).slice(0, MAX_PRODUCT_IMAGES) : []
+
     // Process Option mapping
     const optionData = options?.map((opt: { name: string; values: string[] }, index: number) => ({
       name: opt.name,
@@ -66,7 +69,7 @@ export async function PATCH(
         sku,
         stockCount,
         lowStockThreshold,
-        images,
+        images: productImages,
         sizeGuideUrl,
         videoUrl,
         seoTitle,

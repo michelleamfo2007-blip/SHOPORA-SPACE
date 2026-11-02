@@ -28,44 +28,63 @@ export function MediaUploader({
 
   const upload = useCallback(async (file: File) => {
     if (type === "image" && !file.type.startsWith("image/")) {
-      toast.error("Please select an image file.");
-      return;
+      toast.error("Please select an image file.")
+      return
     }
     if (type === "video" && !file.type.startsWith("video/")) {
-      toast.error("Please select a video file.");
-      return;
+      toast.error("Please select a video file.")
+      return
     }
-    if (file.size > 20 * 1024 * 1024) {
-      toast.error("File must be under 20MB.");
-      return;
+    // Videos still go through the API — keep them small (Vercel ~4.5MB limit).
+    if (type === "video" && file.size > 3.5 * 1024 * 1024) {
+      toast.error("Video must be under 3.5MB on Shopora hosting. Compress it first.")
+      return
     }
 
-    // Show local preview immediately
-    const objectUrl = URL.createObjectURL(file);
-    setPreview(objectUrl);
-    setUploading(true);
+    const objectUrl = URL.createObjectURL(file)
+    setPreview(objectUrl)
+    setUploading(true)
 
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("storeId", storeId);
-
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
-        throw new Error(data.error || "Upload failed");
+      let uploadFile = file
+      if (type === "image") {
+        const { compressImageForUpload, MAX_UPLOAD_BYTES } = await import("@/lib/compress-image")
+        uploadFile = await compressImageForUpload(file)
+        if (uploadFile.size > MAX_UPLOAD_BYTES) {
+          throw new Error("Image is still too large after compression. Try a smaller photo.")
+        }
       }
 
-      onUploaded(data.url);
-      toast.success("Media uploaded successfully!");
+      const fd = new FormData()
+      fd.append("file", uploadFile)
+      fd.append("storeId", storeId)
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: fd,
+        credentials: "include",
+      })
+
+      let data: { url?: string; error?: string } = {}
+      try {
+        data = await res.json()
+      } catch {
+        throw new Error(res.status === 413 ? "File too large for upload." : "Upload failed")
+      }
+
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "Upload failed")
+      }
+
+      onUploaded(data.url!)
+      toast.success("Media uploaded successfully!")
     } catch (err: any) {
-      toast.error(err.message || "Upload failed. Please try again.");
-      setPreview(currentMedia || null);
+      toast.error(err.message || "Upload failed. Please try again.")
+      setPreview(currentMedia || null)
     } finally {
-      setUploading(false);
+      setUploading(false)
     }
-  }, [storeId, currentMedia, onUploaded, type]);
+  }, [storeId, currentMedia, onUploaded, type])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -130,7 +149,7 @@ export function MediaUploader({
           <div className="h-full flex flex-col items-center justify-center gap-2 text-slate-400 px-4 text-center">
             {type === "video" ? <FileVideo className="w-8 h-8" /> : <ImageIcon className="w-8 h-8" />}
             <p className="text-sm font-medium">{label}</p>
-            <p className="text-xs">Max 20MB</p>
+            <p className="text-xs">Images are compressed automatically</p>
           </div>
         )}
 

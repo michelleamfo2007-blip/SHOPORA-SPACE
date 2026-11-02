@@ -29,7 +29,7 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
   const [visibility, setVisibility] = useState(initialData?.visibility || "VISIBLE")
   
   // Media
-  const [images, setImages] = useState<string[]>(initialData?.images || [])
+  const [images, setImages] = useState<string[]>((initialData?.images || []).slice(0, 2))
   const [sizeGuideUrl, setSizeGuideUrl] = useState(initialData?.sizeGuideUrl || "")
   const [videoUrl, setVideoUrl] = useState(initialData?.videoUrl || "")
 
@@ -195,13 +195,14 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
           <Card className="border-slate-200 shadow-sm">
             <CardHeader>
               <CardTitle>Product Images *</CardTitle>
-              <CardDescription>Upload images for your product.</CardDescription>
+              <CardDescription>Up to 2 images per product. First image is the main storefront photo.</CardDescription>
             </CardHeader>
             <CardContent>
-              <MultiImageUploader 
-                storeId={storeId} 
-                images={images} 
-                onImagesChange={setImages} 
+              <MultiImageUploader
+                storeId={storeId}
+                images={images}
+                onImagesChange={setImages}
+                maxImages={2}
               />
             </CardContent>
           </Card>
