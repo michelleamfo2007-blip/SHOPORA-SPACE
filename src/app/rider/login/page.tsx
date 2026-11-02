@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { redirect } from "next/navigation"
 import { getRiderIdFromSession } from "@/lib/rider-session"
 import { RiderLoginForm } from "./RiderLoginForm"
@@ -13,6 +14,12 @@ export default async function RiderLoginPage() {
         <h1 className="mt-2 font-display text-3xl text-stone-900">Rider login</h1>
         <p className="mt-2 text-sm text-stone-600">Accra riders — see open jobs and accept deliveries.</p>
         <RiderLoginForm />
+        <p className="mt-6 text-center text-sm text-stone-600">
+          New rider?{" "}
+          <Link href="/rider/signup" className="underline">
+            Create an account
+          </Link>
+        </p>
       </div>
     </div>
   )

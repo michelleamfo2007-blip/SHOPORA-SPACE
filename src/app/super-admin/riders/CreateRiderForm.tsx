@@ -38,7 +38,16 @@ export function CreateRiderForm() {
 
   return (
     <form onSubmit={onSubmit} className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 md:grid-cols-2">
-      <h2 className="md:col-span-2 text-lg font-bold text-slate-900">Add rider</h2>
+      <div className="md:col-span-2">
+        <h2 className="text-lg font-bold text-slate-900">Add managed rider</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Optional — for Shopora-hired riders. Sets them ACTIVE immediately and you choose a temporary password to share. Independent riders should use{" "}
+          <a href="/rider/signup" className="underline" target="_blank" rel="noreferrer">
+            /rider/signup
+          </a>{" "}
+          instead.
+        </p>
+      </div>
       <input name="name" required placeholder="Full name" className="h-11 rounded-lg border border-slate-200 px-3 text-sm" />
       <input name="phone" required placeholder="Phone (login)" className="h-11 rounded-lg border border-slate-200 px-3 text-sm" />
       <input name="email" type="email" required placeholder="Email (for new-job alerts)" className="h-11 rounded-lg border border-slate-200 px-3 text-sm" />

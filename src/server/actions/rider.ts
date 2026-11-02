@@ -52,12 +52,80 @@ export async function riderLoginAction(formData: FormData) {
   if (!rider || !(await compare(password, rider.passwordHash))) {
     return { error: "Wrong phone number or password." }
   }
+  if (rider.status === "PENDING") {
+    return { error: "Your account is waiting for Shopora approval. We’ll activate you soon." }
+  }
   if (rider.status !== "ACTIVE") {
-    return { error: "Your rider account is not active yet. Contact Shopora." }
+    return { error: "Your rider account is not active. Contact Shopora." }
   }
 
   await setRiderSession(rider.id)
   redirect("/rider")
+}
+
+/** Public rider self-signup. Starts as PENDING until super-admin activates. */
+export async function riderSignupAction(formData: FormData) {
+  const name = String(formData.get("name") || "").trim()
+  const phone = normalizePhone(String(formData.get("phone") || ""))
+  const email = String(formData.get("email") || "").trim().toLowerCase()
+  const momoNumber = String(formData.get("momoNumber") || "").trim() || null
+  const password = String(formData.get("password") || "")
+  const confirm = String(formData.get("confirmPassword") || "")
+
+  if (!name || name.length < 2) return { error: "Enter your full name." }
+  if (!phone || phone.replace(/\D/g, "").length < 9) {
+    return { error: "Enter a valid Ghana phone number." }
+  }
+  if (!email || !email.includes("@")) {
+    return { error: "Enter a valid email so we can send you job alerts." }
+  }
+  if (password.length < 6) return { error: "Password must be at least 6 characters." }
+  if (password !== confirm) return { error: "Passwords do not match." }
+
+  const existing = await db.rider.findUnique({ where: { phone } })
+  if (existing) {
+    return { error: "This phone number is already registered. Log in instead." }
+  }
+
+  try {
+    await db.rider.create({
+      data: {
+        name,
+        phone,
+        email,
+        momoNumber,
+        type: "INDEPENDENT",
+        status: "PENDING",
+        isOnline: false,
+        city: "Accra",
+        passwordHash: await hash(password, 10),
+      },
+    })
+  } catch (err) {
+    console.error("riderSignupAction", err)
+    return { error: "Could not create your account. Try again." }
+  }
+
+  try {
+    await resend.emails.send({
+      from: "Shopora Delivery <orders@shopora.space>",
+      to: "shoporaspace@gmail.com",
+      subject: `New rider signup · ${name}`,
+      html: `
+        <p>A new Accra rider signed up and is waiting for approval.</p>
+        <p><strong>Name:</strong> ${name}<br/>
+        <strong>Phone:</strong> ${phone}<br/>
+        <strong>Email:</strong> ${email}<br/>
+        ${momoNumber ? `<strong>MoMo:</strong> ${momoNumber}<br/>` : ""}
+        </p>
+        <p><a href="https://www.shopora.space/super-admin/riders">Review in Super Admin → Riders</a></p>
+      `,
+    })
+  } catch (err) {
+    console.error("rider signup admin email:", err)
+  }
+
+  return { success: true as const }
 }
 
 export async function riderLogoutAction() {

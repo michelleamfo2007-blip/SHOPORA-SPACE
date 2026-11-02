@@ -15,7 +15,7 @@ export default async function SuperAdminRidersPage() {
       <div>
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Riders</h1>
         <p className="mt-1 text-slate-500">
-          Accra Shopora Delivery riders. They log in at /rider/login, see open jobs after a store confirms payment, and the first to accept gets the job.
+          Riders can self-signup at /rider/signup (starts as PENDING). Activate them here. You can still add managed riders below with an immediate ACTIVE account.
         </p>
       </div>
 
@@ -52,8 +52,18 @@ export default async function SuperAdminRidersPage() {
                 <td className="px-4 py-3 text-slate-600">GHS {rider.walletOwed.toFixed(2)}</td>
                 <td className="px-4 py-3 text-slate-600">{rider._count.jobs}</td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-slate-700">{rider.status}</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        rider.status === "ACTIVE"
+                          ? "bg-emerald-50 text-emerald-800"
+                          : rider.status === "PENDING"
+                            ? "bg-amber-50 text-amber-800"
+                            : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {rider.status}
+                    </span>
                     {rider.status === "ACTIVE" ? (
                       <RiderStatusButton riderId={rider.id} status="SUSPENDED" label="Suspend" />
                     ) : (
