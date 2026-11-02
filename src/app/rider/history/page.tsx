@@ -1,9 +1,10 @@
+import { Suspense } from "react"
 import { redirect } from "next/navigation"
-import Link from "next/link"
 import { requireRider } from "@/lib/rider-session"
 import { getRiderDeliveryHistory } from "@/lib/delivery-earnings"
 import { riderLogoutAction } from "@/server/actions/rider"
 import { RiderNav } from "../RiderNav"
+import { HistoryFilters } from "./HistoryFilters"
 
 function money(amount: number) {
   return `GHS ${amount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -23,7 +24,6 @@ export default async function RiderHistoryPage({
     raw === "DELIVERED" || raw === "FAILED" || raw === "CANCELLED" ? raw : ("ALL" as const)
 
   const jobs = await getRiderDeliveryHistory(auth.rider.id, status)
-  const filters = ["ALL", "DELIVERED", "FAILED", "CANCELLED"] as const
 
   return (
     <div className="min-h-screen bg-[#faf8f5] text-stone-900">
@@ -45,19 +45,9 @@ export default async function RiderHistoryPage({
       </header>
 
       <main className="mx-auto max-w-3xl space-y-6 px-5 py-8">
-        <div className="flex flex-wrap gap-2">
-          {filters.map((f) => (
-            <Link
-              key={f}
-              href={f === "ALL" ? "/rider/history" : `/rider/history?status=${f}`}
-              className={`inline-flex h-9 items-center rounded-full px-4 text-xs font-medium ${
-                status === f ? "bg-stone-900 text-white" : "border border-stone-300 text-stone-700"
-              }`}
-            >
-              {f === "ALL" ? "All" : f.charAt(0) + f.slice(1).toLowerCase()}
-            </Link>
-          ))}
-        </div>
+        <Suspense fallback={<div className="h-9" />}>
+          <HistoryFilters />
+        </Suspense>
 
         <div className="grid gap-3">
           {jobs.length === 0 && (
