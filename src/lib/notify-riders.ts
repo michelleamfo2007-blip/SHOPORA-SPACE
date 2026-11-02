@@ -24,6 +24,7 @@ export async function notifyRidersOfOpenJob(orderId: string) {
   const riders = await db.rider.findMany({
     where: {
       status: "ACTIVE",
+      isOnline: true,
       email: { not: null },
     },
     select: { id: true, name: true, email: true },

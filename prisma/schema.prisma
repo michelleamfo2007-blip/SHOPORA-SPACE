@@ -397,7 +397,27 @@ enum DeliveryJobStatus {
   ASSIGNED
   PICKED_UP
   DELIVERED
+  FAILED
   CANCELLED
+}
+
+enum DeliveryFailReason {
+  CUSTOMER_UNAVAILABLE
+  INCORRECT_ADDRESS
+  CUSTOMER_REFUSED
+  UNABLE_TO_CONTACT
+  OTHER
+}
+
+enum DeliveryAuditAction {
+  ACCEPTED
+  PICKED_UP
+  DELIVERED
+  FAILED
+  REOPENED
+  CANCELLED
+  ASSIGNED_MANUAL
+  OTP_FAILED
 }
 
 enum RiderWalletEntryType {
@@ -444,6 +464,9 @@ model Rider {
   type            RiderType   @default(MANAGED)
   status          RiderStatus @default(PENDING)
   city            String      @default("Accra")
+  /// Available for new Accra jobs
+  isOnline        Boolean     @default(false)
+  lastOnlineAt    DateTime?
   /// Running amount this rider owes Shopora (platform cut not yet settled)
   walletOwed      Float       @default(0)
   createdAt       DateTime    @default(now())
@@ -451,12 +474,14 @@ model Rider {
 
   jobs            DeliveryJob[]
   walletEntries   RiderWalletEntry[]
+  auditLogs       DeliveryAuditLog[]
 }
 
 model DeliveryJob {
   id              String            @id @default(cuid())
   orderId         String            @unique
   riderId         String?
+  previousRiderId String?
   status          DeliveryJobStatus @default(PENDING)
   feeAmount       Float
   riderPayout     Float
@@ -465,6 +490,15 @@ model DeliveryJob {
   dropoffAddress  String
   distanceKm      Float?
   durationMin     Float?
+  /// bcrypt hash of the customer delivery OTP — never expose plaintext to riders
+  deliveryOtpHash String?
+  /// Plain OTP only for the customer track page / email — never selected in rider queries
+  deliveryOtpCode String?
+  deliveryOtpExpiresAt DateTime?
+  deliveryOtpAttempts Int           @default(0)
+  failedReason    DeliveryFailReason?
+  failedNotes     String?
+  failedAt        DateTime?
   assignedAt      DateTime?
   pickedUpAt      DateTime?
   deliveredAt     DateTime?
@@ -474,9 +508,27 @@ model DeliveryJob {
   order           Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
   rider           Rider?            @relation(fields: [riderId], references: [id])
   walletEntries   RiderWalletEntry[]
+  auditLogs       DeliveryAuditLog[]
 
   @@index([riderId])
   @@index([status])
+}
+
+model DeliveryAuditLog {
+  id            String              @id @default(cuid())
+  deliveryJobId String
+  riderId       String?
+  actorType     String              // RIDER | ADMIN | SYSTEM
+  actorId       String?
+  action        DeliveryAuditAction
+  note          String?
+  createdAt     DateTime            @default(now())
+
+  deliveryJob   DeliveryJob         @relation(fields: [deliveryJobId], references: [id], onDelete: Cascade)
+  rider         Rider?              @relation(fields: [riderId], references: [id])
+
+  @@index([deliveryJobId])
+  @@index([createdAt])
 }
 
 model RiderWalletEntry {

@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import { requireRider } from "@/lib/rider-session"
 import { riderLogoutAction } from "@/server/actions/rider"
 import { RiderJobActions } from "./RiderJobActions"
+import { RiderAvailabilityToggle } from "./RiderAvailabilityToggle"
 
 function money(amount: number) {
   return `GHS ${amount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -14,23 +15,25 @@ export default async function RiderDashboardPage() {
   const { rider } = auth
 
   const [openJobs, myJobs] = await Promise.all([
-    db.deliveryJob.findMany({
-      where: {
-        status: "PENDING",
-        riderId: null,
-        order: { status: "PROCESSING", deliveryMethod: "SHOPORA" },
-      },
-      include: {
-        order: {
-          select: {
-            orderNumber: true,
-            shippingAmount: true,
-            store: { select: { name: true, currency: true } },
+    rider.isOnline
+      ? db.deliveryJob.findMany({
+          where: {
+            status: "PENDING",
+            riderId: null,
+            order: { status: "PROCESSING", deliveryMethod: "SHOPORA" },
           },
-        },
-      },
-      orderBy: { createdAt: "asc" },
-    }),
+          include: {
+            order: {
+              select: {
+                orderNumber: true,
+                shippingAmount: true,
+                store: { select: { name: true, currency: true } },
+              },
+            },
+          },
+          orderBy: { createdAt: "asc" },
+        })
+      : Promise.resolve([]),
     db.deliveryJob.findMany({
       where: {
         riderId: rider.id,
@@ -67,6 +70,8 @@ export default async function RiderDashboardPage() {
       </header>
 
       <main className="mx-auto grid max-w-3xl gap-10 px-5 py-8">
+        <RiderAvailabilityToggle isOnline={rider.isOnline} />
+
         <section className="border border-stone-200 bg-white p-5">
           <p className="text-[11px] uppercase tracking-[0.18em] text-stone-500">Wallet owed to Shopora</p>
           <p className="mt-1 font-display text-3xl">{money(rider.walletOwed)}</p>
@@ -75,9 +80,16 @@ export default async function RiderDashboardPage() {
 
         <section>
           <h2 className="font-display text-2xl">Open jobs</h2>
-          <p className="mt-1 text-sm text-stone-600">First to accept gets the delivery. Others cannot take it after that.</p>
+          <p className="mt-1 text-sm text-stone-600">
+            First online rider to accept gets the job. Others cannot take it after that.
+          </p>
           <div className="mt-4 grid gap-4">
-            {openJobs.length === 0 && (
+            {!rider.isOnline && (
+              <p className="border border-dashed border-stone-300 px-4 py-8 text-center text-sm text-stone-500">
+                You are offline. Go online to see and accept Accra jobs.
+              </p>
+            )}
+            {rider.isOnline && openJobs.length === 0 && (
               <p className="border border-dashed border-stone-300 px-4 py-8 text-center text-sm text-stone-500">
                 No open Accra jobs right now. New ones appear when a store confirms payment.
               </p>
@@ -125,7 +137,7 @@ export default async function RiderDashboardPage() {
                   <div>
                     <p className="text-sm font-medium">{job.order.store.name}</p>
                     <p className="text-xs text-stone-500">
-                      {job.order.orderNumber} · {job.status === "ASSIGNED" ? "Go pick up" : "On the way"}
+                      {job.order.orderNumber} · {job.status === "ASSIGNED" ? "Go pick up" : "On the way — ask for OTP"}
                     </p>
                   </div>
                   <p className="text-sm font-medium">{money(job.feeAmount)} on arrival</p>
