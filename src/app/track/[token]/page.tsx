@@ -130,9 +130,14 @@ export default async function TrackPage({ params }: { params: Promise<{ token: s
           )}
         </div>
 
-        <Link href={`/storefront/${order.store.slug}`} className="mt-8 inline-block text-sm text-stone-600 underline">
-          Back to store
-        </Link>
+        <div className="mt-8 flex flex-wrap gap-4 text-sm text-stone-600">
+          <Link href={`/storefront/${order.store.slug}`} className="underline">
+            Back to store
+          </Link>
+          <Link href="/track" className="underline">
+            All my deliveries
+          </Link>
+        </div>
       </div>
     </div>
   )

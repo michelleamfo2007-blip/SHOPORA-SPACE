@@ -4,6 +4,7 @@ import { requireRider } from "@/lib/rider-session"
 import { riderLogoutAction } from "@/server/actions/rider"
 import { RiderJobActions } from "./RiderJobActions"
 import { RiderAvailabilityToggle } from "./RiderAvailabilityToggle"
+import { RiderNav } from "./RiderNav"
 
 function money(amount: number) {
   return `GHS ${amount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -66,6 +67,9 @@ export default async function RiderDashboardPage() {
               Log out
             </button>
           </form>
+        </div>
+        <div className="mx-auto max-w-3xl px-5">
+          <RiderNav active="jobs" />
         </div>
       </header>
 

@@ -152,6 +152,9 @@ export async function acceptDeliveryJobAction(jobId: string) {
       return job.order.orderNumber
     })
 
+    const { notifyDeliveryAccepted } = await import("@/lib/delivery-notifications")
+    await notifyDeliveryAccepted(jobId)
+
     revalidatePath("/rider")
     revalidatePath("/super-admin/deliveries")
     return { success: true, orderNumber }
@@ -236,6 +239,9 @@ export async function markJobPickedUpAction(jobId: string) {
       console.error("Failed to email delivery OTP:", err)
     }
   }
+
+  const { notifyDeliveryPickedUp } = await import("@/lib/delivery-notifications")
+  await notifyDeliveryPickedUp(jobId)
 
   revalidatePath("/rider")
   revalidatePath("/super-admin/deliveries")
@@ -331,7 +337,12 @@ export async function markJobDeliveredAction(jobId: string, otpInput: string) {
     return { error: "Could not complete delivery." }
   }
 
+  const { notifyDeliveryCompleted } = await import("@/lib/delivery-notifications")
+  await notifyDeliveryCompleted(jobId)
+
   revalidatePath("/rider")
+  revalidatePath("/rider/earnings")
+  revalidatePath("/rider/history")
   revalidatePath("/super-admin/deliveries")
   return { success: true }
 }
@@ -392,36 +403,31 @@ export async function reportFailedDeliveryAction(formData: FormData) {
     })
   })
 
-  const vendorEmails = [
-    job.order.store.contactEmail,
-    ...job.order.store.members.map((m) => m.user?.email),
-  ].filter((e): e is string => !!e)
-  const recipients = [...new Set([...vendorEmails, "shoporaspace@gmail.com"])]
+  const note = `${failReasonLabel(reason)}${notes ? ` — ${notes}` : ""}`
+  const { notifyDeliveryFailed } = await import("@/lib/delivery-notifications")
+  await notifyDeliveryFailed(jobId, note)
 
   try {
-    await Promise.all(
-      recipients.map((to) =>
-        resend.emails.send({
-          from: "Shopora Delivery <orders@shopora.space>",
-          to,
-          subject: `Delivery failed · ${job.order.orderNumber}`,
-          react: DeliveryFailedEmail({
-            recipientName: to === "shoporaspace@gmail.com" ? "Shopora" : "there",
-            storeName: job.order.store.name,
-            orderNumber: job.order.orderNumber,
-            reason: failReasonLabel(reason),
-            notes,
-            riderName: auth.rider.name,
-            dropoffAddress: job.dropoffAddress,
-          }),
-        })
-      )
-    )
+    await resend.emails.send({
+      from: "Shopora Delivery <orders@shopora.space>",
+      to: "shoporaspace@gmail.com",
+      subject: `Delivery failed · ${job.order.orderNumber}`,
+      react: DeliveryFailedEmail({
+        recipientName: "Shopora",
+        storeName: job.order.store.name,
+        orderNumber: job.order.orderNumber,
+        reason: failReasonLabel(reason),
+        notes,
+        riderName: auth.rider.name,
+        dropoffAddress: job.dropoffAddress,
+      }),
+    })
   } catch (err) {
-    console.error("Failed delivery notify:", err)
+    console.error("Failed delivery admin notify:", err)
   }
 
   revalidatePath("/rider")
+  revalidatePath("/rider/history")
   revalidatePath("/super-admin/deliveries")
   if (job.order.trackingToken) revalidatePath(`/track/${job.order.trackingToken}`)
   return { success: true }
@@ -544,58 +550,20 @@ export async function reopenDeliveryJobAction(jobId: string) {
   const auth = await requireSuperAdmin()
   if ("error" in auth) return { error: auth.error }
 
-  const job = await db.deliveryJob.findUnique({
-    where: { id: jobId },
-    include: { order: true },
+  const { reopenDeliveryJobInternal } = await import("@/lib/delivery-reassign")
+  const result = await reopenDeliveryJobInternal({
+    jobId,
+    actorType: "ADMIN",
+    actorId: auth.userId,
+    reason: "Admin reopened for new rider accept",
+    action: "REOPENED",
   })
-  if (!job) return { error: "Job not found." }
-  if (job.status === "DELIVERED") return { error: "Completed deliveries cannot be reopened." }
-  if (job.status === "PENDING" && !job.riderId) return { error: "This job is already open." }
-
-  await db.$transaction(async (tx) => {
-    await tx.deliveryJob.update({
-      where: { id: jobId },
-      data: {
-        previousRiderId: job.riderId,
-        riderId: null,
-        status: "PENDING",
-        assignedAt: null,
-        pickedUpAt: null,
-        failedReason: null,
-        failedNotes: null,
-        failedAt: null,
-        deliveryOtpHash: null,
-        deliveryOtpCode: null,
-        deliveryOtpExpiresAt: null,
-        deliveryOtpAttempts: 0,
-      },
-    })
-    if (job.order.status === "SHIPPED") {
-      await tx.order.update({
-        where: { id: job.orderId },
-        data: { status: "PROCESSING" },
-      })
-    }
-    await audit(tx, {
-      deliveryJobId: jobId,
-      riderId: job.riderId,
-      actorType: "ADMIN",
-      actorId: auth.userId,
-      action: "REOPENED",
-      note: "Admin reopened for new rider accept",
-    })
-  })
-
-  try {
-    const { notifyRidersOfOpenJob } = await import("@/lib/notify-riders")
-    await notifyRidersOfOpenJob(job.orderId)
-  } catch (err) {
-    console.error("Reopen notify riders:", err)
-  }
+  if ("error" in result) return { error: result.error }
 
   revalidatePath("/rider")
+  revalidatePath("/rider/history")
   revalidatePath("/super-admin/deliveries")
-  if (job.order.trackingToken) revalidatePath(`/track/${job.order.trackingToken}`)
+  if (result.trackingToken) revalidatePath(`/track/${result.trackingToken}`)
   return { success: true }
 }
 
@@ -626,7 +594,11 @@ export async function cancelDeliveryJobAction(jobId: string, note?: string) {
     })
   })
 
+  const { notifyRiderJobCancelled } = await import("@/lib/delivery-notifications")
+  await notifyRiderJobCancelled(jobId)
+
   revalidatePath("/rider")
+  revalidatePath("/rider/history")
   revalidatePath("/super-admin/deliveries")
   return { success: true }
 }

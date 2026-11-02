@@ -418,6 +418,8 @@ enum DeliveryAuditAction {
   CANCELLED
   ASSIGNED_MANUAL
   OTP_FAILED
+  TIMEOUT_WARN
+  TIMEOUT_REOPEN
 }
 
 enum RiderWalletEntryType {
