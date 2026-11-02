@@ -4,6 +4,7 @@ import { requireRider } from "@/lib/rider-session"
 import { riderLogoutAction } from "@/server/actions/rider"
 import { RiderJobActions } from "./RiderJobActions"
 import { RiderAvailabilityToggle } from "./RiderAvailabilityToggle"
+import { RiderMapLinks } from "./RiderMapLinks"
 import { RiderNav } from "./RiderNav"
 
 function money(amount: number) {
@@ -121,6 +122,11 @@ export default async function RiderDashboardPage() {
                     {" · "}You keep {money(job.riderPayout)}
                   </p>
                 )}
+                <RiderMapLinks
+                  pickupAddress={job.pickupAddress}
+                  dropoffAddress={job.dropoffAddress}
+                  status="PENDING"
+                />
                 <RiderJobActions jobId={job.id} status="PENDING" />
               </article>
             ))}
@@ -156,6 +162,11 @@ export default async function RiderDashboardPage() {
                 <p className="mt-1 text-sm text-stone-700">
                   <span className="text-stone-500">Dropoff:</span> {job.dropoffAddress}
                 </p>
+                <RiderMapLinks
+                  pickupAddress={job.pickupAddress}
+                  dropoffAddress={job.dropoffAddress}
+                  status={job.status}
+                />
                 <RiderJobActions jobId={job.id} status={job.status} />
               </article>
             ))}
