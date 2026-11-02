@@ -123,6 +123,96 @@ function cityFromNominatimAddress(address?: Record<string, string>) {
   )
 }
 
+type PhotonFeature = {
+  geometry?: { coordinates?: [number, number] }
+  properties?: {
+    osm_id?: number
+    osm_type?: string
+    name?: string
+    street?: string
+    housenumber?: string
+    district?: string
+    suburb?: string
+    city?: string
+    town?: string
+    village?: string
+    county?: string
+    state?: string
+    country?: string
+    countrycode?: string
+    type?: string
+  }
+}
+
+function formatPhotonLabel(p: NonNullable<PhotonFeature["properties"]>) {
+  return [
+    p.name,
+    p.housenumber && p.street ? `${p.housenumber} ${p.street}` : p.street,
+    p.suburb || p.district,
+    p.city || p.town || p.village,
+    p.state,
+    p.country,
+  ]
+    .filter(Boolean)
+    .filter((v, i, arr) => arr.indexOf(v) === i)
+    .join(", ")
+}
+
+/** Photon (Komoot) — free OSM autocomplete, better typing suggestions than Nominatim. */
+async function searchPhotonPlaces(query: string): Promise<PlaceSuggestion[]> {
+  const url = new URL("https://photon.komoot.io/api/")
+  url.searchParams.set("q", query)
+  url.searchParams.set("lat", "5.6037")
+  url.searchParams.set("lon", "-0.1870")
+  url.searchParams.set("limit", "8")
+  url.searchParams.set("lang", "en")
+  // Accra metro bbox: minLon, minLat, maxLon, maxLat
+  url.searchParams.set("bbox", "-0.35,5.48,0.05,5.78")
+
+  const res = await fetch(url.toString(), {
+    headers: { "User-Agent": "ShoporaDelivery/1.0 (shopora.space)" },
+    next: { revalidate: 0 },
+  })
+  if (!res.ok) return []
+
+  const data = (await res.json()) as { features?: PhotonFeature[] }
+  const features = data.features || []
+
+  const mapped: PlaceSuggestion[] = []
+  for (let index = 0; index < features.length; index++) {
+    const f = features[index]
+    const p = f.properties || {}
+    const coords = f.geometry?.coordinates
+    const code = (p.countrycode || "").toUpperCase()
+    if (code && code !== "GH") continue
+
+    const cityRaw = p.city || p.town || p.village || p.county || p.state || "Accra"
+    const label = formatPhotonLabel(p) || query
+    const exact =
+      p.name ||
+      (p.housenumber && p.street ? `${p.housenumber} ${p.street}` : p.street) ||
+      p.suburb ||
+      p.district ||
+      label.split(",")[0] ||
+      query
+
+    mapped.push({
+      id: `photon-${p.osm_type || "n"}-${p.osm_id || index}`,
+      label,
+      exactLocation: exact,
+      city: isAccraArea(cityRaw, label) ? "Accra" : cityRaw,
+      ...(coords ? { lat: coords[1], lng: coords[0] } : {}),
+    })
+  }
+
+  // Prefer Accra-area matches first
+  return mapped.sort((a, b) => {
+    const aAccra = isAccraArea(a.city, a.label) ? 0 : 1
+    const bAccra = isAccraArea(b.city, b.label) ? 0 : 1
+    return aAccra - bAccra
+  })
+}
+
 async function searchNominatimPlaces(query: string): Promise<PlaceSuggestion[]> {
   const url = new URL("https://nominatim.openstreetmap.org/search")
   url.searchParams.set("q", `${query}, Accra, Ghana`)
@@ -130,7 +220,6 @@ async function searchNominatimPlaces(query: string): Promise<PlaceSuggestion[]> 
   url.searchParams.set("addressdetails", "1")
   url.searchParams.set("limit", "6")
   url.searchParams.set("countrycodes", "gh")
-  // Accra metro viewbox bias (left, top, right, bottom)
   url.searchParams.set("viewbox", "-0.35,5.78,0.05,5.48")
   url.searchParams.set("bounded", "0")
 
@@ -166,39 +255,18 @@ async function searchNominatimPlaces(query: string): Promise<PlaceSuggestion[]> 
   })
 }
 
-async function searchGooglePlaces(query: string, apiKey: string): Promise<PlaceSuggestion[]> {
-  const url = new URL("https://maps.googleapis.com/maps/api/place/autocomplete/json")
-  url.searchParams.set("input", query)
-  url.searchParams.set("components", "country:gh")
-  url.searchParams.set("location", "5.6037,-0.1870")
-  url.searchParams.set("radius", "45000")
-  url.searchParams.set("key", apiKey)
-
-  const res = await fetch(url.toString())
-  if (!res.ok) return []
-  const data = (await res.json()) as {
-    status: string
-    predictions?: Array<{ place_id: string; description: string; structured_formatting?: { main_text: string } }>
-  }
-  if (data.status !== "OK" && data.status !== "ZERO_RESULTS") return []
-  return (data.predictions || []).map((p) => ({
-    id: `g-${p.place_id}`,
-    label: p.description,
-    exactLocation: p.structured_formatting?.main_text || p.description.split(",")[0] || query,
-    city: "Accra",
-  }))
-}
-
-/** Autocomplete suggestions for checkout (Bolt/Yango-style). Accra-biased. */
+/** Autocomplete for checkout. Photon first (free), Nominatim fallback. Accra-biased. */
 export async function searchDeliveryPlaces(query: string): Promise<PlaceSuggestion[]> {
   const q = query.trim()
   if (q.length < 2) return []
 
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY
-  if (apiKey) {
-    const google = await searchGooglePlaces(q, apiKey)
-    if (google.length > 0) return google
+  try {
+    const photon = await searchPhotonPlaces(q)
+    if (photon.length > 0) return photon.slice(0, 6)
+  } catch (err) {
+    console.error("Photon place search failed:", err)
   }
+
   return searchNominatimPlaces(q)
 }
 
