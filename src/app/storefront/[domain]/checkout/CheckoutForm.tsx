@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useCart } from "@/lib/cart"
 import { processCheckoutAction } from "@/server/actions/checkout"
 import { quoteShoporaDeliveryAction } from "@/server/actions/shopora-delivery"
+import { PlaceAutocomplete } from "@/components/storefront/PlaceAutocomplete"
 
 const COUNTRIES = [
   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
@@ -235,15 +236,23 @@ export function CheckoutForm({
             </Field>
           </div>
           <Field id="exactLocation" label="Exact location">
-            <input
+            <PlaceAutocomplete
               id="exactLocation"
               name="exactLocation"
               required
-              placeholder="Area, street, landmark"
+              placeholder="Start typing — e.g. GCTU, East Legon, Spintex"
               className={inputClass}
               value={exactLocation}
-              onChange={(e) => setExactLocation(e.target.value)}
+              onChange={setExactLocation}
+              onPlaceSelect={(place) => {
+                setExactLocation(place.exactLocation)
+                if (place.city) setCity(place.city)
+                if (shoporaDeliveryEnabled) setCountry("Ghana")
+              }}
             />
+            <p className="text-xs text-stone-500">
+              Pick a suggested place (like Bolt / Yango) so we can quote the right Accra delivery rate.
+            </p>
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field id="city" label="City">

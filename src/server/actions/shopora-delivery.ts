@@ -6,9 +6,23 @@ import {
   geocodeAddress,
   isAccraArea,
   quoteShoporaDelivery,
+  searchDeliveryPlaces,
   type DeliveryQuote,
+  type PlaceSuggestion,
 } from "@/lib/shopora-delivery"
 import { revalidatePath } from "next/cache"
+
+export async function searchDeliveryPlacesAction(query: string): Promise<{
+  suggestions: PlaceSuggestion[]
+}> {
+  try {
+    const suggestions = await searchDeliveryPlaces(query)
+    return { suggestions }
+  } catch (err) {
+    console.error("searchDeliveryPlacesAction", err)
+    return { suggestions: [] }
+  }
+}
 
 export async function updateShoporaDeliverySettingsAction(storeId: string, formData: FormData) {
   const { member } = await requireStoreAccess(storeId)

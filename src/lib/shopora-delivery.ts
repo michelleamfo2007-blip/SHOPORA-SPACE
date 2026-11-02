@@ -84,6 +84,15 @@ export function calculateDeliveryFee(distanceKm: number, durationMin: number): {
   return { fee, shoporaCut, riderPayout }
 }
 
+export type PlaceSuggestion = {
+  id: string
+  label: string
+  exactLocation: string
+  city: string
+  lat?: number
+  lng?: number
+}
+
 async function geocodeNominatim(query: string): Promise<LatLng | null> {
   const url = new URL("https://nominatim.openstreetmap.org/search")
   url.searchParams.set("q", query)
@@ -99,6 +108,97 @@ async function geocodeNominatim(query: string): Promise<LatLng | null> {
   const data = (await res.json()) as Array<{ lat: string; lon: string }>
   if (!data[0]) return null
   return { lat: Number(data[0].lat), lng: Number(data[0].lon) }
+}
+
+function cityFromNominatimAddress(address?: Record<string, string>) {
+  if (!address) return "Accra"
+  return (
+    address.city ||
+    address.town ||
+    address.suburb ||
+    address.county ||
+    address.state ||
+    "Accra"
+  )
+}
+
+async function searchNominatimPlaces(query: string): Promise<PlaceSuggestion[]> {
+  const url = new URL("https://nominatim.openstreetmap.org/search")
+  url.searchParams.set("q", `${query}, Accra, Ghana`)
+  url.searchParams.set("format", "json")
+  url.searchParams.set("addressdetails", "1")
+  url.searchParams.set("limit", "6")
+  url.searchParams.set("countrycodes", "gh")
+  // Accra metro viewbox bias (left, top, right, bottom)
+  url.searchParams.set("viewbox", "-0.35,5.78,0.05,5.48")
+  url.searchParams.set("bounded", "0")
+
+  const res = await fetch(url, {
+    headers: { "User-Agent": "ShoporaDelivery/1.0 (shopora.space)" },
+    next: { revalidate: 0 },
+  })
+  if (!res.ok) return []
+  const data = (await res.json()) as Array<{
+    place_id: number
+    display_name: string
+    lat: string
+    lon: string
+    name?: string
+    address?: Record<string, string>
+  }>
+
+  return data.map((item) => {
+    const city = cityFromNominatimAddress(item.address)
+    const exact =
+      item.name ||
+      [item.address?.road, item.address?.suburb, item.address?.neighbourhood].filter(Boolean).join(", ") ||
+      item.display_name.split(",")[0] ||
+      query
+    return {
+      id: `osm-${item.place_id}`,
+      label: item.display_name,
+      exactLocation: exact,
+      city: isAccraArea(city, item.display_name) ? "Accra" : city,
+      lat: Number(item.lat),
+      lng: Number(item.lon),
+    }
+  })
+}
+
+async function searchGooglePlaces(query: string, apiKey: string): Promise<PlaceSuggestion[]> {
+  const url = new URL("https://maps.googleapis.com/maps/api/place/autocomplete/json")
+  url.searchParams.set("input", query)
+  url.searchParams.set("components", "country:gh")
+  url.searchParams.set("location", "5.6037,-0.1870")
+  url.searchParams.set("radius", "45000")
+  url.searchParams.set("key", apiKey)
+
+  const res = await fetch(url.toString())
+  if (!res.ok) return []
+  const data = (await res.json()) as {
+    status: string
+    predictions?: Array<{ place_id: string; description: string; structured_formatting?: { main_text: string } }>
+  }
+  if (data.status !== "OK" && data.status !== "ZERO_RESULTS") return []
+  return (data.predictions || []).map((p) => ({
+    id: `g-${p.place_id}`,
+    label: p.description,
+    exactLocation: p.structured_formatting?.main_text || p.description.split(",")[0] || query,
+    city: "Accra",
+  }))
+}
+
+/** Autocomplete suggestions for checkout (Bolt/Yango-style). Accra-biased. */
+export async function searchDeliveryPlaces(query: string): Promise<PlaceSuggestion[]> {
+  const q = query.trim()
+  if (q.length < 2) return []
+
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY
+  if (apiKey) {
+    const google = await searchGooglePlaces(q, apiKey)
+    if (google.length > 0) return google
+  }
+  return searchNominatimPlaces(q)
 }
 
 async function geocodeGoogle(query: string, apiKey: string): Promise<LatLng | null> {
