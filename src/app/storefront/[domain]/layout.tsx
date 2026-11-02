@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { Cormorant_Garamond, DM_Sans } from "next/font/google"
+import { DM_Sans } from "next/font/google"
 import { Search } from "lucide-react"
 import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
@@ -12,13 +12,8 @@ import { MobileMenu } from "@/components/storefront/MobileMenu"
 import { SocialIcons } from "@/components/storefront/SocialIcons"
 import { StoreAnalyticsTracker } from "@/components/storefront/StoreAnalyticsTracker"
 
-const display = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-  variable: "--font-store-display",
-})
-
+// Cormorant display font is loaded once in the root layout (--font-store-display).
+// Loading it again here breaks Turbopack / Vercel builds ("next/font/google queries have exactly one entry").
 const sans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-store-sans",
@@ -61,7 +56,7 @@ export default async function StorefrontLayout({
 
   const accent = getStoreAccent(store.primaryColor)
   const themeStyle = { "--store-accent": accent } as React.CSSProperties
-  const fontClasses = `${display.variable} ${sans.variable} font-store`
+  const fontClasses = `${sans.variable} font-store`
   const whatsappHref = store.whatsappNumber ? whatsappLink(store.whatsappNumber) : null
 
   if (isSubscriptionLapsed(store.subscription)) {

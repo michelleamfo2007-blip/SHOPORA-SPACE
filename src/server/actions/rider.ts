@@ -115,23 +115,33 @@ export async function riderSignupAction(formData: FormData) {
     return { error: "Could not create your account. Try again." }
   }
 
+  const firstName = name.split(/\s+/)[0] || "there"
   try {
-    await resend.emails.send({
-      from: "Shopora Delivery <orders@shopora.space>",
-      to: "shoporaspace@gmail.com",
-      subject: `New rider signup · ${name}`,
-      html: `
-        <p>A new Accra rider signed up and is waiting for approval.</p>
-        <p><strong>Name:</strong> ${name}<br/>
-        <strong>Phone:</strong> ${phone}<br/>
-        <strong>Email:</strong> ${email}<br/>
-        ${momoNumber ? `<strong>MoMo:</strong> ${momoNumber}<br/>` : ""}
-        </p>
-        <p><a href="https://www.shopora.space/super-admin/riders">Review in Super Admin → Riders</a></p>
-      `,
-    })
+    const { RiderApplicationReceivedEmail } = await import("@/emails/RiderApplicationEmail")
+    await Promise.all([
+      resend.emails.send({
+        from: "Shopora Delivery <orders@shopora.space>",
+        to: email,
+        subject: "We received your Shopora rider application",
+        react: RiderApplicationReceivedEmail({ riderName: firstName }),
+      }),
+      resend.emails.send({
+        from: "Shopora Delivery <orders@shopora.space>",
+        to: "shoporaspace@gmail.com",
+        subject: `New rider signup · ${name}`,
+        html: `
+          <p>A new Accra rider signed up and is waiting for approval.</p>
+          <p><strong>Name:</strong> ${name}<br/>
+          <strong>Phone:</strong> ${phone}<br/>
+          <strong>Email:</strong> ${email}<br/>
+          ${momoNumber ? `<strong>MoMo:</strong> ${momoNumber}<br/>` : ""}
+          </p>
+          <p><a href="https://www.shopora.space/super-admin/riders">Review in Super Admin → Riders</a></p>
+        `,
+      }),
+    ])
   } catch (err) {
-    console.error("rider signup admin email:", err)
+    console.error("rider signup emails:", err)
   }
 
   return { success: true as const }
@@ -575,6 +585,12 @@ export async function setRiderStatusAction(riderId: string, status: "ACTIVE" | "
   const admin = await db.user.findUnique({ where: { id: session.user.id }, select: { platformRole: true } })
   if (admin?.platformRole !== "SUPER_ADMIN") return { error: "Unauthorized" }
 
+  const before = await db.rider.findUnique({
+    where: { id: riderId },
+    select: { status: true, name: true, email: true },
+  })
+  if (!before) return { error: "Rider not found." }
+
   await db.rider.update({
     where: { id: riderId },
     data: {
@@ -582,6 +598,24 @@ export async function setRiderStatusAction(riderId: string, status: "ACTIVE" | "
       ...(status !== "ACTIVE" ? { isOnline: false } : {}),
     },
   })
+
+  if (status === "ACTIVE" && before.status !== "ACTIVE" && before.email) {
+    try {
+      const { RiderApprovedEmail } = await import("@/emails/RiderApplicationEmail")
+      await resend.emails.send({
+        from: "Shopora Delivery <orders@shopora.space>",
+        to: before.email,
+        subject: "You’re approved as a Shopora rider",
+        react: RiderApprovedEmail({
+          riderName: before.name.split(/\s+/)[0] || "there",
+          loginUrl: "https://www.shopora.space/rider/login",
+        }),
+      })
+    } catch (err) {
+      console.error("rider approved email:", err)
+    }
+  }
+
   revalidatePath("/super-admin/riders")
   revalidatePath("/super-admin/deliveries")
   return { success: true }
