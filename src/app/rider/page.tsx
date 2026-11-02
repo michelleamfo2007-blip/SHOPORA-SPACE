@@ -23,7 +23,12 @@ export default async function RiderDashboardPage() {
           where: {
             status: "PENDING",
             riderId: null,
-            order: { status: "PROCESSING", deliveryMethod: "SHOPORA" },
+            // Payment-confirmed Accra jobs. Include SHIPPED/DELIVERED so a
+            // store that marked early still leaves the open job visible.
+            order: {
+              deliveryMethod: "SHOPORA",
+              status: { in: ["PROCESSING", "SHIPPED", "DELIVERED"] },
+            },
           },
           include: {
             order: {

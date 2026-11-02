@@ -1,4 +1,4 @@
-import { SHOPORA_DELIVERY_CONFIG } from "@/lib/shopora-delivery"
+import { SHOPORA_DELIVERY_CONFIG } from "@/lib/shopora-delivery-config"
 
 /** Bump when rider terms change so existing riders can be asked to re-accept later. */
 export const RIDER_TERMS_VERSION = "2026-11-01"

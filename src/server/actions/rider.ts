@@ -224,7 +224,11 @@ export async function acceptDeliveryJobAction(jobId: string) {
         include: { order: { select: { status: true, deliveryMethod: true, orderNumber: true } } },
       })
       if (!job || job.order.deliveryMethod !== "SHOPORA") throw new Error("NOT_FOUND")
-      if (job.order.status !== "PROCESSING") throw new Error("NOT_READY")
+      // Ready once payment is confirmed. If a store marked SHIPPED/DELIVERED early,
+      // still allow accept and pull the order back to PROCESSING for the rider flow.
+      if (!["PROCESSING", "SHIPPED", "DELIVERED"].includes(job.order.status)) {
+        throw new Error("NOT_READY")
+      }
       if (["CANCELLED", "DELIVERED", "FAILED"].includes(job.status)) throw new Error("CLOSED")
 
       if (DELIVERY_CONFIG.oneActiveJobAtATime) {
@@ -245,6 +249,13 @@ export async function acceptDeliveryJobAction(jobId: string) {
           assignedAt: new Date(),
         },
       })
+
+      if (job.order.status !== "PROCESSING") {
+        await tx.order.update({
+          where: { id: job.orderId },
+          data: { status: "PROCESSING" },
+        })
+      }
 
       await audit(tx, {
         deliveryJobId: jobId,
