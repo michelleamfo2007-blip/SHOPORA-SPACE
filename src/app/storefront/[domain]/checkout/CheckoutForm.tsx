@@ -52,6 +52,7 @@ type DeliveryQuoteView = {
   distanceKm: number
   durationMin: number
   currency: string
+  estimated?: boolean
 }
 
 export function CheckoutForm({
@@ -106,6 +107,7 @@ export function CheckoutForm({
           distanceKm: result.quote.distanceKm,
           durationMin: result.quote.durationMin,
           currency: result.quote.currency,
+          estimated: result.quote.estimated === true || result.quote.source === "estimated",
         })
       })
     }, 700)
@@ -240,7 +242,7 @@ export function CheckoutForm({
               id="exactLocation"
               name="exactLocation"
               required
-              placeholder="Search your area or landmark"
+              placeholder="Type your area, street, or landmark"
               className={inputClass}
               value={exactLocation}
               onChange={setExactLocation}
@@ -250,6 +252,9 @@ export function CheckoutForm({
                 if (shoporaDeliveryEnabled) setCountry("Ghana")
               }}
             />
+            <p className="text-xs text-stone-500">
+              Suggestions are optional — you can type any Accra address. The rider will open it in Google Maps.
+            </p>
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field id="city" label="City">
@@ -283,10 +288,19 @@ export function CheckoutForm({
               {quoting && <p>Getting live delivery rate…</p>}
               {!quoting && activeQuote && (
                 <p>
-                  <strong className="text-stone-900">Live rate: {money(activeQuote.currency, activeQuote.fee)}</strong>
-                  {" · "}~{activeQuote.durationMin} mins · {activeQuote.distanceKm} km
+                  <strong className="text-stone-900">
+                    {activeQuote.estimated ? "Estimated rate" : "Live rate"}:{" "}
+                    {money(activeQuote.currency, activeQuote.fee)}
+                  </strong>
+                  {!activeQuote.estimated && (
+                    <>
+                      {" · "}~{activeQuote.durationMin} mins · {activeQuote.distanceKm} km
+                    </>
+                  )}
                   <span className="mt-1 block text-stone-500">
-                    Pay this to the Shopora rider on arrival. It is not included in what you send the store.
+                    {activeQuote.estimated
+                      ? "We couldn’t pin this spot on the free map index, so this is our Accra standard estimate. Your full written address still goes to the rider for Google Maps."
+                      : "Pay this to the Shopora rider on arrival. It is not included in what you send the store."}
                   </span>
                 </p>
               )}

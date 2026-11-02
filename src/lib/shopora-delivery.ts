@@ -15,6 +15,13 @@ export const SHOPORA_DELIVERY_CONFIG = {
   perMinute: 0.35,
   minFee: 15,
   maxFee: 60,
+  /**
+   * Used when the typed address is Accra but not found on the free map index.
+   * Customer can still checkout; rider navigates with the written address in Google Maps.
+   */
+  fallbackFee: 25,
+  fallbackDistanceKm: 8,
+  fallbackDurationMin: 25,
   /** Share of delivery fee owed to Shopora (rider remits later). */
   platformCutRate: 0.15,
   /** Rough Accra metro bounding box for v1. */
@@ -35,7 +42,9 @@ export type DeliveryQuote = {
   shoporaCut: number
   riderPayout: number
   currency: string
-  source: "google" | "osrm"
+  source: "google" | "osrm" | "estimated"
+  /** True when we could not pin the address exactly and used the Accra fallback fee. */
+  estimated?: boolean
   pickup: LatLng
   dropoff: LatLng
 }
@@ -343,12 +352,42 @@ export async function geocodeAddress(parts: {
   country?: string
 }): Promise<LatLng | null> {
   const query = [parts.exactLocation, parts.city, parts.country || "Ghana"].filter(Boolean).join(", ")
+
+  // Prefer Photon first-result coords (same free index as autocomplete)
+  try {
+    const photon = await searchPhotonPlaces(parts.exactLocation || query)
+    const hit = photon.find((p) => p.lat != null && p.lng != null)
+    if (hit?.lat != null && hit.lng != null) return { lat: hit.lat, lng: hit.lng }
+  } catch {
+    // continue
+  }
+
   const apiKey = process.env.GOOGLE_MAPS_API_KEY
   if (apiKey) {
     const g = await geocodeGoogle(query, apiKey)
     if (g) return g
   }
   return geocodeNominatim(query)
+}
+
+function estimatedAccraQuote(pickup: LatLng): DeliveryQuote {
+  const { fallbackFee, fallbackDistanceKm, fallbackDurationMin, currency } = SHOPORA_DELIVERY_CONFIG
+  const shoporaCut = Math.round(fallbackFee * SHOPORA_DELIVERY_CONFIG.platformCutRate * 100) / 100
+  const riderPayout = Math.round((fallbackFee - shoporaCut) * 100) / 100
+  // Accra CBD — used only as a placeholder pin when the typed address is unmapped
+  const dropoff = { lat: 5.6037, lng: -0.187 }
+  return {
+    fee: fallbackFee,
+    distanceKm: fallbackDistanceKm,
+    durationMin: fallbackDurationMin,
+    shoporaCut,
+    riderPayout,
+    currency,
+    source: "estimated",
+    estimated: true,
+    pickup,
+    dropoff,
+  }
 }
 
 export async function quoteShoporaDelivery(input: {
@@ -359,12 +398,14 @@ export async function quoteShoporaDelivery(input: {
     return { ok: false, error: "Shopora Delivery is only available for Accra pickups right now." }
   }
 
-  const dropoff = await geocodeAddress(input.dropoffAddress)
-  if (!dropoff) {
-    return { ok: false, error: "We could not find that delivery address. Try a clearer landmark or area." }
+  // Never block Accra free-text addresses — rider will open the written address in Google Maps.
+  if (!isAccraArea(input.dropoffAddress.city, input.dropoffAddress.exactLocation)) {
+    return { ok: false, error: "Shopora Delivery is only available for Accra addresses right now." }
   }
-  if (!inAccraBounds(dropoff)) {
-    return { ok: false, error: "Shopora Delivery is only available inside Accra for now." }
+
+  const dropoff = await geocodeAddress(input.dropoffAddress)
+  if (!dropoff || !inAccraBounds(dropoff)) {
+    return { ok: true, quote: estimatedAccraQuote(input.pickup) }
   }
 
   const apiKey = process.env.GOOGLE_MAPS_API_KEY
@@ -380,7 +421,7 @@ export async function quoteShoporaDelivery(input: {
     source = "osrm"
   }
   if (!route) {
-    return { ok: false, error: "We could not calculate a live delivery rate right now. Please try again." }
+    return { ok: true, quote: estimatedAccraQuote(input.pickup) }
   }
 
   const { fee, shoporaCut, riderPayout } = calculateDeliveryFee(route.distanceKm, route.durationMin)
