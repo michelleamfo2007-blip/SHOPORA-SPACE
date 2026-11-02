@@ -18,9 +18,7 @@ export function OrderRow({ order, store }: { order: any; store: any }) {
 
   const payment = order.payments?.[0]
   const isShopora = order.deliveryMethod === "SHOPORA"
-  const statusOptions = isShopora
-    ? STATUS_OPTIONS.filter((o) => o.value === "PROCESSING" || o.value === "CANCELLED")
-    : STATUS_OPTIONS
+  const statusOptions = STATUS_OPTIONS
 
   async function onVerify(e: React.MouseEvent) {
     e.stopPropagation()
@@ -141,9 +139,9 @@ export function OrderRow({ order, store }: { order: any; store: any }) {
                 </option>
               ))}
             </select>
-            {isShopora && order.status === "PROCESSING" && (
-              <p className="max-w-[180px] text-right text-[10px] leading-snug text-slate-500">
-                Rider handles shipped/delivered
+            {isShopora && (
+              <p className="max-w-[200px] text-right text-[10px] leading-snug text-slate-500">
+                For Shopora Delivery, prefer leaving Shipped/Delivered to the rider (OTP). You can still change status if needed.
               </p>
             )}
           </div>
