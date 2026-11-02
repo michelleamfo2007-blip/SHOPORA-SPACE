@@ -134,11 +134,12 @@ export function RiderSignupForm() {
           className="mt-1 h-4 w-4 border-stone-400"
         />
         <span>
-          I have read and agree to the{" "}
+          I Agree — I have read and accept the{" "}
           <Link href="/rider/terms" target="_blank" className="underline">
-            Rider Terms &amp; Conditions
+            Shopora Space Delivery Rider Terms and Conditions
           </Link>
-          , including Shopora’s {RIDER_PLATFORM_CUT_PERCENT}% platform fee on each delivery.
+          , including the {RIDER_PLATFORM_CUT_PERCENT}% Shopora / {100 - RIDER_PLATFORM_CUT_PERCENT}% rider
+          delivery-fee split.
         </span>
       </label>
 

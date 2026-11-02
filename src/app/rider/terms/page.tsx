@@ -4,43 +4,83 @@ import { RIDER_TERMS } from "@/lib/rider-terms"
 export default function RiderTermsPage() {
   return (
     <div className="min-h-screen bg-[#faf8f5] px-5 py-14 text-stone-900">
-      <div className="mx-auto max-w-2xl">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-stone-500">Shopora Delivery</p>
-        <h1 className="mt-2 font-display text-4xl">{RIDER_TERMS.title}</h1>
-        <p className="mt-2 text-sm text-stone-600">
-          Last updated {RIDER_TERMS.updatedLabel} · Version {RIDER_TERMS.version}
-        </p>
+      <article className="mx-auto max-w-2xl">
+        <p className="text-[11px] uppercase tracking-[0.22em] text-stone-500">{RIDER_TERMS.brand}</p>
+        <h1 className="mt-2 font-display text-4xl leading-tight">{RIDER_TERMS.title}</h1>
+        <p className="mt-3 text-sm text-stone-600">Effective Date: {RIDER_TERMS.effectiveDate}</p>
+        <p className="mt-1 text-xs text-stone-500">Version {RIDER_TERMS.version}</p>
 
         <div className="mt-6 border border-stone-900 bg-white px-5 py-4">
-          <p className="text-sm font-medium text-stone-900">
-            Shopora takes {RIDER_TERMS.cutPercent}% of every delivery fee.
+          <p className="text-sm font-medium">
+            Commission: Shopora {RIDER_TERMS.cutPercent}% · Rider {RIDER_TERMS.riderPercent}%
           </p>
           <p className="mt-1 text-sm text-stone-600">
-            You collect the full delivery fee from the customer on arrival, keep{" "}
-            {100 - RIDER_TERMS.cutPercent}%, and settle Shopora’s {RIDER_TERMS.cutPercent}% cut later
-            (usually weekly via MoMo).
+            Calculated on the delivery fee only — not on the product total. Example on GH₵30: Shopora GH₵4.50,
+            rider GH₵25.50.
           </p>
         </div>
 
-        <div className="mt-10 space-y-8">
+        <div className="mt-10 space-y-10">
           {RIDER_TERMS.sections.map((section) => (
             <section key={section.heading}>
-              <h2 className="font-display text-xl">{section.heading}</h2>
-              <p className="mt-2 text-sm leading-relaxed text-stone-700">{section.body}</p>
+              <h2 className="font-display text-2xl">{section.heading}</h2>
+              {section.paragraphs?.map((p) => (
+                <p key={p.slice(0, 48)} className="mt-3 text-sm leading-relaxed text-stone-700">
+                  {p}
+                </p>
+              ))}
+              {section.numbered && (
+                <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-stone-700">
+                  {section.numbered.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ol>
+              )}
+              {section.bullets && (
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-stone-700">
+                  {section.bullets.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              )}
+              {section.note && (
+                <p className="mt-3 text-sm leading-relaxed text-stone-700">{section.note}</p>
+              )}
             </section>
           ))}
         </div>
 
-        <p className="mt-12 text-sm text-stone-600">
-          Questions? Email{" "}
-          <a href="mailto:shoporaspace@gmail.com" className="underline">
-            shoporaspace@gmail.com
-          </a>
-        </p>
-        <Link href="/rider/signup" className="mt-6 inline-block text-sm underline">
+        <section className="mt-12 border border-stone-200 bg-white px-5 py-6">
+          <h2 className="font-display text-2xl">{RIDER_TERMS.acceptance.title}</h2>
+          <p className="mt-3 text-sm leading-relaxed text-stone-700">{RIDER_TERMS.acceptance.intro}</p>
+          <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-stone-700">
+            {RIDER_TERMS.acceptance.points.map((point) => (
+              <li key={point}>{point}</li>
+            ))}
+          </ol>
+          <p className="mt-4 text-sm leading-relaxed text-stone-700">{RIDER_TERMS.acceptance.electronic}</p>
+        </section>
+
+        <footer className="mt-12 border-t border-stone-200 pt-6 text-sm text-stone-600">
+          <p className="font-medium text-stone-900">{RIDER_TERMS.brand}</p>
+          <p className="mt-2">
+            Official Website:{" "}
+            <a href={RIDER_TERMS.website} className="underline">
+              {RIDER_TERMS.website}
+            </a>
+          </p>
+          <p className="mt-1">
+            Email:{" "}
+            <a href={`mailto:${RIDER_TERMS.supportEmail}`} className="underline">
+              {RIDER_TERMS.supportEmail}
+            </a>
+          </p>
+        </footer>
+
+        <Link href="/rider/signup" className="mt-8 inline-block text-sm underline">
           Back to rider signup
         </Link>
-      </div>
+      </article>
     </div>
   )
 }
