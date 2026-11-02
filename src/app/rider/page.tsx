@@ -5,6 +5,7 @@ import { riderLogoutAction } from "@/server/actions/rider"
 import { RiderJobActions } from "./RiderJobActions"
 import { RiderAvailabilityToggle } from "./RiderAvailabilityToggle"
 import { RiderMapLinks } from "./RiderMapLinks"
+import { RiderJobMap } from "./RiderJobMap"
 import { RiderNav } from "./RiderNav"
 
 function money(amount: number) {
@@ -122,6 +123,11 @@ export default async function RiderDashboardPage() {
                     {" · "}You keep {money(job.riderPayout)}
                   </p>
                 )}
+                <RiderJobMap
+                  pickupAddress={job.pickupAddress}
+                  dropoffAddress={job.dropoffAddress}
+                  focus="both"
+                />
                 <RiderMapLinks
                   pickupAddress={job.pickupAddress}
                   dropoffAddress={job.dropoffAddress}
@@ -162,6 +168,11 @@ export default async function RiderDashboardPage() {
                 <p className="mt-1 text-sm text-stone-700">
                   <span className="text-stone-500">Dropoff:</span> {job.dropoffAddress}
                 </p>
+                <RiderJobMap
+                  pickupAddress={job.pickupAddress}
+                  dropoffAddress={job.dropoffAddress}
+                  focus={job.status === "PICKED_UP" ? "dropoff" : "both"}
+                />
                 <RiderMapLinks
                   pickupAddress={job.pickupAddress}
                   dropoffAddress={job.dropoffAddress}
