@@ -4,19 +4,34 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { verifyOrderPaymentAction, updateOrderStatusAction } from "@/server/actions/order"
 import { useRouter } from "next/navigation"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal } from "lucide-react"
 
-export function OrderRow({ order, store }: { order: any, store: any }) {
+const STATUS_OPTIONS = [
+  { value: "PROCESSING", label: "Processing" },
+  { value: "SHIPPED", label: "Shipped" },
+  { value: "DELIVERED", label: "Delivered" },
+  { value: "CANCELLED", label: "Cancelled" },
+] as const
+
+export function OrderRow({ order, store }: { order: any; store: any }) {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   const payment = order.payments?.[0]
+  const isShopora = order.deliveryMethod === "SHOPORA"
+  const statusOptions = isShopora
+    ? STATUS_OPTIONS.filter((o) => o.value === "PROCESSING" || o.value === "CANCELLED")
+    : STATUS_OPTIONS
 
   async function onVerify(e: React.MouseEvent) {
     e.stopPropagation()
-    if (!confirm("Are you sure you want to verify this payment? Ensure you have actually received the funds in your account.")) return
-    
+    if (
+      !confirm(
+        "Are you sure you want to verify this payment? Ensure you have actually received the funds in your account."
+      )
+    ) {
+      return
+    }
+
     setLoading(true)
     const result = await verifyOrderPaymentAction(store.id, order.id)
     setLoading(false)
@@ -28,43 +43,63 @@ export function OrderRow({ order, store }: { order: any, store: any }) {
     }
   }
 
-  async function onUpdateStatus(e: React.MouseEvent, newStatus: string) {
+  async function onUpdateStatus(e: React.ChangeEvent<HTMLSelectElement>) {
     e.stopPropagation()
+    const newStatus = e.target.value
+    if (!newStatus || newStatus === order.status) return
+
     setLoading(true)
     const result = await updateOrderStatusAction(store.id, order.id, newStatus)
     setLoading(false)
-    if (result.error) alert(result.error)
-    else router.refresh()
+    if (result.error) {
+      alert(result.error)
+      e.target.value = order.status
+    } else {
+      router.refresh()
+    }
   }
 
   return (
-    <tr 
+    <tr
       className="cursor-pointer hover:bg-slate-50/50 transition-colors group"
       onClick={() => router.push(`/${store.id}/orders/${order.id}`)}
     >
       <td className="px-6 py-4 font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
         #{order.orderNumber}
-        <div className="text-xs text-slate-500 font-medium mt-1">{new Date(order.createdAt).toLocaleDateString()}</div>
+        <div className="mt-1 text-xs font-medium text-slate-500">
+          {new Date(order.createdAt).toLocaleDateString()}
+        </div>
+        {isShopora && (
+          <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+            Shopora Delivery
+          </div>
+        )}
       </td>
-      <td className="px-6 py-4 font-semibold text-slate-700">
-        {order.customer.name}
-      </td>
+      <td className="px-6 py-4 font-semibold text-slate-700">{order.customer.name}</td>
       <td className="px-6 py-4">
-        <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset ${
-          order.status === "PENDING" || order.status === "PENDING_VERIFICATION" ? "bg-amber-50 text-amber-700 ring-amber-600/20" :
-          order.status === "PROCESSING" ? "bg-blue-50 text-blue-700 ring-blue-600/20" :
-          order.status === "SHIPPED" ? "bg-indigo-50 text-indigo-700 ring-indigo-600/20" :
-          order.status === "DELIVERED" ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20" :
-          "bg-red-50 text-red-700 ring-red-600/20"
-        }`}>
+        <span
+          className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset ${
+            order.status === "PENDING" || order.status === "PENDING_VERIFICATION"
+              ? "bg-amber-50 text-amber-700 ring-amber-600/20"
+              : order.status === "PROCESSING"
+                ? "bg-blue-50 text-blue-700 ring-blue-600/20"
+                : order.status === "SHIPPED"
+                  ? "bg-indigo-50 text-indigo-700 ring-indigo-600/20"
+                  : order.status === "DELIVERED"
+                    ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20"
+                    : "bg-red-50 text-red-700 ring-red-600/20"
+          }`}
+        >
           {order.status.replace("_", " ")}
         </span>
       </td>
       <td className="px-6 py-4">
         {payment?.reference ? (
-          <span className="font-mono text-xs bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded-md">{payment.reference}</span>
+          <span className="rounded-md bg-slate-100 px-2 py-1 font-mono text-xs font-bold text-slate-600">
+            {payment.reference}
+          </span>
         ) : (
-          <span className="text-slate-400 font-semibold">-</span>
+          <span className="font-semibold text-slate-400">-</span>
         )}
       </td>
       <td className="px-6 py-4 text-right font-extrabold text-slate-900">
@@ -72,30 +107,46 @@ export function OrderRow({ order, store }: { order: any, store: any }) {
       </td>
       <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
         {order.status === "PENDING_VERIFICATION" ? (
-          <Button size="sm" onClick={onVerify} disabled={loading} className="bg-amber-100 text-amber-700 hover:bg-amber-200 font-bold border-0">
+          <Button
+            size="sm"
+            onClick={onVerify}
+            disabled={loading}
+            className="border-0 bg-amber-100 font-bold text-amber-700 hover:bg-amber-200"
+          >
             {loading ? "Verifying..." : "Verify Payment"}
           </Button>
         ) : (
-          <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-900 transition-colors" disabled={loading}>
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-5 w-5" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="font-medium rounded-xl">
-              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "PROCESSING")} className="cursor-pointer">
-                Mark as Processing
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "SHIPPED")} className="cursor-pointer">
-                Mark as Shipped
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "DELIVERED")} className="cursor-pointer">
-                Mark as Delivered
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => onUpdateStatus(e, "CANCELLED")} className="text-red-600 cursor-pointer focus:text-red-600 focus:bg-red-50">
-                Cancel Order
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex flex-col items-end gap-1">
+            <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+              Change status
+            </label>
+            <select
+              value={
+                statusOptions.some((o) => o.value === order.status)
+                  ? order.status
+                  : order.status === "PENDING"
+                    ? "PROCESSING"
+                    : order.status
+              }
+              disabled={loading || order.status === "DELIVERED" || order.status === "CANCELLED" || order.status === "REFUNDED"}
+              onChange={onUpdateStatus}
+              className="h-9 min-w-[150px] rounded-lg border border-slate-200 bg-white px-2 text-sm font-semibold text-slate-800 focus:border-slate-400 focus:outline-none disabled:opacity-60"
+            >
+              {!statusOptions.some((o) => o.value === order.status) && (
+                <option value={order.status}>{order.status.replace("_", " ")}</option>
+              )}
+              {statusOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            {isShopora && order.status === "PROCESSING" && (
+              <p className="max-w-[180px] text-right text-[10px] leading-snug text-slate-500">
+                Rider handles shipped/delivered
+              </p>
+            )}
+          </div>
         )}
       </td>
     </tr>

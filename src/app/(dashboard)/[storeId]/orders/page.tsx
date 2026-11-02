@@ -63,7 +63,7 @@ export default async function OrdersPage({
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Payment Ref</th>
                   <th className="px-6 py-4 text-right">Total</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4 text-right">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
