@@ -16,12 +16,17 @@ export function OrderRow({ order, store }: { order: any; store: any }) {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
+  const storeId = store?.id as string
   const payment = order.payments?.[0]
   const isShopora = order.deliveryMethod === "SHOPORA"
   const statusOptions = STATUS_OPTIONS
 
   async function onVerify(e: React.MouseEvent) {
     e.stopPropagation()
+    if (!storeId) {
+      alert("Missing store id — refresh the page and try again.")
+      return
+    }
     if (
       !confirm(
         "Are you sure you want to verify this payment? Ensure you have actually received the funds in your account."
@@ -31,7 +36,7 @@ export function OrderRow({ order, store }: { order: any; store: any }) {
     }
 
     setLoading(true)
-    const result = await verifyOrderPaymentAction(store.id, order.id)
+    const result = await verifyOrderPaymentAction(storeId, order.id)
     setLoading(false)
 
     if (result.error) {
@@ -45,9 +50,13 @@ export function OrderRow({ order, store }: { order: any; store: any }) {
     e.stopPropagation()
     const newStatus = e.target.value
     if (!newStatus || newStatus === order.status) return
+    if (!storeId) {
+      alert("Missing store id — refresh the page and try again.")
+      return
+    }
 
     setLoading(true)
-    const result = await updateOrderStatusAction(store.id, order.id, newStatus)
+    const result = await updateOrderStatusAction(storeId, order.id, newStatus)
     setLoading(false)
     if (result.error) {
       alert(result.error)

@@ -67,16 +67,18 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     jwt({ token, user }) {
       if (user) {
+        token.sub = user.id
+        token.id = user.id
         token.platformRole = user.platformRole
       }
       return token
     },
     session({ session, token }) {
-      if (session.user && token.sub) {
-        session.user.id = token.sub;
-        session.user.platformRole = token.platformRole as string | undefined;
+      if (session.user) {
+        session.user.id = (token.id as string | undefined) || (token.sub as string)
+        session.user.platformRole = token.platformRole as string | undefined
       }
-      return session;
+      return session
     },
   },
 }
