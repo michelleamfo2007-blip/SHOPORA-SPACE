@@ -9,11 +9,12 @@
 export const SHOPORA_DELIVERY_CONFIG = {
   city: "Accra",
   currency: "GHS",
-  baseFee: 15,
-  perKm: 3,
-  perMinute: 0.5,
-  minFee: 20,
-  maxFee: 80,
+  /** Lower Accra pricing — still distance/time based. */
+  baseFee: 10,
+  perKm: 2,
+  perMinute: 0.35,
+  minFee: 15,
+  maxFee: 60,
   /** Share of delivery fee owed to Shopora (rider remits later). */
   platformCutRate: 0.15,
   /** Rough Accra metro bounding box for v1. */
