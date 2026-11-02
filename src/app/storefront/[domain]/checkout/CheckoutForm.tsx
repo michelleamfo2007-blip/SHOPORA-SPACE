@@ -240,7 +240,7 @@ export function CheckoutForm({
               id="exactLocation"
               name="exactLocation"
               required
-              placeholder="Start typing — e.g. GCTU, East Legon, Spintex"
+              placeholder="Search your area or landmark"
               className={inputClass}
               value={exactLocation}
               onChange={setExactLocation}
@@ -250,9 +250,6 @@ export function CheckoutForm({
                 if (shoporaDeliveryEnabled) setCountry("Ghana")
               }}
             />
-            <p className="text-xs text-stone-500">
-              Pick a suggested place (like Bolt / Yango) so we can quote the right Accra delivery rate.
-            </p>
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field id="city" label="City">
