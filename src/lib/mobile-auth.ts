@@ -2,6 +2,8 @@ import { createHmac, timingSafeEqual } from "crypto"
 import { compare } from "bcryptjs"
 import { db } from "@/lib/db"
 import { normalizeRiderPhone, riderPhoneLookupVariants } from "@/lib/rider-phone"
+import { LAPSED_STORE_MESSAGE } from "@/lib/store-access"
+import { isSubscriptionLapsed } from "@/lib/subscription"
 
 /** Bearer tokens for the Shopora mobile app (vendors + riders). Website cookies are unaffected. */
 
@@ -56,6 +58,33 @@ export async function requireMobileVendor(req: Request) {
   })
   if (!user) return { error: "Account not found." as const, status: 401 }
   return { user }
+}
+
+/** Same rules as the website's getStoreAccess: store member (or super admin) and subscription not lapsed. */
+export async function requireMobileStoreAccess(req: Request, storeId: string) {
+  const auth = await requireMobileVendor(req)
+  if (auth.error !== undefined) return { error: auth.error, status: auth.status }
+
+  const store = await db.store.findUnique({
+    where: { id: storeId },
+    select: {
+      id: true,
+      currency: true,
+      subscription: { select: { status: true, currentPeriodEnd: true } },
+      members: { where: { userId: auth.user.id }, select: { role: true }, take: 1 },
+    },
+  })
+  if (!store) return { error: "Store not found." as const, status: 404 }
+
+  const member = store.members[0]
+  if (!member && auth.user.platformRole !== "SUPER_ADMIN") {
+    return { error: "You don’t have access to this store." as const, status: 403 }
+  }
+  if (isSubscriptionLapsed(store.subscription)) {
+    return { error: LAPSED_STORE_MESSAGE, status: 403 }
+  }
+
+  return { user: auth.user, store: { id: store.id, currency: store.currency }, role: member?.role ?? "OWNER" }
 }
 
 export async function requireMobileRider(req: Request) {
