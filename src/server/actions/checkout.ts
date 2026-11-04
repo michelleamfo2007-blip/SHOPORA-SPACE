@@ -9,6 +9,7 @@ import { DEFAULT_VARIANT_NAME } from "@/lib/product-variants"
 import { NewOrderEmail } from "@/emails/NewOrderEmail"
 import { OrderReceivedEmail } from "@/emails/OrderReceivedEmail"
 import { isAccraArea, quoteShoporaDelivery } from "@/lib/shopora-delivery"
+import { pushToStoreMembers } from "@/lib/push"
 
 const variantSelect = { id: true, price: true, name: true, product: { select: { name: true } } } as const
 
@@ -271,6 +272,12 @@ export async function processCheckoutAction(formData: FormData) {
   } catch (err) {
     console.error("Failed to send order notification emails", err)
   }
+
+  await pushToStoreMembers(storeId, {
+    title: `New order · ${store.currency} ${totalAmount.toFixed(2)}`,
+    body: `${firstName} placed order ${orderNumber}. Check the payment and verify it.`,
+    data: { screen: "order", orderId: order.id },
+  })
 
   return { orderId: order.id, orderNumber, trackingToken }
 }

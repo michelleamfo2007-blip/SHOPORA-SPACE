@@ -1,6 +1,7 @@
 import { db } from "@/lib/db"
 import { resend } from "@/lib/resend"
 import { RiderNewJobEmail } from "@/emails/RiderNewJobEmail"
+import { pushToOnlineRiders } from "@/lib/push"
 
 /** Email every active Accra rider who has an email when a delivery job becomes available. */
 export async function notifyRidersOfOpenJob(orderId: string) {
@@ -20,6 +21,12 @@ export async function notifyRidersOfOpenJob(orderId: string) {
 
   if (!job || job.status !== "PENDING" || job.riderId) return
   if (job.order.deliveryMethod !== "SHOPORA" || job.order.status !== "PROCESSING") return
+
+  await pushToOnlineRiders({
+    title: `New Accra job · GHS ${job.feeAmount.toFixed(2)}`,
+    body: `${job.order.store.name} → ${job.dropoffAddress}. First to accept gets it.`,
+    data: { screen: "rider-jobs" },
+  })
 
   const riders = await db.rider.findMany({
     where: {
