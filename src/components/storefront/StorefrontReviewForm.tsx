@@ -7,7 +7,17 @@ import { submitStorefrontReviewAction } from "@/server/actions/reviews"
 const inputClass =
   "w-full border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 placeholder:text-stone-400 focus:border-stone-900 focus:outline-none"
 
-export function StorefrontReviewForm({ domain, productId }: { domain: string, productId?: string }) {
+export function StorefrontReviewForm({
+  domain,
+  productId,
+  title = "How was your experience?",
+  onSubmitted,
+}: {
+  domain: string
+  productId?: string
+  title?: string
+  onSubmitted?: () => void
+}) {
   const [rating, setRating] = useState(5)
   const [hoveredRating, setHoveredRating] = useState(0)
   const [customerName, setCustomerName] = useState("")
@@ -23,13 +33,18 @@ export function StorefrontReviewForm({ domain, productId }: { domain: string, pr
     setIsSubmitting(true)
     setError(null)
     try {
-      await submitStorefrontReviewAction(domain, {
+      const result = await submitStorefrontReviewAction(domain, {
         customerName,
         rating,
         comment,
         productId
       })
+      if ("error" in result) {
+        setError(result.error ?? "Your review could not be sent. Please try again.")
+        return
+      }
       setIsSuccess(true)
+      onSubmitted?.()
     } catch (err) {
       console.error(err)
       setError("Your review could not be sent. Please try again.")
@@ -44,14 +59,14 @@ export function StorefrontReviewForm({ domain, productId }: { domain: string, pr
     return (
       <div className="bg-[#f3efe8] p-8 text-center">
         <p className="font-display text-3xl">Thank you</p>
-        <p className="mt-2 text-sm text-stone-600">Your review will appear once the store approves it.</p>
+        <p className="mt-2 text-sm text-stone-600">Your review is now live. It helps other shoppers decide.</p>
       </div>
     )
   }
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-5 text-left">
-      <h2 className="text-center font-display text-3xl">How was your experience?</h2>
+      <h2 className="text-center font-display text-3xl">{title}</h2>
 
       <div className="flex justify-center gap-1">
         {[1, 2, 3, 4, 5].map((star) => (

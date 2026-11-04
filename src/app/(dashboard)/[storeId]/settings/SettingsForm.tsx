@@ -28,6 +28,11 @@ export function SettingsForm({ store }: { store: any }) {
   const [snapchatHandle, setSnapchatHandle] = useState(store.snapchatHandle || "")
   const [contactEmail, setContactEmail] = useState(store.contactEmail || "")
 
+  const [announcementText, setAnnouncementText] = useState(store.announcementText || "")
+  const [heroHeadline, setHeroHeadline] = useState(store.heroHeadline || "")
+  const [heroSubtext, setHeroSubtext] = useState(store.heroSubtext || "")
+  const [aboutText, setAboutText] = useState(store.aboutText || "")
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -45,6 +50,10 @@ export function SettingsForm({ store }: { store: any }) {
       formData.append("tiktokHandle", tiktokHandle)
       formData.append("snapchatHandle", snapchatHandle)
       formData.append("contactEmail", contactEmail)
+      formData.append("announcementText", announcementText)
+      formData.append("heroHeadline", heroHeadline)
+      formData.append("heroSubtext", heroSubtext)
+      formData.append("aboutText", aboutText)
       
       await updateStoreBrandingAction(store.id, formData)
       
@@ -137,6 +146,52 @@ export function SettingsForm({ store }: { store: any }) {
               label="Upload Hero Image"
             />
           </div>
+        </div>
+      </div>
+
+      <div className="grid gap-6">
+        <h3 className="text-lg font-medium border-b pb-2">Storefront Text</h3>
+
+        <div className="grid gap-2">
+          <Label>Announcement bar</Label>
+          <Input
+            value={announcementText}
+            onChange={e => setAnnouncementText(e.target.value)}
+            maxLength={80}
+            placeholder="Delivery fee paid on arrival"
+          />
+          <p className="text-xs text-stone-500">The thin line at the very top of your store. Leave empty for the default.</p>
+        </div>
+
+        <div className="grid gap-2">
+          <Label>Homepage headline</Label>
+          <Input
+            value={heroHeadline}
+            onChange={e => setHeroHeadline(e.target.value)}
+            maxLength={60}
+            placeholder={name || "Your store name"}
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label>Homepage subtext</Label>
+          <Textarea
+            value={heroSubtext}
+            onChange={e => setHeroSubtext(e.target.value)}
+            rows={2}
+            maxLength={200}
+            placeholder="One or two lines under the headline."
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label>Our story</Label>
+          <Textarea
+            value={aboutText}
+            onChange={e => setAboutText(e.target.value)}
+            rows={4}
+            placeholder="Who you are and why customers love your products. Shown on your homepage."
+          />
         </div>
       </div>
 

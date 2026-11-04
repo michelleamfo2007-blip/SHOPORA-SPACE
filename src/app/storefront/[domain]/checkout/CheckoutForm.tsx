@@ -47,6 +47,49 @@ function money(currency: string, amount: number) {
   return `${currency} ${amount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
+/** Saved on this device after a successful order so repeat customers don't retype everything. */
+const SAVED_DETAILS_KEY = "shopora_checkout_details"
+type SavedDetails = {
+  email: string
+  phone: string
+  firstName: string
+  lastName: string
+  exactLocation: string
+  city: string
+  country: string
+}
+
+function loadSavedDetails(): Partial<SavedDetails> | null {
+  if (typeof window === "undefined") return null
+  try {
+    const raw = localStorage.getItem(SAVED_DETAILS_KEY)
+    return raw ? (JSON.parse(raw) as Partial<SavedDetails>) : null
+  } catch {
+    return null
+  }
+}
+
+function CopyButton({ value, label = "Copy" }: { value: string; label?: string }) {
+  const [copied, setCopied] = useState(false)
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(value)
+          setCopied(true)
+          setTimeout(() => setCopied(false), 2000)
+        } catch {
+          // Clipboard blocked; the number is still visible to copy by hand.
+        }
+      }}
+      className="ml-3 shrink-0 rounded-full border border-stone-300 px-3 py-1 text-[11px] uppercase tracking-[0.15em] text-stone-700 transition-colors hover:border-stone-900"
+    >
+      {copied ? "Copied" : label}
+    </button>
+  )
+}
+
 type DeliveryQuoteView = {
   fee: number
   distanceKm: number
@@ -78,12 +121,31 @@ export function CheckoutForm({
   const [deliveryMethod, setDeliveryMethod] = useState<"VENDOR" | "SHOPORA">(
     shoporaDeliveryEnabled ? "SHOPORA" : "VENDOR"
   )
-  const [exactLocation, setExactLocation] = useState("")
-  const [city, setCity] = useState(shoporaDeliveryEnabled ? "Accra" : "")
-  const [country, setCountry] = useState("Ghana")
+  // The form only renders once the (browser-only) cart has items, so reading saved details here is safe.
+  const [saved] = useState(loadSavedDetails)
+  const [exactLocation, setExactLocation] = useState(saved?.exactLocation ?? "")
+  const [city, setCity] = useState(saved?.city || (shoporaDeliveryEnabled ? "Accra" : ""))
+  const [country, setCountry] = useState(saved?.country || "Ghana")
   const [quote, setQuote] = useState<DeliveryQuoteView | null>(null)
   const [quoteError, setQuoteError] = useState<string | null>(null)
   const [quoting, startQuote] = useTransition()
+  const [email, setEmail] = useState(saved?.email ?? "")
+  const [phone, setPhone] = useState(saved?.phone ?? "")
+  const [firstName, setFirstName] = useState(saved?.firstName ?? "")
+  const [lastName, setLastName] = useState(saved?.lastName ?? "")
+  const [restored, setRestored] = useState(!!saved)
+
+  function forgetDetails() {
+    localStorage.removeItem(SAVED_DETAILS_KEY)
+    setEmail("")
+    setPhone("")
+    setFirstName("")
+    setLastName("")
+    setExactLocation("")
+    setCity(shoporaDeliveryEnabled ? "Accra" : "")
+    setCountry("Ghana")
+    setRestored(false)
+  }
 
   useEffect(() => {
     if (!shoporaDeliveryEnabled || deliveryMethod !== "SHOPORA") return
@@ -156,6 +218,12 @@ export function CheckoutForm({
         return
       }
 
+      try {
+        const details: SavedDetails = { email, phone, firstName, lastName, exactLocation, city, country }
+        localStorage.setItem(SAVED_DETAILS_KEY, JSON.stringify(details))
+      } catch {
+        // Storage full or blocked; the order still went through.
+      }
       clearCart()
       const track =
         "trackingToken" in result && result.trackingToken
@@ -176,19 +244,46 @@ export function CheckoutForm({
     <div className="grid gap-12 lg:grid-cols-[1.2fr_1fr] lg:gap-16">
       <form action={handleSubmit} className="order-2 grid gap-10 lg:order-1">
         <section className="grid gap-5">
-          <h2 className="font-display text-3xl">Contact</h2>
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="font-display text-3xl">1. Contact</h2>
+            {restored && (
+              <button type="button" onClick={forgetDetails} className="text-xs text-stone-500 underline underline-offset-4 hover:text-stone-900">
+                Not you? Clear details
+              </button>
+            )}
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field id="email" label="Email">
-              <input id="email" name="email" type="email" required className={inputClass} />
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClass}
+              />
             </Field>
             <Field id="phone" label="Phone number">
-              <input id="phone" name="phone" type="tel" required className={inputClass} />
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                required
+                placeholder="024 123 4567"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className={inputClass}
+              />
             </Field>
           </div>
         </section>
 
         <section className="grid gap-5">
-          <h2 className="font-display text-3xl">Delivery</h2>
+          <h2 className="font-display text-3xl">2. Delivery</h2>
           {deliveryPolicy && (
             <p className="border-l-2 border-[var(--store-accent)] bg-[#f3efe8] px-4 py-3 text-sm leading-relaxed text-stone-700">
               {deliveryPolicy}
@@ -233,10 +328,26 @@ export function CheckoutForm({
 
           <div className="grid grid-cols-2 gap-4">
             <Field id="firstName" label="First name">
-              <input id="firstName" name="firstName" required className={inputClass} />
+              <input
+                id="firstName"
+                name="firstName"
+                autoComplete="given-name"
+                required
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className={inputClass}
+              />
             </Field>
             <Field id="lastName" label="Last name">
-              <input id="lastName" name="lastName" required className={inputClass} />
+              <input
+                id="lastName"
+                name="lastName"
+                autoComplete="family-name"
+                required
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className={inputClass}
+              />
             </Field>
           </div>
           <Field id="exactLocation" label="Exact location">
@@ -263,6 +374,7 @@ export function CheckoutForm({
               <input
                 id="city"
                 name="city"
+                autoComplete="address-level2"
                 required
                 className={inputClass}
                 value={city}
@@ -315,7 +427,7 @@ export function CheckoutForm({
         </section>
 
         <section className="grid gap-5">
-          <h2 className="font-display text-3xl">Payment</h2>
+          <h2 className="font-display text-3xl">3. Payment</h2>
           <p className="text-sm leading-relaxed text-stone-600">
             Send the product total using the payment details on this page, then enter your transaction ID or reference below.
             {deliveryMethod === "SHOPORA" && " Delivery is paid to the rider when they arrive."}
@@ -378,8 +490,11 @@ export function CheckoutForm({
 
           <div className="border border-stone-300 p-6 md:p-8">
             <h2 className="text-[11px] uppercase tracking-[0.2em] text-stone-500">How to pay</h2>
-            <p className="mt-3 text-sm text-stone-700">
-              Send exactly <strong className="font-medium text-stone-900">{money(currency, productTotal)}</strong> to:
+            <p className="mt-3 flex flex-wrap items-center text-sm text-stone-700">
+              <span>
+                Send exactly <strong className="font-medium text-stone-900">{money(currency, productTotal)}</strong> to:
+              </span>
+              <CopyButton value={productTotal.toFixed(2)} label="Copy amount" />
             </p>
             {!paymentSetting ? (
               <p className="mt-4 text-sm text-red-700">This store has not added its payment details yet. Please contact the store before paying.</p>
@@ -388,15 +503,27 @@ export function CheckoutForm({
                 {paymentSetting.mobileMoneyNumber && (
                   <div>
                     <p className="text-[11px] uppercase tracking-[0.18em] text-stone-500">Mobile Money</p>
-                    <p className="mt-1 text-xl tracking-wide text-stone-900">{paymentSetting.mobileMoneyNumber}</p>
+                    <div className="mt-1 flex items-center">
+                      <p className="text-xl tracking-wide text-stone-900">{paymentSetting.mobileMoneyNumber}</p>
+                      <CopyButton value={paymentSetting.mobileMoneyNumber.replace(/[^\d+]/g, "") || paymentSetting.mobileMoneyNumber} />
+                    </div>
                     {paymentSetting.accountName && <p className="text-sm text-stone-600">{paymentSetting.accountName}</p>}
+                    <a
+                      href="tel:*170%23"
+                      className="mt-3 inline-flex h-10 items-center rounded-full border border-stone-900 px-5 text-sm text-stone-900 md:hidden"
+                    >
+                      Dial *170# (MTN MoMo)
+                    </a>
                   </div>
                 )}
                 {paymentSetting.bankName && (
                   <div>
                     <p className="text-[11px] uppercase tracking-[0.18em] text-stone-500">Bank transfer</p>
                     <p className="mt-1 text-sm text-stone-700">{paymentSetting.bankName}</p>
-                    <p className="text-xl tracking-wide text-stone-900">{paymentSetting.accountNumber}</p>
+                    <div className="flex items-center">
+                      <p className="text-xl tracking-wide text-stone-900">{paymentSetting.accountNumber}</p>
+                      {paymentSetting.accountNumber && <CopyButton value={paymentSetting.accountNumber} />}
+                    </div>
                     <p className="text-sm text-stone-600">{paymentSetting.accountName}</p>
                   </div>
                 )}

@@ -2,13 +2,22 @@
 
 import { useState, useMemo } from "react"
 import Link from "next/link"
-import { Heart, Minus, Plus } from "lucide-react"
+import { Heart, Minus, Plus, Share2, Star } from "lucide-react"
 import { useCart } from "@/lib/cart"
 import { useFavorites } from "@/lib/favorites"
 import { ProductCard } from "@/components/storefront/ProductCard"
+import { StorefrontReviewForm } from "@/components/storefront/StorefrontReviewForm"
 
 function money(currency: string, amount: number) {
   return `${currency} ${amount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+export type ProductReview = {
+  id: string
+  rating: number
+  comment: string | null
+  createdAt: string
+  customerName: string
 }
 
 type ProductClientProps = {
@@ -16,9 +25,21 @@ type ProductClientProps = {
   store: any
   basePath: string
   related: any[]
+  domain: string
+  reviews: ProductReview[]
 }
 
-export function ProductClient({ product, store, basePath, related }: ProductClientProps) {
+function Stars({ rating, className = "h-3.5 w-3.5" }: { rating: number; className?: string }) {
+  return (
+    <span className="flex gap-0.5 text-[var(--store-accent)]" aria-label={`${rating.toFixed(1)} out of 5 stars`}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star key={i} className={`${className} ${i < Math.round(rating) ? "fill-current" : "fill-stone-200 text-stone-200"}`} strokeWidth={0} />
+      ))}
+    </span>
+  )
+}
+
+export function ProductClient({ product, store, basePath, related, domain, reviews }: ProductClientProps) {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {}
     if (product.options && product.options.length > 0) {
@@ -51,16 +72,44 @@ export function ProductClient({ product, store, basePath, related }: ProductClie
   const compareAtPrice = activeVariant?.compareAtPrice ?? product.compareAtPrice
   const onSale = compareAtPrice !== null && compareAtPrice !== undefined && compareAtPrice > price
   const stock = activeVariant?.stockCount ?? product.stockCount ?? 0
+  const soldOut = stock <= 0
   const variantLabel = activeVariant && activeVariant.name !== "Default" ? activeVariant.name : null
 
   const allImages = Array.from(new Set([
     ...(product.images || []),
     ...(product.variants?.map((v: any) => v.imageUrl).filter(Boolean) || [])
   ])) as string[]
+  // On phones the gallery is a swipe strip; start it on the photo for the chosen option.
+  const mobileImages = activeImageUrl ? [activeImageUrl, ...allImages.filter((img) => img !== activeImageUrl)] : allImages
+
+  const ratingAvg = reviews.length ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0
+  const [showReviewForm, setShowReviewForm] = useState(false)
+  const [shareNote, setShareNote] = useState<string | null>(null)
+
+  const handleShare = async () => {
+    const url = window.location.href
+    const text = `${product.name} · ${money(store.currency, price)} at ${store.name}`
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: product.name, text, url })
+        return
+      } catch {
+        // User closed the share sheet; fall through to copying.
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      setShareNote("Link copied")
+    } catch {
+      setShareNote(url)
+    }
+    setTimeout(() => setShareNote(null), 2500)
+  }
 
   const cart = useCart()
 
   const handleAddToCart = () => {
+    if (soldOut) return
     cart.addItem({
       variantId: activeVariant?.id ?? product.id,
       productId: product.id,
@@ -100,7 +149,13 @@ export function ProductClient({ product, store, basePath, related }: ProductClie
       </nav>
 
       <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
-        <div className="flex min-w-0 flex-col-reverse gap-4 self-start lg:flex-row">
+        <MobileGallery
+          key={variantKey}
+          images={mobileImages}
+          name={product.name}
+          badge={soldOut ? "Sold out" : onSale ? "Sale" : null}
+        />
+        <div className="hidden min-w-0 flex-col-reverse gap-4 self-start md:flex lg:flex-row">
           {allImages.length > 1 && (
             <div className="scrollbar-none flex gap-3 overflow-x-auto lg:w-20 lg:shrink-0 lg:flex-col lg:overflow-visible">
               {allImages.map((img, idx) => (
@@ -125,14 +180,35 @@ export function ProductClient({ product, store, basePath, related }: ProductClie
             ) : (
               <div className="flex h-full items-center justify-center font-display text-2xl italic text-stone-400">{product.name}</div>
             )}
-            {onSale && (
-              <span className="absolute left-4 top-4 bg-[#faf8f5] px-3 py-1.5 text-[10px] uppercase tracking-[0.2em]">Sale</span>
+            {(soldOut || onSale) && (
+              <span className="absolute left-4 top-4 bg-[#faf8f5] px-3 py-1.5 text-[10px] uppercase tracking-[0.2em]">
+                {soldOut ? "Sold out" : "Sale"}
+              </span>
             )}
           </div>
         </div>
 
         <div className="min-w-0 md:sticky md:top-28 md:self-start">
-          <h1 className="break-words font-display text-4xl leading-tight tracking-tight md:text-5xl">{product.name}</h1>
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="break-words font-display text-4xl leading-tight tracking-tight md:text-5xl">{product.name}</h1>
+            <button
+              onClick={handleShare}
+              className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-stone-300 text-stone-800 transition-colors hover:border-stone-900"
+              aria-label="Share this product"
+            >
+              <Share2 className="h-4 w-4" strokeWidth={1.5} />
+            </button>
+          </div>
+          {shareNote && <p className="mt-2 break-all text-xs text-stone-500">{shareNote}</p>}
+
+          {reviews.length > 0 && (
+            <a href="#reviews" className="mt-3 flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900">
+              <Stars rating={ratingAvg} />
+              <span>
+                {ratingAvg.toFixed(1)} · {reviews.length} review{reviews.length === 1 ? "" : "s"}
+              </span>
+            </a>
+          )}
 
           <div className="mt-4 flex items-baseline gap-3">
             <span className={`text-xl ${onSale ? "text-[var(--store-accent)]" : "text-stone-900"}`}>{money(store.currency, price)}</span>
@@ -217,9 +293,10 @@ export function ProductClient({ product, store, basePath, related }: ProductClie
             </div>
             <button
               onClick={handleAddToCart}
-              className="h-13 flex-1 rounded-full bg-[var(--store-accent)] text-sm tracking-wide text-white transition-opacity hover:opacity-90"
+              disabled={soldOut}
+              className="h-13 flex-1 rounded-full bg-[var(--store-accent)] text-sm tracking-wide text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-600"
             >
-              Add to bag
+              {soldOut ? "Sold out" : "Add to bag"}
             </button>
             <button
               onClick={() => toggleFavorite(product.id)}
@@ -238,15 +315,26 @@ export function ProductClient({ product, store, basePath, related }: ProductClie
               rel="noreferrer"
               className="mt-3 flex h-13 w-full items-center justify-center rounded-full border border-stone-900 text-sm tracking-wide text-stone-900 transition-colors hover:bg-stone-900 hover:text-white"
             >
-              Order on WhatsApp
+              {soldOut ? "Ask about restock on WhatsApp" : "Order on WhatsApp"}
             </a>
           )}
 
           <p className="mt-5 text-sm text-stone-500">
             {stock > 5 && "In stock and ready to order."}
             {stock > 0 && stock <= 5 && `Only ${stock} left.`}
-            {stock <= 0 && (whatsappHref ? "Message the seller to check availability." : "Contact the seller to check availability.")}
+            {soldOut && (whatsappHref ? "Sold out for now. Message the seller to ask about restock." : "Sold out for now.")}
           </p>
+
+          {product.sizeGuideUrl && (
+            <a
+              href={product.sizeGuideUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-block text-sm text-stone-700 underline underline-offset-4 hover:text-stone-900"
+            >
+              View size guide
+            </a>
+          )}
 
           <div className="mt-8 divide-y divide-stone-200 border-y border-stone-200">
             <details open className="group py-5">
@@ -280,6 +368,56 @@ export function ProductClient({ product, store, basePath, related }: ProductClie
           )}
         </div>
       </div>
+
+      <section id="reviews" className="mt-20 scroll-mt-28 border-t border-stone-200 pt-16 md:mt-28">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Reviews</p>
+            <h2 className="mt-3 font-display text-4xl md:text-5xl">
+              {reviews.length ? `${ratingAvg.toFixed(1)} out of 5` : "No reviews yet"}
+            </h2>
+            {reviews.length > 0 && (
+              <div className="mt-3 flex items-center gap-2 text-sm text-stone-600">
+                <Stars rating={ratingAvg} className="h-4 w-4" />
+                Based on {reviews.length} review{reviews.length === 1 ? "" : "s"}
+              </div>
+            )}
+          </div>
+          {!showReviewForm && (
+            <button
+              onClick={() => setShowReviewForm(true)}
+              className="h-12 rounded-full border border-stone-900 px-7 text-sm tracking-wide text-stone-900 transition-colors hover:bg-stone-900 hover:text-white"
+            >
+              Write a review
+            </button>
+          )}
+        </div>
+
+        {showReviewForm && (
+          <div className="mx-auto mt-10 max-w-lg bg-[#f3efe8] p-6 md:p-8">
+            <StorefrontReviewForm domain={domain} productId={product.id} title={`Review ${product.name}`} />
+          </div>
+        )}
+
+        {reviews.length > 0 && (
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            {reviews.map((review) => (
+              <figure key={review.id} className="border-t border-stone-200 pt-6">
+                <Stars rating={review.rating} />
+                {review.comment && (
+                  <blockquote className="mt-4 font-display text-xl italic leading-snug text-stone-800">
+                    &ldquo;{review.comment}&rdquo;
+                  </blockquote>
+                )}
+                <figcaption className="mt-4 text-[11px] uppercase tracking-[0.2em] text-stone-500">
+                  {review.customerName} ·{" "}
+                  {new Date(review.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        )}
+      </section>
 
       {product.videoUrl && (
         <section className="mt-20 border-t border-stone-200 pt-16 md:mt-28">
@@ -317,10 +455,58 @@ export function ProductClient({ product, store, basePath, related }: ProductClie
         </button>
         <button
           onClick={handleAddToCart}
-          className="h-12 rounded-full bg-[var(--store-accent)] px-7 text-sm tracking-wide text-white"
+          disabled={soldOut}
+          className="h-12 rounded-full bg-[var(--store-accent)] px-7 text-sm tracking-wide text-white disabled:bg-stone-300 disabled:text-stone-600"
         >
-          Add to bag
+          {soldOut ? "Sold out" : "Add to bag"}
         </button>
+      </div>
+    </div>
+  )
+}
+
+/** Phone gallery: swipe between photos with dots underneath. */
+function MobileGallery({ images, name, badge }: { images: string[]; name: string; badge: string | null }) {
+  const [index, setIndex] = useState(0)
+
+  return (
+    <div className="-mx-5 md:hidden">
+      <div
+        className="scrollbar-none flex snap-x snap-mandatory overflow-x-auto"
+        onScroll={(e) => {
+          const el = e.currentTarget
+          setIndex(Math.round(el.scrollLeft / el.clientWidth))
+        }}
+      >
+        {images.length === 0 ? (
+          <div className="flex aspect-[4/5] w-full shrink-0 items-center justify-center bg-[#efebe4] font-display text-2xl italic text-stone-400">
+            {name}
+          </div>
+        ) : (
+          images.map((img, i) => (
+            <div key={img} className="relative aspect-[4/5] w-full shrink-0 snap-center bg-[#efebe4]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={img} alt={i === 0 ? name : ""} className="h-full w-full object-cover" loading={i === 0 ? "eager" : "lazy"} />
+            </div>
+          ))
+        )}
+      </div>
+      <div className="relative">
+        {badge && (
+          <span className="absolute bottom-[calc(100%+12px)] left-4 bg-[#faf8f5] px-3 py-1.5 text-[10px] uppercase tracking-[0.2em]">
+            {badge}
+          </span>
+        )}
+        {images.length > 1 && (
+          <div className="flex justify-center gap-1.5 pt-3">
+            {images.map((img, i) => (
+              <span
+                key={img}
+                className={`h-1.5 rounded-full transition-all ${i === index ? "w-5 bg-stone-900" : "w-1.5 bg-stone-300"}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

@@ -9,6 +9,7 @@ export const STORE_SETTING_FIELDS = [
   "heroSubtext",
   "heroImage",
   "aboutText",
+  "announcementText",
   "instagramHandle",
   "whatsappNumber",
   "tiktokHandle",

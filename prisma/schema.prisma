@@ -128,6 +128,8 @@ model Store {
   
   heroHeadline   String?
   heroSubtext    String?
+  /// Short line in the storefront's top bar (defaults to the delivery note when empty)
+  announcementText String?
   heroImage      String?
   aboutText      String?
   instagramHandle String?

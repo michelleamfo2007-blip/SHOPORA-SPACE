@@ -15,6 +15,11 @@ const EDITABLE = [
   "instagramHandle",
   "tiktokHandle",
   "snapchatHandle",
+  "heroHeadline",
+  "heroSubtext",
+  "aboutText",
+  "announcementText",
+  "slug",
 ] as const
 
 export async function GET(req: Request, { params }: { params: Promise<{ storeId: string }> }) {

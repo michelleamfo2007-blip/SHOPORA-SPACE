@@ -60,15 +60,54 @@ export default async function ProductPage({ params }: Props) {
 
   if (!product) notFound()
 
-  const [basePath, related] = await Promise.all([
+  const categoryIds = product.categories.map((c) => c.id)
+  const [basePath, sameCategory, latest, reviews] = await Promise.all([
     getStorefrontBasePath(domain),
+    categoryIds.length
+      ? db.product.findMany({
+          where: {
+            storeId: store.id,
+            status: "ACTIVE",
+            visibility: "VISIBLE",
+            id: { not: product.id },
+            categories: { some: { id: { in: categoryIds } } },
+          },
+          include: { variants: { take: 2 } },
+          orderBy: { createdAt: "desc" },
+          take: 4,
+        })
+      : Promise.resolve([]),
     db.product.findMany({
       where: { storeId: store.id, status: "ACTIVE", visibility: "VISIBLE", id: { not: product.id } },
       include: { variants: { take: 2 } },
       orderBy: { createdAt: "desc" },
       take: 4,
     }),
+    db.review.findMany({
+      where: { productId: product.id, status: { not: "HIDDEN" } },
+      select: { id: true, rating: true, comment: true, createdAt: true, customer: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }),
   ])
 
-  return <ProductClient product={product} store={store} basePath={basePath} related={related} />
+  // Prefer items from the same collection, topped up with the newest pieces.
+  const related = [...sameCategory, ...latest.filter((p) => !sameCategory.some((s) => s.id === p.id))].slice(0, 4)
+
+  return (
+    <ProductClient
+      product={product}
+      store={store}
+      basePath={basePath}
+      related={related}
+      domain={domain}
+      reviews={reviews.map((r) => ({
+        id: r.id,
+        rating: r.rating,
+        comment: r.comment,
+        createdAt: r.createdAt.toISOString(),
+        customerName: r.customer?.name || "Verified customer",
+      }))}
+    />
+  )
 }

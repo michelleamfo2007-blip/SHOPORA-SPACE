@@ -35,6 +35,7 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
   const hoverImageUrl = product.images?.find((img) => img !== imageUrl) || null
   const onSale = compareAtPrice !== null && compareAtPrice > price
   const hasChoices = (product.variants?.length ?? 0) > 1
+  const soldOut = !hasChoices && typeof variant?.stockCount === "number" && variant.stockCount <= 0
 
   const isFaved = isFavorite(product.id)
 
@@ -90,9 +91,9 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
           </div>
         )}
 
-        {onSale && (
+        {(soldOut || onSale) && (
           <span className="absolute left-3 top-3 bg-[#faf8f5] px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-stone-900">
-            Sale
+            {soldOut ? "Sold out" : "Sale"}
           </span>
         )}
 
@@ -104,7 +105,7 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
           <Heart className={`h-4 w-4 ${isFaved ? "fill-stone-900" : ""}`} strokeWidth={1.5} />
         </button>
 
-        {hasChoices ? (
+        {soldOut ? null : hasChoices ? (
           <span className="absolute inset-x-3 bottom-3 hidden translate-y-2 bg-[#faf8f5] py-3 text-center text-[11px] uppercase tracking-[0.2em] text-stone-900 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:block">
             Choose options
           </span>
@@ -117,7 +118,7 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
           </button>
         )}
 
-        {!hasChoices && (
+        {!hasChoices && !soldOut && (
           <button
             onClick={handleAddToCart}
             className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#faf8f5] text-stone-900 shadow-sm lg:hidden"

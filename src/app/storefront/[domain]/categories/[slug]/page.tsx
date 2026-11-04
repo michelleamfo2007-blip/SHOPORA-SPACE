@@ -48,7 +48,12 @@ export default async function CategoryProductsPage({
         </nav>
         <h1 className="mt-4 font-display text-5xl md:text-7xl">{category.name}</h1>
       </div>
-      <ProductsClient products={products} currency={store.currency} basePath={basePath} />
+      <ProductsClient
+        products={products.map((p) => ({ ...p, categorySlugs: [category.slug] }))}
+        categories={[]}
+        currency={store.currency}
+        basePath={basePath}
+      />
     </div>
   );
 }

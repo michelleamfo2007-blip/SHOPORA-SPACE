@@ -35,7 +35,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       take: 6,
     }),
     db.review.findMany({
-      where: { storeId: store.id, status: "PUBLISHED" },
+      where: { storeId: store.id, status: { not: "HIDDEN" }, comment: { not: null } },
       orderBy: { createdAt: "desc" },
       take: 3,
       include: { customer: true },
