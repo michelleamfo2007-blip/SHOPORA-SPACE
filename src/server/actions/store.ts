@@ -4,7 +4,9 @@ import { db } from "@/lib/db"
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/auth";
 import { redirect } from "next/navigation"
+import { revalidatePath } from "next/cache"
 import { requireStoreAccess } from "@/lib/store-access"
+import { storeSettingsFromFormData, updateStoreSettings } from "@/lib/store-settings"
 
 export async function createStoreAction(formData: FormData) {
   const session = await getServerSession(authOptions)
@@ -68,43 +70,9 @@ export async function updateStoreBrandingAction(storeId: string, formData: FormD
     throw new Error("Unauthorized to manage store settings")
   }
 
-  const description = formData.get("description") as string | null
-  const logoUrl = formData.get("logoUrl") as string | null
-  const primaryColor = formData.get("primaryColor") as string | null
-  
-  const heroHeadline = formData.get("heroHeadline") as string | null
-  const heroSubtext = formData.get("heroSubtext") as string | null
-  const heroImage = formData.get("heroImage") as string | null
-  const aboutText = formData.get("aboutText") as string | null
-  const instagramHandle = formData.get("instagramHandle") as string | null
-  const whatsappNumber = formData.get("whatsappNumber") as string | null
-  const tiktokHandle = formData.get("tiktokHandle") as string | null
-  const snapchatHandle = formData.get("snapchatHandle") as string | null
-  const contactEmail = formData.get("contactEmail") as string | null
-  const currency = formData.get("currency") as string | null
-  const deliveryPolicy = formData.get("deliveryPolicy") as string | null
-
   try {
-    await db.store.update({
-      where: { id: storeId },
-      data: {
-        description,
-        logoUrl,
-        primaryColor: primaryColor || "#2563eb",
-        heroHeadline,
-        heroSubtext,
-        heroImage,
-        aboutText,
-        instagramHandle,
-        whatsappNumber,
-        tiktokHandle,
-        snapchatHandle,
-        contactEmail,
-        ...(currency && { currency }),
-        ...(deliveryPolicy !== null && { deliveryPolicy })
-      }
-    })
-
+    await updateStoreSettings(storeId, storeSettingsFromFormData(formData))
+    revalidatePath("/", "layout")
     return { success: true }
   } catch (error: any) {
     console.error("Failed to update store settings:", error)

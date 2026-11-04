@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { requireStoreAccess } from "@/lib/store-access"
 import { redirect } from "next/navigation"
+import { createDiscount } from "@/lib/discount-service"
 
 export async function createDiscountAction(storeId: string, formData: FormData) {
   await requireStoreAccess(storeId)
@@ -13,19 +14,8 @@ export async function createDiscountAction(storeId: string, formData: FormData) 
   const value = parseFloat(formData.get("value") as string)
   const usageLimit = formData.get("usageLimit") ? parseInt(formData.get("usageLimit") as string) : null
 
-  if (!code || !type || isNaN(value)) {
-    throw new Error("Missing required fields")
-  }
-
-  await db.discount.create({
-    data: {
-      storeId,
-      code: code.toUpperCase().replace(/\s+/g, ''),
-      type,
-      value,
-      usageLimit
-    }
-  })
+  const result = await createDiscount(storeId, { code: code || "", type: type || "", value, usageLimit })
+  if ("error" in result) throw new Error(result.error)
 
   revalidatePath(`/${storeId}/discounts`)
   redirect(`/${storeId}/discounts`)

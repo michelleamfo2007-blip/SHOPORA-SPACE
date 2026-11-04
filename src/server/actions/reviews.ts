@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { requireStoreAccess } from "@/lib/store-access"
+import { addManualReview } from "@/lib/review-service"
 
 export async function toggleReviewStatusAction(storeId: string, reviewId: string, isHidden: boolean) {
   await requireStoreAccess(storeId)
@@ -30,33 +31,8 @@ export async function deleteReviewAction(storeId: string, reviewId: string) {
 export async function addManualReviewAction(storeId: string, data: { customerName: string, rating: number, comment: string, productId?: string }) {
   await requireStoreAccess(storeId)
 
-  // Find or create customer
-  let customer = await db.customer.findFirst({ where: { storeId, name: data.customerName } })
-  if (!customer) {
-    customer = await db.customer.create({ data: { storeId, name: data.customerName } })
-  }
-
-  // If no product is specified, just pick the first active product (or none if schema allows, but productId is required in schema)
-  let prodId = data.productId
-  if (prodId) {
-    const product = await db.product.findFirst({ where: { id: prodId, storeId } })
-    if (!product) throw new Error("Product not found")
-  } else {
-    const p = await db.product.findFirst({ where: { storeId } })
-    if (p) prodId = p.id
-    else throw new Error("Store has no products to review.")
-  }
-
-  await db.review.create({
-    data: {
-      storeId,
-      customerId: customer.id,
-      productId: prodId,
-      rating: data.rating,
-      comment: data.comment,
-      status: "PUBLISHED"
-    }
-  })
+  const result = await addManualReview(storeId, data)
+  if ("error" in result) throw new Error(result.error)
 
   revalidatePath(`/${storeId}/reviews`)
   return { success: true }

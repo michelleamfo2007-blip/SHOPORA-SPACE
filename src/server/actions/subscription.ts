@@ -6,6 +6,7 @@ import { authOptions } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { resend } from "@/lib/resend"
+import { submitSubscriptionPayment } from "@/lib/subscription-payment"
 
 export async function startTrialAction(planName: string, interval: string = "month") {
   const session = await getServerSession(authOptions)
@@ -136,90 +137,17 @@ export async function submitPaymentReference(storeId: string, formData: FormData
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) throw new Error("Unauthorized")
 
-  const method = formData.get("paymentMethod") as string
-  const reference = formData.get("reference") as string
-  
-  if (!method || !reference) {
-    throw new Error("Payment method and reference are required")
-  }
-
-  // Find the store and subscription
-  const store = await db.store.findUnique({
-    where: { id: storeId },
-    include: { subscription: { include: { plan: true } } }
-  })
-
-  if (!store || !store.subscription) {
-    throw new Error("No subscription found for this store.")
-  }
-
   const membership = await db.storeMember.findUnique({
     where: { storeId_userId: { storeId, userId: session.user.id } },
   })
   if (!membership) throw new Error("Unauthorized")
 
-  // Calculate the amount due
-  const isEarlyBirdActive = store.subscription.isEarlyBird && store.subscription.earlyBirdMonthsUsed < 2
-  const expectedAmount = isEarlyBirdActive ? 50 : store.subscription.plan.price
-
-  // Create the payment record
-  await db.subscriptionPayment.create({
-    data: {
-      subscriptionId: store.subscription.id,
-      amount: expectedAmount,
-      status: "PENDING",
-      paymentMethod: method,
-      reference: reference,
-    }
+  const result = await submitSubscriptionPayment(storeId, {
+    method: (formData.get("paymentMethod") as string) || "",
+    reference: (formData.get("reference") as string) || "",
+    userEmail: session.user.email,
   })
+  if ("error" in result) throw new Error(result.error)
 
-  // Send Notifications
-  try {
-    const emailPromises = []
-    
-    // Notify Tenant Admin (Receipt)
-    if (session.user.email) {
-      emailPromises.push(
-        resend.emails.send({
-          from: "Shopora Billing <billing@shopora.space>",
-          to: session.user.email,
-          subject: `Subscription Payment Submitted - ${store.name}`,
-          html: `
-            <p>Hi there,</p>
-            <p>We have successfully received your payment reference for your Shopora subscription.</p>
-            <p><strong>Amount:</strong> GHS ${expectedAmount.toFixed(2)}</p>
-            <p><strong>Reference:</strong> ${reference}</p>
-            <p>Our team is currently verifying the payment. Your subscription will be activated shortly.</p>
-          `
-        })
-      )
-    }
-
-    // Notify Super Admin
-    emailPromises.push(
-      resend.emails.send({
-        from: "Shopora System <billing@shopora.space>",
-        to: "shoporaspace@gmail.com",
-        subject: `New Subscription Payment Pending`,
-        html: `
-          <p>A tenant has submitted a manual payment reference for their subscription.</p>
-          <p><strong>Store:</strong> ${store.name} (${store.slug})</p>
-          <p><strong>Plan:</strong> ${store.subscription.plan.name}</p>
-          <p><strong>Amount due:</strong> GHS ${expectedAmount.toFixed(2)}</p>
-          <p><strong>Reference:</strong> ${reference}</p>
-          <p>Log in to the Super Admin dashboard (Subscriptions tab) to verify and approve the payment.</p>
-        `
-      })
-    )
-
-    await Promise.all(emailPromises)
-  } catch (err) {
-    console.error("Failed to send subscription payment notification emails", err)
-  }
-
-  // We do NOT update the subscription status here.
-  // The super admin must approve it manually.
-
-  revalidatePath(`/${storeId}/billing`)
   return { success: true }
 }

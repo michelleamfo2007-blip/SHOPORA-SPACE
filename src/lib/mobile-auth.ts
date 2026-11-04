@@ -60,8 +60,11 @@ export async function requireMobileVendor(req: Request) {
   return { user }
 }
 
-/** Same rules as the website's getStoreAccess: store member (or super admin) and subscription not lapsed. */
-export async function requireMobileStoreAccess(req: Request, storeId: string) {
+/**
+ * Same rules as the website's getStoreAccess: store member (or super admin) and subscription not lapsed.
+ * Billing passes allowLapsed so a lapsed store can still pay to reactivate.
+ */
+export async function requireMobileStoreAccess(req: Request, storeId: string, options: { allowLapsed?: boolean } = {}) {
   const auth = await requireMobileVendor(req)
   if (auth.error !== undefined) return { error: auth.error, status: auth.status }
 
@@ -80,7 +83,7 @@ export async function requireMobileStoreAccess(req: Request, storeId: string) {
   if (!member && auth.user.platformRole !== "SUPER_ADMIN") {
     return { error: "You don’t have access to this store." as const, status: 403 }
   }
-  if (isSubscriptionLapsed(store.subscription)) {
+  if (!options.allowLapsed && isSubscriptionLapsed(store.subscription)) {
     return { error: LAPSED_STORE_MESSAGE, status: 403 }
   }
 

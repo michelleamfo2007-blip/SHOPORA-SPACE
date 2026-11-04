@@ -1,8 +1,7 @@
 "use server";
 
-import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
 import { getStoreAccess } from "@/lib/store-access";
+import { savePaymentDetails } from "@/lib/payment-settings";
 
 export async function savePaymentSettings(
   storeId: string,
@@ -15,34 +14,5 @@ export async function savePaymentSettings(
   const access = await getStoreAccess(storeId);
   if ("error" in access) return { error: access.error };
 
-  try {
-    await db.storePaymentSetting.upsert({
-      where: { storeId },
-      update: {
-        provider: "MANUAL_TRANSFER",
-        bankName,
-        accountName,
-        accountNumber,
-        mobileMoneyNumber,
-        instructions,
-        isActive: true, // Auto activate
-      },
-      create: {
-        storeId,
-        provider: "MANUAL_TRANSFER",
-        bankName,
-        accountName,
-        accountNumber,
-        mobileMoneyNumber,
-        instructions,
-        isActive: true,
-      },
-    });
-
-    revalidatePath(`/${storeId}/settings/payments`);
-    return { success: true };
-  } catch (error) {
-    console.error("Failed to save payment settings:", error);
-    return { error: "Failed to save payment settings" };
-  }
+  return savePaymentDetails(storeId, { bankName, accountName, accountNumber, mobileMoneyNumber, instructions });
 }
