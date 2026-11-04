@@ -14,13 +14,29 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
   const products = await db.product.findMany({
     where: { storeId },
     orderBy: { createdAt: "desc" },
-    take: 100,
-    select: { id: true, name: true, price: true, stockCount: true, status: true, images: true },
+    take: 200,
+    select: {
+      id: true,
+      name: true,
+      price: true,
+      status: true,
+      visibility: true,
+      images: true,
+      variants: { select: { price: true, stockCount: true } },
+    },
   })
 
   return Response.json({
     currency: access.store.currency,
-    products: products.map((p) => ({ ...p, imageUrl: p.images[0] ?? null, images: undefined })),
+    products: products.map((p) => ({
+      id: p.id,
+      name: p.name,
+      price: p.price ?? p.variants[0]?.price ?? null,
+      stockCount: p.variants.reduce((sum, v) => sum + v.stockCount, 0),
+      status: p.status,
+      visibility: p.visibility,
+      imageUrl: p.images[0] ?? null,
+    })),
   })
 }
 
