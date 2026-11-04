@@ -107,17 +107,30 @@ export function ProductClient({ product, store, basePath, related, domain, revie
   }
 
   const cart = useCart()
+  const cartVariantId = activeVariant?.id ?? product.id
+  const inBag = cart.items.find((i) => i.variantId === cartVariantId)?.quantity ?? 0
+  const available = Math.max(0, stock - inBag)
+  const qty = Math.min(quantity, Math.max(1, available))
+  const [stockNote, setStockNote] = useState<string | null>(null)
 
   const handleAddToCart = () => {
     if (soldOut) return
-    cart.addItem({
-      variantId: activeVariant?.id ?? product.id,
+    if (available <= 0) {
+      setStockNote(`You already have all ${stock} in your bag.`)
+      cart.openDrawer()
+      return
+    }
+    const added = cart.addItem({
+      variantId: cartVariantId,
       productId: product.id,
       name: variantLabel ? `${product.name} - ${variantLabel}` : product.name,
       price: price,
-      quantity,
+      quantity: qty,
       imageUrl: activeImageUrl || product.images?.[0],
+      maxQuantity: stock,
     })
+    setStockNote(added < qty ? `Only ${stock} available — your bag has the most you can order.` : null)
+    setQuantity(1)
     cart.openDrawer()
   }
 
@@ -126,7 +139,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
 
   const buildWhatsappHref = (pageUrl?: string) =>
     `https://wa.me/${store.whatsappNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-      `Hi ${store.name}, I'd like to order ${quantity} x ${product.name}${variantLabel ? ` (${variantLabel})` : ""} at ${money(store.currency, price)}.${
+      `Hi ${store.name}, I'd like to order ${qty} x ${product.name}${variantLabel ? ` (${variantLabel})` : ""} at ${money(store.currency, price)}.${
         pageUrl ? `\n${pageUrl}` : ""
       }`
     )}`
@@ -283,11 +296,16 @@ export function ProductClient({ product, store, basePath, related, domain, revie
 
           <div className="mt-8 hidden gap-3 md:flex">
             <div className="flex h-13 items-center border border-stone-300">
-              <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="flex h-full w-11 items-center justify-center text-stone-600 hover:text-stone-900" aria-label="Decrease quantity">
+              <button onClick={() => setQuantity(Math.max(1, qty - 1))} className="flex h-full w-11 items-center justify-center text-stone-600 hover:text-stone-900" aria-label="Decrease quantity">
                 <Minus className="h-3.5 w-3.5" />
               </button>
-              <span className="w-8 text-center text-sm">{quantity}</span>
-              <button onClick={() => setQuantity((q) => Math.min(99, q + 1))} className="flex h-full w-11 items-center justify-center text-stone-600 hover:text-stone-900" aria-label="Increase quantity">
+              <span className="w-8 text-center text-sm">{qty}</span>
+              <button
+                onClick={() => setQuantity(Math.min(Math.max(1, available), qty + 1))}
+                disabled={qty >= available}
+                className="flex h-full w-11 items-center justify-center text-stone-600 hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-30"
+                aria-label="Increase quantity"
+              >
                 <Plus className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -320,10 +338,13 @@ export function ProductClient({ product, store, basePath, related, domain, revie
           )}
 
           <p className="mt-5 text-sm text-stone-500">
-            {stock > 5 && "In stock and ready to order."}
+            {stock > 5 && `In stock and ready to order (${stock} available).`}
             {stock > 0 && stock <= 5 && `Only ${stock} left.`}
+            {inBag > 0 && !soldOut && ` ${inBag} already in your bag.`}
             {soldOut && (whatsappHref ? "Sold out for now. Message the seller to ask about restock." : "Sold out for now.")}
           </p>
+
+          {stockNote && <p className="mt-2 text-sm text-[var(--store-accent)]">{stockNote}</p>}
 
           {product.sizeGuideUrl && (
             <a

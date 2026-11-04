@@ -8,10 +8,33 @@ import { isSubscriptionLapsed } from "@/lib/subscription"
 import { DEFAULT_VARIANT_NAME } from "@/lib/product-variants"
 import { NewOrderEmail } from "@/emails/NewOrderEmail"
 import { OrderReceivedEmail } from "@/emails/OrderReceivedEmail"
-import { isAccraArea, quoteShoporaDelivery } from "@/lib/shopora-delivery"
+import { inAccraBounds, isAccraArea, quoteShoporaDelivery } from "@/lib/shopora-delivery"
 import { pushToStoreMembers } from "@/lib/push"
 
-const variantSelect = { id: true, price: true, name: true, product: { select: { name: true } } } as const
+const variantSelect = {
+  id: true,
+  price: true,
+  name: true,
+  stockCount: true,
+  productId: true,
+  product: { select: { name: true, _count: { select: { options: true } } } },
+} as const
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+
+class OutOfStockError extends Error {
+  constructor(public itemName: string) {
+    super("OUT_OF_STOCK")
+  }
+}
+
+function parsePin(latRaw: FormDataEntryValue | null, lngRaw: FormDataEntryValue | null) {
+  const lat = Number(latRaw)
+  const lng = Number(lngRaw)
+  if (!latRaw || !lngRaw || !Number.isFinite(lat) || !Number.isFinite(lng)) return null
+  if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null
+  return { lat, lng }
+}
 
 function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!)
@@ -34,6 +57,24 @@ export async function processCheckoutAction(formData: FormData) {
   if (!storeId || !email || !phone || !firstName || !lastName || !exactLocation || !cartDataStr || !reference) {
     return { error: "Please fill in all the required fields." }
   }
+  if (!EMAIL_RE.test(email.trim()) || email.length > 120) {
+    return { error: "Enter a valid email address so we can send your order updates." }
+  }
+  const phoneDigits = phone.replace(/\D/g, "")
+  if (phoneDigits.length < 9 || phoneDigits.length > 15) {
+    return { error: "Enter a valid phone number, e.g. 024 123 4567." }
+  }
+  if (firstName.trim().length > 60 || lastName.trim().length > 60) {
+    return { error: "Your name is too long. Please shorten it." }
+  }
+  if (exactLocation.trim().length < 3 || exactLocation.length > 300) {
+    return { error: "Add your delivery location (area, street or landmark)." }
+  }
+  const referenceClean = reference.trim()
+  if (referenceClean.length < 4 || referenceClean.length > 64) {
+    return { error: "Enter the transaction ID or reference from your payment (at least 4 characters)." }
+  }
+  const pin = parsePin(formData.get("dropoffLat"), formData.get("dropoffLng"))
 
   const store = await db.store.findUnique({ 
     where: { id: storeId },
@@ -53,12 +94,13 @@ export async function processCheckoutAction(formData: FormData) {
     if (!store.shoporaDeliveryEnabled || store.pickupLat == null || store.pickupLng == null) {
       return { error: "Shopora Delivery is not available for this store right now." }
     }
-    if (!isAccraArea(city, exactLocation)) {
+    if (!(pin && inAccraBounds(pin)) && !isAccraArea(city, exactLocation)) {
       return { error: "Shopora Delivery is only available for Accra addresses right now." }
     }
     const quoted = await quoteShoporaDelivery({
       pickup: { lat: store.pickupLat, lng: store.pickupLng },
       dropoffAddress: { exactLocation, city, country },
+      dropoffPoint: pin,
     })
     if (!quoted.ok) return { error: quoted.error }
     shippingAmount = quoted.quote.fee
@@ -108,7 +150,10 @@ export async function processCheckoutAction(formData: FormData) {
     return { error: "Some items in your cart are no longer available. Please remove them and try again." }
   }
 
-  const lineItems = new Map<string, { variantId: string; name: string; quantity: number; price: number }>()
+  const lineItems = new Map<
+    string,
+    { variantId: string; productId: string; simple: boolean; name: string; quantity: number; price: number; stock: number }
+  >()
   for (const item of requestedItems) {
     const variant = resolved.get(item.variantId)!
     const existing = lineItems.get(variant.id)
@@ -116,12 +161,25 @@ export async function processCheckoutAction(formData: FormData) {
     else
       lineItems.set(variant.id, {
         variantId: variant.id,
+        productId: variant.productId,
+        simple: variant.product._count.options === 0,
         name: variant.name && variant.name !== DEFAULT_VARIANT_NAME ? `${variant.product.name} (${variant.name})` : variant.product.name,
         quantity: item.quantity,
         price: variant.price,
+        stock: variant.stockCount,
       })
   }
   const cartItems = [...lineItems.values()]
+
+  // Never sell more than the seller has.
+  for (const item of cartItems) {
+    if (item.stock <= 0) {
+      return { error: `${item.name} is sold out. Please remove it from your bag.` }
+    }
+    if (item.quantity > item.stock) {
+      return { error: `Only ${item.stock} of ${item.name} left. Please reduce the quantity in your bag.` }
+    }
+  }
 
   const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
 
@@ -146,10 +204,30 @@ export async function processCheckoutAction(formData: FormData) {
   const orderNumber = `ORD-${Date.now().toString().slice(-6)}`
   const shippingAddress = `${exactLocation}, ${city}, ${country}`
   const trackingToken = deliveryMethod === "SHOPORA" ? randomBytes(16).toString("hex") : null
-  const order = await db.order.create({
+  const customerId = customer.id
+
+  let order
+  try {
+    order = await db.$transaction(async (tx) => {
+      // Reserve stock atomically so two shoppers can't both buy the last piece.
+      for (const item of cartItems) {
+        const reserved = await tx.productVariant.updateMany({
+          where: { id: item.variantId, stockCount: { gte: item.quantity } },
+          data: { stockCount: { decrement: item.quantity } },
+        })
+        if (reserved.count === 0) throw new OutOfStockError(item.name)
+        if (item.simple) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stockCount: { decrement: item.quantity } },
+          })
+        }
+      }
+
+      return tx.order.create({
     data: {
       storeId,
-      customerId: customer.id,
+      customerId,
       orderNumber,
       totalAmount,
       shippingAmount,
@@ -160,6 +238,9 @@ export async function processCheckoutAction(formData: FormData) {
       deliveryDurationMin,
       shoporaCutAmount,
       deliveryQuotedAt,
+      dropoffLat: pin?.lat ?? null,
+      dropoffLng: pin?.lng ?? null,
+      stockReserved: true,
       trackingToken,
       orderItems: {
         create: cartItems.map(item => ({
@@ -173,7 +254,7 @@ export async function processCheckoutAction(formData: FormData) {
           provider: "MANUAL_TRANSFER",
           status: "PENDING_VERIFICATION",
           amount: totalAmount,
-          reference: reference
+          reference: referenceClean
         }
       },
       ...(deliveryMethod === "SHOPORA"
@@ -186,6 +267,8 @@ export async function processCheckoutAction(formData: FormData) {
                 shoporaCut: shoporaCutAmount ?? 0,
                 pickupAddress: [store.pickupAddress, store.pickupCity].filter(Boolean).join(", ") || "Accra",
                 dropoffAddress: shippingAddress,
+                dropoffLat: pin?.lat ?? null,
+                dropoffLng: pin?.lng ?? null,
                 distanceKm: deliveryDistanceKm,
                 durationMin: deliveryDurationMin,
               },
@@ -193,7 +276,14 @@ export async function processCheckoutAction(formData: FormData) {
           }
         : {}),
     }
-  })
+      })
+    })
+  } catch (err) {
+    if (err instanceof OutOfStockError) {
+      return { error: `${err.itemName} just sold out or has fewer left than you chose. Please update your bag.` }
+    }
+    throw err
+  }
 
   // 3. Send Notifications
   try {

@@ -7,6 +7,7 @@ import { useCart } from "@/lib/cart"
 import { processCheckoutAction } from "@/server/actions/checkout"
 import { quoteShoporaDeliveryAction } from "@/server/actions/shopora-delivery"
 import { PlaceAutocomplete } from "@/components/storefront/PlaceAutocomplete"
+import { LocationPicker, type Pin } from "@/components/storefront/LocationPicker"
 
 const COUNTRIES = [
   "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
@@ -134,6 +135,7 @@ export function CheckoutForm({
   const [firstName, setFirstName] = useState(saved?.firstName ?? "")
   const [lastName, setLastName] = useState(saved?.lastName ?? "")
   const [restored, setRestored] = useState(!!saved)
+  const [pin, setPin] = useState<Pin | null>(null)
 
   function forgetDetails() {
     localStorage.removeItem(SAVED_DETAILS_KEY)
@@ -158,6 +160,8 @@ export function CheckoutForm({
           exactLocation,
           city,
           country,
+          dropoffLat: pin?.lat ?? null,
+          dropoffLng: pin?.lng ?? null,
         })
         if ("error" in result) {
           setQuote(null)
@@ -177,7 +181,7 @@ export function CheckoutForm({
     }, 700)
 
     return () => clearTimeout(handle)
-  }, [shoporaDeliveryEnabled, deliveryMethod, exactLocation, city, country, storeId])
+  }, [shoporaDeliveryEnabled, deliveryMethod, exactLocation, city, country, storeId, pin])
 
   const canQuote =
     !!shoporaDeliveryEnabled &&
@@ -211,6 +215,10 @@ export function CheckoutForm({
       formData.set("exactLocation", exactLocation)
       formData.set("city", city)
       formData.set("country", country)
+      if (pin) {
+        formData.set("dropoffLat", String(pin.lat))
+        formData.set("dropoffLng", String(pin.lng))
+      }
 
       const result = await processCheckoutAction(formData)
       if ("error" in result) {
@@ -363,12 +371,23 @@ export function CheckoutForm({
                 setExactLocation(place.exactLocation)
                 if (place.city) setCity(place.city)
                 if (shoporaDeliveryEnabled) setCountry("Ghana")
+                if (place.lat != null && place.lng != null) setPin({ lat: place.lat, lng: place.lng })
               }}
             />
             <p className="text-xs text-stone-500">
-              Suggestions are optional — you can type any Accra address. The rider will open it in Google Maps.
+              Add a landmark too (e.g. “blue gate opposite Total”). For the exact spot, use your location or drop a pin below.
             </p>
           </Field>
+          <LocationPicker
+            pin={pin}
+            onPinChange={setPin}
+            onPlaceFound={(place) => {
+              // Fill the box only if the customer hasn't typed their own address yet.
+              if (!exactLocation.trim()) setExactLocation(place.exactLocation)
+              if (!city.trim() || shoporaDeliveryEnabled) setCity(place.city || city)
+              setCountry("Ghana")
+            }}
+          />
           <div className="grid grid-cols-2 gap-4">
             <Field id="city" label="City">
               <input
@@ -433,7 +452,15 @@ export function CheckoutForm({
             {deliveryMethod === "SHOPORA" && " Delivery is paid to the rider when they arrive."}
           </p>
           <Field id="paymentReference" label="Transaction ID or reference">
-            <input id="paymentReference" name="paymentReference" required placeholder="e.g. 0541234567 or TXN-999" className={inputClass} />
+            <input
+              id="paymentReference"
+              name="paymentReference"
+              required
+              minLength={4}
+              maxLength={64}
+              placeholder="e.g. 0541234567 or TXN-999"
+              className={inputClass}
+            />
           </Field>
         </section>
 

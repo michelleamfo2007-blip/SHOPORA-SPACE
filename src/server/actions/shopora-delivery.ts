@@ -5,6 +5,7 @@ import { requireStoreAccess } from "@/lib/store-access"
 import {
   isAccraArea,
   quoteShoporaDelivery,
+  reverseGeocode,
   searchDeliveryPlaces,
   type DeliveryQuote,
   type PlaceSuggestion,
@@ -36,11 +37,26 @@ export async function updateShoporaDeliverySettingsAction(storeId: string, formD
   })
 }
 
+/** Fills the address box from a GPS/map pin at checkout. */
+export async function reverseGeocodeAction(lat: number, lng: number) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+    return { place: null }
+  }
+  try {
+    return { place: await reverseGeocode({ lat, lng }) }
+  } catch (err) {
+    console.error("reverseGeocodeAction", err)
+    return { place: null }
+  }
+}
+
 export async function quoteShoporaDeliveryAction(input: {
   storeId: string
   exactLocation: string
   city: string
   country?: string
+  dropoffLat?: number | null
+  dropoffLng?: number | null
 }): Promise<{ quote: DeliveryQuote } | { error: string }> {
   const store = await db.store.findUnique({
     where: { id: input.storeId },
@@ -62,7 +78,12 @@ export async function quoteShoporaDeliveryAction(input: {
   if (!input.exactLocation.trim() || !input.city.trim()) {
     return { error: "Enter your delivery location and city first." }
   }
-  if (!isAccraArea(input.city, input.exactLocation)) {
+  const pin =
+    typeof input.dropoffLat === "number" && typeof input.dropoffLng === "number" &&
+    Number.isFinite(input.dropoffLat) && Number.isFinite(input.dropoffLng)
+      ? { lat: input.dropoffLat, lng: input.dropoffLng }
+      : null
+  if (!pin && !isAccraArea(input.city, input.exactLocation)) {
     return { error: "Shopora Delivery is only available for Accra addresses right now." }
   }
 
@@ -73,6 +94,7 @@ export async function quoteShoporaDeliveryAction(input: {
       city: input.city.trim(),
       country: input.country || "Ghana",
     },
+    dropoffPoint: pin,
   })
 
   if (!result.ok) return { error: result.error }

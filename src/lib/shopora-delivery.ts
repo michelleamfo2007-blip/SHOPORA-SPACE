@@ -241,6 +241,62 @@ async function searchNominatimPlaces(query: string): Promise<PlaceSuggestion[]> 
   })
 }
 
+/** Nearest place name for a GPS/map pin, so the written address matches the pin. Photon first, Nominatim fallback. */
+export async function reverseGeocode(point: LatLng): Promise<{ exactLocation: string; city: string; label: string } | null> {
+  try {
+    const url = new URL("https://photon.komoot.io/reverse")
+    url.searchParams.set("lat", String(point.lat))
+    url.searchParams.set("lon", String(point.lng))
+    url.searchParams.set("lang", "en")
+    const res = await fetch(url.toString(), {
+      headers: { "User-Agent": "ShoporaDelivery/1.0 (shopora.space)" },
+      next: { revalidate: 0 },
+    })
+    if (res.ok) {
+      const data = (await res.json()) as { features?: PhotonFeature[] }
+      const p = data.features?.[0]?.properties
+      if (p) {
+        const label = formatPhotonLabel(p)
+        const exact =
+          p.name || (p.housenumber && p.street ? `${p.housenumber} ${p.street}` : p.street) || p.suburb || p.district
+        const cityRaw = p.city || p.town || p.village || p.county || p.state || "Accra"
+        if (exact || label) {
+          return {
+            exactLocation: [exact, p.suburb && p.suburb !== exact ? p.suburb : null].filter(Boolean).join(", ") || label,
+            city: isAccraArea(cityRaw, label) ? "Accra" : cityRaw,
+            label,
+          }
+        }
+      }
+    }
+  } catch {
+    // fall through to Nominatim
+  }
+
+  try {
+    const url = new URL("https://nominatim.openstreetmap.org/reverse")
+    url.searchParams.set("lat", String(point.lat))
+    url.searchParams.set("lon", String(point.lng))
+    url.searchParams.set("format", "json")
+    url.searchParams.set("zoom", "18")
+    url.searchParams.set("addressdetails", "1")
+    const res = await fetch(url, {
+      headers: { "User-Agent": "ShoporaDelivery/1.0 (shopora.space)" },
+      next: { revalidate: 0 },
+    })
+    if (!res.ok) return null
+    const item = (await res.json()) as { display_name?: string; address?: Record<string, string> }
+    if (!item.display_name) return null
+    const city = cityFromNominatimAddress(item.address)
+    const exact =
+      [item.address?.road, item.address?.suburb || item.address?.neighbourhood].filter(Boolean).join(", ") ||
+      item.display_name.split(",").slice(0, 2).join(",")
+    return { exactLocation: exact, city: isAccraArea(city, item.display_name) ? "Accra" : city, label: item.display_name }
+  } catch {
+    return null
+  }
+}
+
 /** Autocomplete for checkout. Photon first (free), Nominatim fallback. Accra-biased. */
 export async function searchDeliveryPlaces(query: string): Promise<PlaceSuggestion[]> {
   const q = query.trim()
@@ -376,18 +432,25 @@ async function estimatedAccraQuote(
 export async function quoteShoporaDelivery(input: {
   pickup: LatLng
   dropoffAddress: { exactLocation: string; city: string; country?: string }
+  /** Exact pin from the customer's GPS or map. Used instead of geocoding the typed address. */
+  dropoffPoint?: LatLng | null
 }): Promise<{ ok: true; quote: DeliveryQuote } | { ok: false; error: string }> {
   if (!inAccraBounds(input.pickup)) {
     return { ok: false, error: "Shopora Delivery is only available for Accra pickups right now." }
   }
 
+  const pin = input.dropoffPoint && inAccraBounds(input.dropoffPoint) ? input.dropoffPoint : null
+  if (input.dropoffPoint && !pin) {
+    return { ok: false, error: "That pin is outside Accra. Shopora Delivery only covers Accra right now." }
+  }
+
   // Never block Accra free-text addresses — rider will open the written address in Google Maps.
-  if (!isAccraArea(input.dropoffAddress.city, input.dropoffAddress.exactLocation)) {
+  if (!pin && !isAccraArea(input.dropoffAddress.city, input.dropoffAddress.exactLocation)) {
     return { ok: false, error: "Shopora Delivery is only available for Accra addresses right now." }
   }
 
   const dropoffText = `${input.dropoffAddress.exactLocation} ${input.dropoffAddress.city}`
-  const dropoff = await geocodeAddress(input.dropoffAddress)
+  const dropoff = pin ?? (await geocodeAddress(input.dropoffAddress))
   if (!dropoff || !inAccraBounds(dropoff)) {
     return { ok: true, quote: await estimatedAccraQuote(input.pickup, dropoffText) }
   }

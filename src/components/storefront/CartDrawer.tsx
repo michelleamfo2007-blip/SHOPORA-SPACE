@@ -134,12 +134,16 @@ export function CartDrawer({ currency, basePath }: CartDrawerProps) {
                         <span className="w-8 text-center text-sm">{item.quantity}</span>
                         <button
                           onClick={() => cart.updateQuantity(item.variantId, item.quantity + 1)}
-                          className="flex h-8 w-8 items-center justify-center text-stone-600 hover:text-stone-900"
+                          disabled={typeof item.maxQuantity === "number" && item.quantity >= item.maxQuantity}
+                          className="flex h-8 w-8 items-center justify-center text-stone-600 hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-30"
                           aria-label="Increase quantity"
                         >
                           <Plus className="h-3 w-3" />
                         </button>
                       </div>
+                      {typeof item.maxQuantity === "number" && item.quantity >= item.maxQuantity && (
+                        <span className="text-[11px] text-stone-500">Only {item.maxQuantity} available</span>
+                      )}
                       <button
                         type="button"
                         onClick={() => cart.removeItem(item.variantId)}

@@ -445,6 +445,11 @@ model Order {
   deliveryDurationMin Float?
   shoporaCutAmount Float?
   deliveryQuotedAt DateTime?
+  /// Exact delivery pin chosen by the customer at checkout (GPS or map)
+  dropoffLat      Float?
+  dropoffLng      Float?
+  /// True while this order's items are taken out of stock (set at checkout, cleared on cancel/refund)
+  stockReserved   Boolean     @default(false)
   trackingToken   String?     @unique
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
@@ -552,6 +557,8 @@ model DeliveryJob {
   shoporaCut      Float
   pickupAddress   String
   dropoffAddress  String
+  dropoffLat      Float?
+  dropoffLng      Float?
   distanceKm      Float?
   durationMin     Float?
   /// bcrypt hash of the customer delivery OTP — never expose plaintext to riders

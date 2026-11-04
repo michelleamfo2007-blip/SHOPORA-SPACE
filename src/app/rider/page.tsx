@@ -131,11 +131,15 @@ export default async function RiderDashboardPage() {
                 <RiderJobMap
                   pickupAddress={job.pickupAddress}
                   dropoffAddress={job.dropoffAddress}
+                  dropoffLat={job.dropoffLat}
+                  dropoffLng={job.dropoffLng}
                   focus="both"
                 />
                 <RiderMapLinks
                   pickupAddress={job.pickupAddress}
                   dropoffAddress={job.dropoffAddress}
+                  dropoffLat={job.dropoffLat}
+                  dropoffLng={job.dropoffLng}
                   status="PENDING"
                 />
                 <RiderJobActions jobId={job.id} status="PENDING" />
@@ -176,11 +180,15 @@ export default async function RiderDashboardPage() {
                 <RiderJobMap
                   pickupAddress={job.pickupAddress}
                   dropoffAddress={job.dropoffAddress}
+                  dropoffLat={job.dropoffLat}
+                  dropoffLng={job.dropoffLng}
                   focus={job.status === "PICKED_UP" ? "dropoff" : "both"}
                 />
                 <RiderMapLinks
                   pickupAddress={job.pickupAddress}
                   dropoffAddress={job.dropoffAddress}
+                  dropoffLat={job.dropoffLat}
+                  dropoffLng={job.dropoffLng}
                   status={job.status}
                 />
                 <RiderJobActions jobId={job.id} status={job.status} />

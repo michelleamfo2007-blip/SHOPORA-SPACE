@@ -156,6 +156,16 @@ export default async function OrderDetailsPage({
               ) : (
                 <p className="text-sm italic text-slate-500">No delivery details provided</p>
               )}
+              {order.dropoffLat != null && order.dropoffLng != null && (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${order.dropoffLat},${order.dropoffLng}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex text-sm font-medium text-slate-900 underline underline-offset-4"
+                >
+                  Open the customer’s exact pin in Google Maps
+                </a>
+              )}
             </CardContent>
           </Card>
 

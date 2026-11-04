@@ -11,16 +11,23 @@ function mapsDirUrl(destination: string, origin?: string) {
 export function RiderMapLinks({
   pickupAddress,
   dropoffAddress,
+  dropoffLat,
+  dropoffLng,
   status,
 }: {
   pickupAddress: string
   dropoffAddress: string
+  dropoffLat?: number | null
+  dropoffLng?: number | null
   status: "PENDING" | "ASSIGNED" | "PICKED_UP" | "DELIVERED" | "FAILED" | "CANCELLED"
 }) {
+  // The customer's exact pin beats the typed address for navigation.
+  const dropoff = dropoffLat != null && dropoffLng != null ? `${dropoffLat},${dropoffLng}` : dropoffAddress
+
   if (status === "PENDING") {
     return (
       <a
-        href={mapsDirUrl(dropoffAddress, pickupAddress)}
+        href={mapsDirUrl(dropoff, pickupAddress)}
         target="_blank"
         rel="noreferrer"
         className="mt-3 inline-flex h-10 items-center justify-center rounded-full border border-stone-300 px-4 text-sm font-medium text-stone-800"
@@ -42,7 +49,7 @@ export function RiderMapLinks({
           Navigate to pickup
         </a>
         <a
-          href={mapsDirUrl(dropoffAddress, pickupAddress)}
+          href={mapsDirUrl(dropoff, pickupAddress)}
           target="_blank"
           rel="noreferrer"
           className="inline-flex h-10 items-center justify-center rounded-full border border-stone-300 px-4 text-sm font-medium text-stone-800"
@@ -56,12 +63,12 @@ export function RiderMapLinks({
   if (status === "PICKED_UP") {
     return (
       <a
-        href={mapsDirUrl(dropoffAddress)}
+        href={mapsDirUrl(dropoff)}
         target="_blank"
         rel="noreferrer"
         className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-full bg-stone-900 px-4 text-sm font-medium text-white"
       >
-        Navigate to customer
+        Navigate to customer{dropoff !== dropoffAddress ? " (exact pin)" : ""}
       </a>
     )
   }

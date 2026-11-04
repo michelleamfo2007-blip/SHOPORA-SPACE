@@ -53,6 +53,8 @@ export async function GET(
       deliveryDistanceKm: order.deliveryDistanceKm,
       deliveryDurationMin: order.deliveryDurationMin,
       shippingAddress: order.shippingAddress,
+      dropoffLat: order.dropoffLat,
+      dropoffLng: order.dropoffLng,
       customer: order.customer,
       items: order.orderItems.map((item) => ({
         id: item.id,

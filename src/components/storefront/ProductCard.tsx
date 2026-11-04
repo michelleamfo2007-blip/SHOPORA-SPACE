@@ -49,6 +49,7 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
       price: price,
       quantity: 1,
       imageUrl: imageUrl,
+      ...(typeof variant?.stockCount === "number" ? { maxQuantity: variant.stockCount } : {}),
     })
     cart.openDrawer()
   }

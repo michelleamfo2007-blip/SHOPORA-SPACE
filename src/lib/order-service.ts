@@ -4,6 +4,7 @@ import { Resend } from "resend"
 import { OrderStatusEmail, type OrderStatusKind } from "@/emails/OrderStatusEmail"
 import { DEFAULT_VARIANT_NAME } from "@/lib/product-variants"
 import { notifyRidersOfOpenJob } from "@/lib/notify-riders"
+import { releaseOrderStock, reserveOrderStock } from "@/lib/order-stock"
 
 /**
  * Order mutations shared by the website dashboard (server actions) and the mobile app (API routes).
@@ -151,10 +152,25 @@ export async function updateOrderStatus(storeId: string, orderId: string, status
       }
     }
 
-    await db.order.update({
-      where: { id: orderId, storeId },
-      data: { status },
-    })
+    const closed = ["CANCELLED", "REFUNDED"]
+    const wasClosed = closed.includes(order.status)
+    const willClose = closed.includes(status)
+    try {
+      await db.$transaction(async (tx) => {
+        if (willClose && !wasClosed) await releaseOrderStock(tx, orderId)
+        if (wasClosed && !willClose) await reserveOrderStock(tx, orderId)
+        await tx.order.update({
+          where: { id: orderId, storeId },
+          data: { status },
+        })
+      })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : ""
+      if (message.startsWith("OUT_OF_STOCK:")) {
+        return { error: `Not enough ${message.slice("OUT_OF_STOCK:".length)} in stock to reopen this order.` }
+      }
+      throw err
+    }
 
     if (status === "PROCESSING" && order.status !== "PROCESSING") {
       await sendOrderStatusEmail(orderId, storeId, "ACCEPTED")

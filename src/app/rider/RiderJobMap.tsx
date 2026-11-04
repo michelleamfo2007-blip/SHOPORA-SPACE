@@ -6,6 +6,8 @@ import { resolveRiderMapPointsAction } from "@/server/actions/rider-map"
 type Props = {
   pickupAddress: string
   dropoffAddress: string
+  dropoffLat?: number | null
+  dropoffLng?: number | null
   focus?: "pickup" | "dropoff" | "both"
 }
 
@@ -36,7 +38,7 @@ function markerEl(label: string, color: string) {
   return el
 }
 
-export function RiderJobMap({ pickupAddress, dropoffAddress, focus = "both" }: Props) {
+export function RiderJobMap({ pickupAddress, dropoffAddress, dropoffLat, dropoffLng, focus = "both" }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -52,7 +54,7 @@ export function RiderJobMap({ pickupAddress, dropoffAddress, focus = "both" }: P
       try {
         const [maplibreMod, points] = await Promise.all([
           import("maplibre-gl"),
-          resolveRiderMapPointsAction({ pickupAddress, dropoffAddress }),
+          resolveRiderMapPointsAction({ pickupAddress, dropoffAddress, dropoffLat, dropoffLng }),
         ])
         await import("maplibre-gl/dist/maplibre-gl.css")
         const maplibregl = maplibreMod as typeof import("maplibre-gl")
@@ -120,7 +122,7 @@ export function RiderJobMap({ pickupAddress, dropoffAddress, focus = "both" }: P
       markers.forEach((m) => m.remove())
       map?.remove()
     }
-  }, [pickupAddress, dropoffAddress, focus])
+  }, [pickupAddress, dropoffAddress, dropoffLat, dropoffLng, focus])
 
   return (
     <div className="mt-3 overflow-hidden border border-stone-200 bg-stone-100">

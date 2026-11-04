@@ -10,14 +10,22 @@ export async function GET(req: Request, { params }: { params: Promise<{ jobId: s
 
   const job = await db.deliveryJob.findUnique({
     where: { id: jobId },
-    select: { riderId: true, status: true, pickupAddress: true, dropoffAddress: true },
+    select: {
+      riderId: true,
+      status: true,
+      pickupAddress: true,
+      dropoffAddress: true,
+      dropoffLat: true,
+      dropoffLng: true,
+    },
   })
   const visible = job && ((job.status === "PENDING" && !job.riderId) || job.riderId === auth.rider.id)
   if (!job || !visible) return Response.json({ error: "Job not found." }, { status: 404 })
 
+  const exact = job.dropoffLat != null && job.dropoffLng != null ? { lat: job.dropoffLat, lng: job.dropoffLng } : null
   const [pickup, dropoff] = await Promise.all([
     geocodeAddress({ exactLocation: job.pickupAddress, city: "Accra", country: "Ghana" }),
-    geocodeAddress({ exactLocation: job.dropoffAddress, city: "Accra", country: "Ghana" }),
+    exact ?? geocodeAddress({ exactLocation: job.dropoffAddress, city: "Accra", country: "Ghana" }),
   ])
 
   return Response.json({ pickup, dropoff })
