@@ -3,7 +3,7 @@ import Link from "next/link"
 import { ArrowRight, MessageCircle, Smartphone, Truck, BadgeCheck } from "lucide-react"
 import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
-import { formatMoney, getStorefrontBasePath, whatsappLink } from "@/lib/storefront"
+import { getStorefrontBasePath, whatsappLink } from "@/lib/storefront"
 import { ProductCard } from "@/components/storefront/ProductCard"
 
 export default async function StorefrontHomePage({ params }: { params: Promise<{ domain: string }> }) {
@@ -63,7 +63,6 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       id: p.id,
       name: p.name,
       image: p.variants[0]?.imageUrl || p.images[0],
-      price: p.variants[0]?.price ?? p.price,
     }))
     .filter((p): p is typeof p & { image: string } => !!p.image)
     .slice(0, 3)
@@ -130,10 +129,6 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
                   alt={tile.name}
                   className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
                 />
-                <span className="absolute bottom-2 left-2 right-2 bg-[#faf8f5]/90 px-2.5 py-1.5 text-[10px] leading-snug text-stone-900 md:bottom-3 md:left-3 md:right-3 md:px-3 md:py-2 md:text-xs">
-                  <span className="block truncate">{tile.name}</span>
-                  {tile.price != null && <span className="block text-stone-500">{formatMoney(store.currency, tile.price)}</span>}
-                </span>
               </Link>
             ))}
           </div>
