@@ -8,13 +8,6 @@ export async function POST(req: Request) {
 
     const { user } = result
     const memberships = await vendorStoresFor(user.id)
-    if (memberships.length === 0) {
-      return Response.json(
-        { error: "No store on this account yet. Create your store on shopora.space first." },
-        { status: 403 }
-      )
-    }
-
     return Response.json({
       token: signMobileToken("vendor", user.id),
       user: { id: user.id, name: user.name, email: user.email },

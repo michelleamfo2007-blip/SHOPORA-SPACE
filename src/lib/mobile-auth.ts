@@ -135,9 +135,10 @@ export async function authenticateRider(phoneInput: string, password: string) {
   return { rider }
 }
 
+/** Stores the seller can open in the app. Unfinished website drafts are left out so the app offers setup instead. */
 export function vendorStoresFor(userId: string) {
   return db.storeMember.findMany({
-    where: { userId },
+    where: { userId, NOT: { store: { slug: { startsWith: "draft-" } } } },
     select: {
       role: true,
       store: { select: { id: true, name: true, slug: true, currency: true, logoUrl: true } },

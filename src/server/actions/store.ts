@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache"
 import { requireStoreAccess } from "@/lib/store-access"
 import { storeSettingsFromFormData, updateStoreSettings } from "@/lib/store-settings"
 import { DEFAULT_BRAND_COLOR } from "@/lib/store-brand"
+import { checkStoreSlug } from "@/lib/store-onboarding"
 
 export async function createStoreAction(formData: FormData) {
   const session = await getServerSession(authOptions)
@@ -97,32 +98,8 @@ export async function completeSetupAction(formData: FormData) {
     return { error: "Missing required fields" }
   }
 
-  // Sanitize slug: lowercase, replace spaces with hyphens, remove non-alphanumeric
-  const slug = rawSlug
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9-\s]/g, "") // remove special characters except spaces/hyphens
-    .replace(/\s+/g, "-")         // replace spaces with hyphens
-    .replace(/-+/g, "-")          // replace multiple hyphens with single hyphen
-    .replace(/^-+|-+$/g, "")      // trim hyphens
-
-  if (!slug) {
-    return { error: "Please enter a valid store URL containing only letters and numbers" }
-  }
-
-  const reservedSlugs = ["www", "api", "app", "admin", "super-admin", "mail", "ftp", "blog", "shop", "store", "checkout"]
-  if (reservedSlugs.includes(slug.toLowerCase())) {
-    return { error: "This store URL is reserved and cannot be used" }
-  }
-
-  // Check if slug is taken by someone else
-  const existingStore = await db.store.findUnique({
-    where: { slug }
-  })
-
-  if (existingStore) {
-    return { error: "Store URL is already taken" }
-  }
+  const { slug, error: slugError } = await checkStoreSlug(rawSlug)
+  if (slugError) return { error: slugError }
 
   // Find the draft store for this user
   const membership = await db.storeMember.findFirst({

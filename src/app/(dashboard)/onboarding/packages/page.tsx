@@ -6,45 +6,9 @@ import { Button } from "@/components/ui/button"
 import { startTrialAction } from "@/server/actions/subscription"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { TRIAL_PACKAGES } from "@/lib/plans"
 
-const packages = [
-  {
-    name: "Starter",
-    priceMonthly: 100,
-    priceYearly: 1100,
-    description: "Perfect for new merchants starting their online journey.",
-    features: [
-      "Up to 25 Products",
-      "Basic Storefront Theme",
-      "Order Management",
-      "Standard Support"
-    ]
-  },
-  {
-    name: "Professional",
-    priceMonthly: 200,
-    priceYearly: 2200,
-    description: "For growing businesses that need more power.",
-    features: [
-      "Up to 50 Products",
-      "Custom Domain Support",
-      "Advanced Analytics",
-      "Priority Support"
-    ]
-  },
-  {
-    name: "Business",
-    priceMonthly: 300,
-    priceYearly: 3300,
-    description: "Enterprise-grade features for high-volume stores.",
-    features: [
-      "Unlimited Products",
-      "Custom Domain Support",
-      "Multiple Staff Accounts",
-      "24/7 Dedicated Manager"
-    ]
-  }
-]
+const packages = TRIAL_PACKAGES
 
 export default function PackagesPage() {
   const [isYearly, setIsYearly] = useState(false)
