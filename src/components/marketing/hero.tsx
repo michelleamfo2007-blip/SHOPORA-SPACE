@@ -5,9 +5,9 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 const previewOrders = [
-  { name: "Silk set · M", status: "Paid", amount: "GHS 420" },
-  { name: "Linen shirt · L", status: "New", amount: "GHS 180" },
-  { name: "Canvas tote", status: "Packed", amount: "GHS 95" },
+  { name: "Silk set · M", status: "Paid · MoMo", amount: "GHS 420" },
+  { name: "Linen shirt · L", status: "Verify", amount: "GHS 180" },
+  { name: "Canvas tote", status: "With rider", amount: "GHS 95" },
 ];
 
 export function Hero() {
@@ -23,14 +23,14 @@ export function Hero() {
         >
           <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            0% platform fees · 1-month free trial
+            0% platform fees · 1-month free trial · Now with the Shopora app
           </p>
           <h1 className="max-w-xl text-5xl font-semibold tracking-tight text-stone-950 md:text-6xl md:leading-[1.05]">
             Sell global.
             <span className="block text-stone-500">Manage local.</span>
           </h1>
           <p className="mt-5 max-w-lg text-base leading-relaxed text-stone-600 md:text-lg">
-            Shopora is the storefront and dashboard for sellers who want their own payments, their own customers, and every cedi from a sale.
+            Your own online store, a seller app on your phone, and Shopora Delivery in Accra. Customers pay you directly by MoMo or bank, and every cedi from the sale stays yours.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
@@ -40,10 +40,10 @@ export function Hero() {
               Create an account <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="#features"
+              href="#app"
               className="inline-flex items-center justify-center rounded-full border border-stone-300 bg-white px-6 py-3.5 text-sm font-medium text-stone-900 transition-colors hover:bg-stone-100"
             >
-              See how it works
+              See the app
             </Link>
           </div>
         </motion.div>

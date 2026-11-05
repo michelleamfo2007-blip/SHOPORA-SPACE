@@ -24,13 +24,15 @@ export function Footer() {
           <div className="md:col-span-2">
             <Link href="/" className="text-lg font-semibold tracking-tight">Shopora</Link>
             <p className="mt-3 max-w-sm text-sm leading-relaxed text-stone-400">
-              A storefront and dashboard for merchants who keep their own payments and their own customers.
+              Your online store, seller app and Accra delivery. Customers pay you directly by MoMo or bank.
             </p>
           </div>
           <div>
             <h3 className="text-sm font-medium">Product</h3>
             <ul className="mt-3 space-y-2 text-sm text-stone-400">
               <li><Link href="/#features" className="hover:text-white">Features</Link></li>
+              <li><Link href="/#app" className="hover:text-white">The app</Link></li>
+              <li><Link href="/#payments" className="hover:text-white">Payments</Link></li>
               <li><Link href="/#pricing" className="hover:text-white">Pricing</Link></li>
               <li><Link href="/showcase" className="hover:text-white">Showcase</Link></li>
             </ul>

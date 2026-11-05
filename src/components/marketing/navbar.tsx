@@ -6,6 +6,8 @@ import { Menu, X } from "lucide-react";
 
 const links = [
   { href: "/#features", label: "Features" },
+  { href: "/#app", label: "App" },
+  { href: "/#payments", label: "Payments" },
   { href: "/#pricing", label: "Pricing" },
   { href: "/showcase", label: "Showcase" },
 ];
@@ -24,6 +26,7 @@ function Logo() {
 export function Navbar() {
   const [open, setOpen] = useState(false);
 
+  
   useEffect(() => {
     if (!open) return;
     const previous = document.body.style.overflow;

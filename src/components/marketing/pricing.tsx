@@ -4,6 +4,13 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import Link from "next/link";
 
+const everyPlan = [
+  "0% platform fee on sales",
+  "Customers pay you by MoMo or bank",
+  "Seller app for your phone",
+  "Shopora Delivery in Accra",
+];
+
 const plans = [
   {
     name: "Starter",
@@ -11,13 +18,7 @@ const plans = [
     currency: "GHS",
     period: "/mo",
     description: "For a new shop getting its first products online.",
-    features: [
-      "Up to 25 products",
-      "Your own payment gateway",
-      "Standard support",
-      "0% platform fee on sales",
-      "Free .shopora.space address",
-    ],
+    features: ["Up to 25 products", ...everyPlan, "Free .shopora.space address", "Standard support"],
     highlighted: false,
     cta: "Start free trial",
     href: "/signup",
@@ -30,12 +31,11 @@ const plans = [
     description: "For a store that is already taking orders and wants room to grow.",
     features: [
       "Up to 50 products",
-      "Your own payment gateway",
-      "Priority support",
-      "0% platform fee on sales",
+      ...everyPlan,
       "Free .shopora.space address",
       "Your own domain",
       "Advanced analytics",
+      "Priority support",
     ],
     highlighted: true,
     cta: "Start free trial",
@@ -49,11 +49,10 @@ const plans = [
     description: "For a higher-volume shop that wants a person on the account.",
     features: [
       "Unlimited products",
-      "Your own payment gateway",
+      ...everyPlan,
+      "Your own domain",
       "Dedicated account manager",
       "Custom integrations",
-      "0% platform fee on sales",
-      "Your own domain",
     ],
     highlighted: false,
     cta: "Start free trial",
@@ -70,7 +69,9 @@ export function Pricing() {
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-stone-950 md:text-4xl">
             One monthly price. The sale stays yours.
           </h2>
-          <p className="mt-3 text-stone-600">Every plan starts with a 1-month free trial. No share of revenue.</p>
+          <p className="mt-3 text-stone-600">
+            Every plan starts with a 1-month free trial. No share of revenue. Pay your plan by MoMo or bank transfer.
+          </p>
         </div>
 
         <div className="grid items-stretch gap-4 md:grid-cols-3">
