@@ -432,9 +432,9 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
                   value={status} 
                   onChange={e => setStatus(e.target.value)}
                 >
-                  <option value="ACTIVE">🟢 Active</option>
-                  <option value="DRAFT">📝 Draft</option>
-                  <option value="ARCHIVED">📦 Archived</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="DRAFT">Draft</option>
+                  <option value="ARCHIVED">Archived</option>
                 </select>
               </div>
             </CardContent>

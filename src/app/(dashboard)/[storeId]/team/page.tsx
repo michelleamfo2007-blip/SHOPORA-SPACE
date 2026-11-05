@@ -2,13 +2,23 @@ import { requireStoreManagerPage, getStoreAccess } from "@/lib/store-access"
 import { ROLE_DESCRIPTIONS, ROLE_LABELS } from "@/lib/store-roles"
 import { listTeam } from "@/lib/team"
 import { TeamManager } from "./TeamManager"
+import { storeHasFeature } from "@/lib/store-plan"
+import { UpgradeCard } from "@/components/dashboard/UpgradeCard"
 
 export default async function TeamPage({ params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params
   await requireStoreManagerPage(storeId)
   const access = await getStoreAccess(storeId)
   if ("error" in access) return null
-  const team = await listTeam(storeId)
+  const [team, allowed] = await Promise.all([listTeam(storeId), storeHasFeature(storeId, "team")])
+  if (!allowed) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-6 pb-10">
+        <h1 className="text-3xl font-semibold tracking-tight text-stone-950">Team</h1>
+        <UpgradeCard storeId={storeId} feature="team" />
+      </div>
+    )
+  }
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 pb-10">

@@ -3,12 +3,15 @@ import { ArrowLeft } from "lucide-react"
 import { db } from "@/lib/db"
 import { getBulkRows } from "@/lib/bulk-products"
 import { BulkEditor } from "./BulkEditor"
+import { storeHasFeature } from "@/lib/store-plan"
+import { UpgradeCard } from "@/components/dashboard/UpgradeCard"
 
 export default async function BulkEditPage({ params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params
-  const [store, rows] = await Promise.all([
+  const [store, rows, allowed] = await Promise.all([
     db.store.findUnique({ where: { id: storeId }, select: { currency: true } }),
     getBulkRows(storeId),
+    storeHasFeature(storeId, "bulkEdit"),
   ])
 
   return (
@@ -24,7 +27,11 @@ export default async function BulkEditPage({ params }: { params: Promise<{ store
           </p>
         </div>
       </div>
-      <BulkEditor storeId={storeId} currency={store?.currency ?? "GHS"} rows={rows} />
+      {allowed ? (
+        <BulkEditor storeId={storeId} currency={store?.currency ?? "GHS"} rows={rows} />
+      ) : (
+        <UpgradeCard storeId={storeId} feature="bulkEdit" />
+      )}
     </div>
   )
 }

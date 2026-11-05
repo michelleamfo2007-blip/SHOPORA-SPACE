@@ -3,12 +3,15 @@ import { ArrowLeft } from "lucide-react"
 import { db } from "@/lib/db"
 import { MANUAL_ORDER_SOURCES, listSellableVariants } from "@/lib/manual-order"
 import { ManualOrderForm } from "./ManualOrderForm"
+import { storeHasFeature } from "@/lib/store-plan"
+import { UpgradeCard } from "@/components/dashboard/UpgradeCard"
 
 export default async function NewManualOrderPage({ params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params
-  const [store, items] = await Promise.all([
+  const [store, items, allowed] = await Promise.all([
     db.store.findUnique({ where: { id: storeId }, select: { currency: true } }),
     listSellableVariants(storeId),
+    storeHasFeature(storeId, "manualOrders"),
   ])
 
   return (
@@ -24,12 +27,16 @@ export default async function NewManualOrderPage({ params }: { params: Promise<{
           </p>
         </div>
       </div>
-      <ManualOrderForm
-        storeId={storeId}
-        currency={store?.currency ?? "GHS"}
-        items={items}
-        sources={MANUAL_ORDER_SOURCES.map((s) => ({ value: s.value, label: s.label }))}
-      />
+      {allowed ? (
+        <ManualOrderForm
+          storeId={storeId}
+          currency={store?.currency ?? "GHS"}
+          items={items}
+          sources={MANUAL_ORDER_SOURCES.map((s) => ({ value: s.value, label: s.label }))}
+        />
+      ) : (
+        <UpgradeCard storeId={storeId} feature="manualOrders" />
+      )}
     </div>
   )
 }

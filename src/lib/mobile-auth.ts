@@ -5,6 +5,8 @@ import { normalizeRiderPhone, riderPhoneLookupVariants } from "@/lib/rider-phone
 import { LAPSED_STORE_MESSAGE } from "@/lib/store-access"
 import { isSubscriptionLapsed } from "@/lib/subscription"
 import { isStoreManager } from "@/lib/store-roles"
+import { featuresForPlan, normalizePlan, type PlanFeature } from "@/lib/plan-features"
+import { featureGate } from "@/lib/store-plan"
 
 /** Bearer tokens for the Shopora mobile app (vendors + riders). Website cookies are unaffected. */
 
@@ -145,15 +147,34 @@ export async function authenticateRider(phoneInput: string, password: string) {
 }
 
 /** Stores the seller can open in the app. Unfinished website drafts are left out so the app offers setup instead. */
-export function vendorStoresFor(userId: string) {
-  return db.storeMember.findMany({
+export async function vendorStoresFor(userId: string) {
+  const memberships = await db.storeMember.findMany({
     where: { userId, NOT: { store: { slug: { startsWith: "draft-" } } } },
     select: {
       role: true,
-      store: { select: { id: true, name: true, slug: true, currency: true, logoUrl: true } },
+      store: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          currency: true,
+          logoUrl: true,
+          subscription: { select: { plan: { select: { name: true } } } },
+        },
+      },
     },
     orderBy: { createdAt: "asc" },
   })
+  return memberships.map(({ role, store: { subscription, ...store } }) => {
+    const plan = normalizePlan(subscription?.plan.name)
+    return { role, store: { ...store, plan, features: featuresForPlan(plan) } }
+  })
+}
+
+/** 403 body for a tool the store's plan doesn't include; the app shows it with an upgrade prompt. */
+export async function mobileFeatureGate(storeId: string, feature: PlanFeature) {
+  const locked = await featureGate(storeId, feature)
+  return locked ? Response.json({ error: locked, upgrade: true }, { status: 403 }) : null
 }
 
 export function publicRider(rider: {

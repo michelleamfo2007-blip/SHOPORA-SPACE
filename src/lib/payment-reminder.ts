@@ -32,7 +32,7 @@ export function paymentReminderMessage(input: ReminderInput) {
   if (p?.bankName && p.accountNumber) {
     lines.push(`Or bank transfer: ${p.bankName}, ${p.accountNumber}${p.accountName ? `, ${p.accountName}` : ""}.`)
   }
-  lines.push(`Please reply with your transaction ID once you've paid so we can send your order. 🙏`)
+  lines.push(`Please reply with your transaction ID once you've paid so we can send your order.`)
   return lines.join("\n")
 }
 

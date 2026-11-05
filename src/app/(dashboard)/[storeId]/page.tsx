@@ -3,6 +3,7 @@ import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
 import { getStoreSetup } from "@/lib/store-setup"
 import { getMonthlyGoal } from "@/lib/sales-goal"
+import { storeHasFeature } from "@/lib/store-plan"
 import { requireStoreManagerPage } from "@/lib/store-access"
 import { DashboardOverviewClient } from "./DashboardOverviewClient"
 
@@ -178,7 +179,7 @@ export default async function DashboardOverview({ params }: { params: Promise<{ 
       bestSellers={bestSellers}
       chartData={chartData}
       setup={await getStoreSetup(storeId)}
-      goal={await getMonthlyGoal(storeId)}
+      goal={(await storeHasFeature(storeId, "monthlyGoal")) ? await getMonthlyGoal(storeId) : null}
     />
   )
 }

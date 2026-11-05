@@ -39,10 +39,10 @@ export async function getShareKit(storeId: string, productId: string) {
   const price = product.variants[0]?.price ?? product.price ?? 0
   const link = productPublicUrl(product.store.slug, product.id)
   const caption = [
-    `✨ ${product.name}`,
+    `${product.name}`,
     `${formatPrice(product.store.currency, price)}`,
     ``,
-    `Order now 👉 ${link}`,
+    `Order now: ${link}`,
     product.store.whatsappNumber ? `Or send us a message on WhatsApp: ${product.store.whatsappNumber}` : null,
     ``,
     `#${product.store.name.replace(/[^a-z0-9]/gi, "")} #ShopGhana #Accra`,

@@ -2,6 +2,7 @@ import { db } from "@/lib/db"
 import { requireMobileStoreManager } from "@/lib/mobile-auth"
 import { getStoreSetup } from "@/lib/store-setup"
 import { getMonthlyGoal } from "@/lib/sales-goal"
+import { storeHasFeature } from "@/lib/store-plan"
 
 /** Same numbers as the web dashboard Overview page. */
 export async function GET(req: Request, { params }: { params: Promise<{ storeId: string }> }) {
@@ -50,7 +51,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
         select: { totalAmount: true, createdAt: true },
       }),
       getStoreSetup(storeId),
-      getMonthlyGoal(storeId),
+      storeHasFeature(storeId, "monthlyGoal").then((ok) => (ok ? getMonthlyGoal(storeId) : null)),
     ])
 
   const count = (...s: string[]) => statuses.filter((g) => s.includes(g.status)).reduce((n, g) => n + g._count._all, 0)

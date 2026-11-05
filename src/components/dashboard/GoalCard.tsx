@@ -56,7 +56,7 @@ export function GoalCard({ storeId, currency, goal }: { storeId: string; currenc
           </div>
           <p className="mt-2 text-sm text-stone-500">
             {goal.percent >= 100
-              ? "🎉 Goal reached — well done!"
+              ? "Goal reached. Well done!"
               : `${goal.percent}% there · ${fmt(remaining)} to go · ${goal.daysLeft} day${goal.daysLeft === 1 ? "" : "s"} left`}
           </p>
         </>

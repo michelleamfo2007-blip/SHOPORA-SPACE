@@ -6,6 +6,7 @@ import { Plus, ShoppingBag } from "lucide-react"
 import { OrderStatus } from "@prisma/client"
 import { ORDER_SOURCE_LABELS } from "@/lib/manual-order"
 import { orderPaymentReminder } from "@/lib/payment-reminder"
+import { storeHasFeature } from "@/lib/store-plan"
 
 export default async function OrdersPage({ 
   params,
@@ -36,14 +37,17 @@ export default async function OrdersPage({
 
   if (!store) return null
 
-  const paymentSetting = await db.storePaymentSetting.findUnique({
-    where: { storeId },
-    select: { mobileMoneyNumber: true, accountName: true, bankName: true, accountNumber: true },
-  })
+  const [paymentSetting, remindersEnabled] = await Promise.all([
+    db.storePaymentSetting.findUnique({
+      where: { storeId },
+      select: { mobileMoneyNumber: true, accountName: true, bankName: true, accountNumber: true },
+    }),
+    storeHasFeature(storeId, "paymentReminders"),
+  ])
   const orders = store.orders.map((order) => ({
     ...order,
     sourceLabel: order.source === "WEBSITE" ? null : ORDER_SOURCE_LABELS[order.source],
-    reminderUrl: orderPaymentReminder(order, store, paymentSetting)?.url ?? null,
+    reminderUrl: remindersEnabled ? (orderPaymentReminder(order, store, paymentSetting)?.url ?? null) : null,
   }))
 
   return (

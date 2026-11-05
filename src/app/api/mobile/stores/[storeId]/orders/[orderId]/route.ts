@@ -3,6 +3,7 @@ import { requireMobileStoreAccess } from "@/lib/mobile-auth"
 import { DEFAULT_VARIANT_NAME } from "@/lib/product-variants"
 import { ORDER_SOURCE_LABELS } from "@/lib/manual-order"
 import { orderPaymentReminder } from "@/lib/payment-reminder"
+import { storeHasFeature } from "@/lib/store-plan"
 
 export async function GET(
   req: Request,
@@ -39,14 +40,15 @@ export async function GET(
   if (!order) return Response.json({ error: "Order not found." }, { status: 404 })
 
   const payment = order.payments[0]
-  const [store, paymentSetting] = await Promise.all([
+  const [store, paymentSetting, remindersEnabled] = await Promise.all([
     db.store.findUnique({ where: { id: storeId }, select: { name: true, currency: true } }),
     db.storePaymentSetting.findUnique({
       where: { storeId },
       select: { mobileMoneyNumber: true, accountName: true, bankName: true, accountNumber: true },
     }),
+    storeHasFeature(storeId, "paymentReminders"),
   ])
-  const reminder = store ? orderPaymentReminder(order, store, paymentSetting) : null
+  const reminder = store && remindersEnabled ? orderPaymentReminder(order, store, paymentSetting) : null
 
   return Response.json({
     currency: access.store.currency,

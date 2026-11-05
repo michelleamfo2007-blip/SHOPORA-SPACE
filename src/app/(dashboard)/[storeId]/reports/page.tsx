@@ -1,8 +1,11 @@
 import Link from "next/link"
-import { Download } from "lucide-react"
+import { Download, Lock } from "lucide-react"
 import { db } from "@/lib/db"
 import { requireStoreManagerPage } from "@/lib/store-access"
-import { REPORT_PRESETS, getSalesReport, resolveReportRange } from "@/lib/sales-report"
+import { REPORT_PRESETS, getSalesReport, resolveReportRange, withoutProfit } from "@/lib/sales-report"
+import { getStorePlan } from "@/lib/store-plan"
+import { planIncludes } from "@/lib/plan-features"
+import { UpgradeCard } from "@/components/dashboard/UpgradeCard"
 
 function money(currency: string, n: number) {
   return `${currency} ${n.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -20,10 +23,23 @@ export default async function ReportsPage({
   const query = await searchParams
   const range = resolveReportRange(query)
 
-  const [store, report] = await Promise.all([
+  const plan = await getStorePlan(storeId)
+  if (!planIncludes(plan.name, "salesReports")) {
+    return (
+      <div className="space-y-6 pb-10">
+        <h1 className="text-3xl font-semibold tracking-tight text-stone-950">Sales reports</h1>
+        <UpgradeCard storeId={storeId} feature="salesReports" />
+      </div>
+    )
+  }
+  const showProfit = planIncludes(plan.name, "profit")
+  const canExport = planIncludes(plan.name, "reportExport")
+
+  const [store, fullReport] = await Promise.all([
     db.store.findUnique({ where: { id: storeId }, select: { currency: true } }),
     getSalesReport(storeId, range.from, range.to),
   ])
+  const report = showProfit ? fullReport : withoutProfit(fullReport)
   const currency = store?.currency ?? "GHS"
   const { totals } = report
   const maxDay = Math.max(1, ...report.byDay.map((d) => d.revenue))
@@ -39,12 +55,21 @@ export default async function ReportsPage({
           <h1 className="text-3xl font-semibold tracking-tight text-stone-950">Sales reports</h1>
           <p className="mt-1 text-stone-500">{range.label} · paid orders only</p>
         </div>
-        <a
-          href={`/${storeId}/reports/export?${exportQuery}`}
-          className="inline-flex h-10 items-center gap-2 self-start rounded-full bg-stone-950 px-5 text-sm font-medium text-white hover:bg-stone-800"
-        >
-          <Download className="h-4 w-4" /> Download for Excel (CSV)
-        </a>
+        {canExport ? (
+          <a
+            href={`/${storeId}/reports/export?${exportQuery}`}
+            className="inline-flex h-10 items-center gap-2 self-start rounded-full bg-stone-950 px-5 text-sm font-medium text-white hover:bg-stone-800"
+          >
+            <Download className="h-4 w-4" /> Download for Excel (CSV)
+          </a>
+        ) : (
+          <Link
+            href={`/${storeId}/billing`}
+            className="inline-flex h-10 items-center gap-2 self-start rounded-full border border-stone-300 bg-white px-5 text-sm font-medium text-stone-700 hover:bg-stone-50"
+          >
+            <Lock className="h-4 w-4" /> Excel download &amp; profit on Business
+          </Link>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -70,11 +95,13 @@ export default async function ReportsPage({
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: "Sales", value: money(currency, totals.revenue), hint: `${totals.orders} paid orders` },
-          {
-            label: "Profit",
-            value: money(currency, totals.profit),
-            hint: totals.margin != null ? `${Math.round(totals.margin * 100)}% margin` : "Add cost prices to see profit",
-          },
+          showProfit
+            ? {
+                label: "Profit",
+                value: money(currency, totals.profit),
+                hint: totals.margin != null ? `${Math.round(totals.margin * 100)}% margin` : "Add cost prices to see profit",
+              }
+            : { label: "Profit", value: "Business plan", hint: "Upgrade to see your profit" },
           { label: "Average order", value: money(currency, totals.averageOrder), hint: "per paid order" },
           { label: "Waiting for payment", value: money(currency, totals.pendingAmount), hint: `${totals.pendingOrders} orders` },
         ].map((card) => (
@@ -140,7 +167,7 @@ export default async function ReportsPage({
                   <th className="pb-2 font-medium">Product</th>
                   <th className="pb-2 text-right font-medium">Sold</th>
                   <th className="pb-2 text-right font-medium">Sales</th>
-                  <th className="pb-2 text-right font-medium">Profit</th>
+                  {showProfit && <th className="pb-2 text-right font-medium">Profit</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
@@ -149,7 +176,9 @@ export default async function ReportsPage({
                     <td className="py-2.5 pr-2 text-stone-800">{p.name}</td>
                     <td className="py-2.5 text-right text-stone-600">{p.quantity}</td>
                     <td className="py-2.5 text-right text-stone-900">{money(currency, p.revenue)}</td>
-                    <td className="py-2.5 text-right text-stone-600">{p.profit == null ? "—" : money(currency, p.profit)}</td>
+                    {showProfit && (
+                      <td className="py-2.5 text-right text-stone-600">{p.profit == null ? "—" : money(currency, p.profit)}</td>
+                    )}
                   </tr>
                 ))}
               </tbody>

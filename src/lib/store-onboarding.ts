@@ -2,6 +2,7 @@ import { db } from "@/lib/db"
 import { resend } from "@/lib/resend"
 import { DEFAULT_BRAND_COLOR } from "@/lib/store-brand"
 import { TRIAL_PACKAGES, isTrialPackage, type PlanInterval } from "@/lib/plans"
+import { featuresForPlan, normalizePlan } from "@/lib/plan-features"
 
 const RESERVED_SLUGS = ["www", "api", "app", "admin", "super-admin", "mail", "ftp", "blog", "shop", "store", "checkout"]
 const EARLY_BIRD_LIMIT = 15
@@ -158,5 +159,6 @@ export async function createStoreWithTrial(userId: string, input: NewStoreInput)
   if (endDate) {
     await sendTrialStartedEmails({ name: user.name, email: user.email }, input.planName, endDate, { needsSetup: false })
   }
-  return { store: { ...store, role: "OWNER" as const } }
+  const planName = normalizePlan(input.planName)
+  return { store: { ...store, role: "OWNER" as const, plan: planName, features: featuresForPlan(planName) } }
 }

@@ -3,10 +3,12 @@ import { notFound } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { getShareKit } from "@/lib/share-kit"
 import { ShareActions } from "./ShareActions"
+import { storeHasFeature } from "@/lib/store-plan"
+import { UpgradeCard } from "@/components/dashboard/UpgradeCard"
 
 export default async function ShareKitPage({ params }: { params: Promise<{ storeId: string; productId: string }> }) {
   const { storeId, productId } = await params
-  const kit = await getShareKit(storeId, productId)
+  const [kit, allowed] = await Promise.all([getShareKit(storeId, productId), storeHasFeature(storeId, "shareKit")])
   if (!kit) notFound()
 
   return (
@@ -21,13 +23,18 @@ export default async function ShareKitPage({ params }: { params: Promise<{ store
         </div>
       </div>
 
-      {!kit.isLive && (
-        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          This product is hidden or a draft, so the images and link won&apos;t work for customers until you publish it.
-        </p>
+      {!allowed ? (
+        <UpgradeCard storeId={storeId} feature="shareKit" />
+      ) : (
+        <>
+          {!kit.isLive && (
+            <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              This product is hidden or a draft, so the images and link won&apos;t work for customers until you publish it.
+            </p>
+          )}
+          <ShareActions kit={kit} />
+        </>
       )}
-
-      <ShareActions kit={kit} />
     </div>
   )
 }

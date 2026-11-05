@@ -170,6 +170,15 @@ export async function getSalesReport(storeId: string, from: Date, to: Date) {
 
 export type SalesReport = Awaited<ReturnType<typeof getSalesReport>>
 
+/** Profit is a Business-plan insight; lower plans see sales without it. */
+export function withoutProfit(report: SalesReport): SalesReport {
+  return {
+    ...report,
+    totals: { ...report.totals, profit: 0, margin: null, productsMissingCost: 0 },
+    topProducts: report.topProducts.map((p) => ({ ...p, profit: null })),
+  }
+}
+
 function csvCell(value: string | number | null | undefined) {
   const s = value == null ? "" : String(value)
   return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s

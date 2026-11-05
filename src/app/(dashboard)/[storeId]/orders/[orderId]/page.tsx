@@ -8,6 +8,7 @@ import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { ORDER_SOURCE_LABELS } from "@/lib/manual-order"
 import { orderPaymentReminder } from "@/lib/payment-reminder"
+import { storeHasFeature } from "@/lib/store-plan"
 
 export default async function OrderDetailsPage({
   params
@@ -46,7 +47,9 @@ export default async function OrderDetailsPage({
     where: { storeId },
     select: { mobileMoneyNumber: true, accountName: true, bankName: true, accountNumber: true },
   })
-  const reminder = orderPaymentReminder(order, store, paymentSetting)
+  const reminder = (await storeHasFeature(storeId, "paymentReminders"))
+    ? orderPaymentReminder(order, store, paymentSetting)
+    : null
 
   return (
     <div className="grid gap-6">

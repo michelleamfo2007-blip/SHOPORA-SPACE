@@ -1,4 +1,4 @@
-import { requireMobileStoreAccess } from "@/lib/mobile-auth"
+import { mobileFeatureGate, requireMobileStoreAccess } from "@/lib/mobile-auth"
 import { MANUAL_ORDER_SOURCES, createManualOrder, listSellableVariants } from "@/lib/manual-order"
 
 /** Products to pick from when recording a WhatsApp / Instagram / walk-in order. */
@@ -6,6 +6,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
   const { storeId } = await params
   const access = await requireMobileStoreAccess(req, storeId)
   if ("error" in access) return Response.json({ error: access.error }, { status: access.status })
+  const locked = await mobileFeatureGate(storeId, "manualOrders")
+  if (locked) return locked
 
   return Response.json({
     currency: access.store.currency,
@@ -18,6 +20,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ storeId
   const { storeId } = await params
   const access = await requireMobileStoreAccess(req, storeId)
   if ("error" in access) return Response.json({ error: access.error }, { status: access.status })
+  const locked = await mobileFeatureGate(storeId, "manualOrders")
+  if (locked) return locked
 
   const body = await req.json().catch(() => ({}))
   const result = await createManualOrder(storeId, {

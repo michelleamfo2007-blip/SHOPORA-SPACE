@@ -58,7 +58,7 @@ interface DashboardOverviewClientProps {
     amount: number
   }>
   setup: StoreSetup | null
-  goal: { goal: number | null; achieved: number; percent: number | null; daysLeft: number; monthLabel: string }
+  goal: { goal: number | null; achieved: number; percent: number | null; daysLeft: number; monthLabel: string } | null
 }
 
 export function DashboardOverviewClient({
@@ -124,7 +124,7 @@ export function DashboardOverviewClient({
 
       {setup && <StoreSetupCard storeId={storeId} setup={setup} />}
 
-      <GoalCard storeId={storeId} currency={currency} goal={goal} />
+      {goal && <GoalCard storeId={storeId} currency={currency} goal={goal} />}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {[

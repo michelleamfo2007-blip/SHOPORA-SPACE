@@ -3,10 +3,13 @@ import { Users } from "lucide-react"
 import { SUGGESTED_CUSTOMER_TAGS } from "@/lib/customer-notes"
 import { PAID_ORDER_STATUSES } from "@/lib/store-roles"
 import { CustomerList } from "./CustomerList"
+import { storeHasFeature } from "@/lib/store-plan"
+import { UpgradeCard } from "@/components/dashboard/UpgradeCard"
 
 export default async function CustomersPage({ params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params
-  const [store, customers] = await Promise.all([
+  const [notesEnabled, store, customers] = await Promise.all([
+    storeHasFeature(storeId, "customerNotes"),
     db.store.findUnique({ where: { id: storeId }, select: { currency: true } }),
     db.customer.findMany({
       where: { storeId },
@@ -33,8 +36,10 @@ export default async function CustomersPage({ params }: { params: Promise<{ stor
         </h2>
         <p className="mt-1 text-slate-500">The people who buy from you. Add private notes and tags like VIP or Wholesale.</p>
       </div>
+      {!notesEnabled && <UpgradeCard storeId={storeId} feature="customerNotes" compact />}
       <CustomerList
         storeId={storeId}
+        notesEnabled={notesEnabled}
         currency={store?.currency ?? "GHS"}
         suggestedTags={SUGGESTED_CUSTOMER_TAGS}
         customers={customers.map((c) => ({

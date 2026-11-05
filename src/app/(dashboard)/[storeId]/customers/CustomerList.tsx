@@ -102,11 +102,13 @@ export function CustomerList({
   currency,
   customers,
   suggestedTags,
+  notesEnabled,
 }: {
   storeId: string
   currency: string
   customers: Customer[]
   suggestedTags: string[]
+  notesEnabled: boolean
 }) {
   const router = useRouter()
   const [query, setQuery] = useState("")
@@ -163,7 +165,10 @@ export function CustomerList({
             return (
               <li key={c.id}>
                 <div className="flex items-center gap-4 px-6 py-4">
-                  <button onClick={() => setOpen(open === c.id ? null : c.id)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+                  <button
+                    onClick={() => notesEnabled && setOpen(open === c.id ? null : c.id)}
+                    className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                  >
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold uppercase text-blue-700">
                       {c.name.substring(0, 2)}
                     </span>
@@ -201,11 +206,13 @@ export function CustomerList({
                       <MessageCircle className="h-4 w-4" />
                     </a>
                   )}
-                  <button onClick={() => setOpen(open === c.id ? null : c.id)} aria-label="Notes and tags">
-                    <ChevronDown className={`h-4 w-4 text-stone-400 transition-transform ${open === c.id ? "rotate-180" : ""}`} />
-                  </button>
+                  {notesEnabled && (
+                    <button onClick={() => setOpen(open === c.id ? null : c.id)} aria-label="Notes and tags">
+                      <ChevronDown className={`h-4 w-4 text-stone-400 transition-transform ${open === c.id ? "rotate-180" : ""}`} />
+                    </button>
+                  )}
                 </div>
-                {open === c.id && (
+                {notesEnabled && open === c.id && (
                   <CustomerEditor storeId={storeId} customer={c} suggestedTags={suggestedTags} onSaved={() => router.refresh()} />
                 )}
               </li>

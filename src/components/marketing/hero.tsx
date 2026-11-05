@@ -54,25 +54,36 @@ export function Hero({ store }: { store?: FeaturedStorefront | null }) {
           transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
           className="relative mx-auto mt-16 max-w-5xl md:mt-24"
         >
-          <div className="hidden md:block md:pl-28 lg:pl-40">
+          <div className="md:pl-28 lg:pl-40">
             <BrowserStorefront store={store} />
             {store && (
               <a
                 href={`https://${store.domain}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 flex items-center justify-end gap-1 text-xs text-stone-500 hover:text-stone-900"
+                className="mt-4 hidden items-center justify-end gap-1 text-xs text-stone-500 hover:text-stone-900 md:flex"
               >
                 Live on Shopora · {store.domain}
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </a>
             )}
           </div>
-          <div className="flex justify-center md:absolute md:-bottom-12 md:left-4 md:block xl:-left-4">
-            <Phone className="rotate-0 md:-rotate-[4deg]">
+          <div className="relative z-10 -mt-20 flex justify-center md:absolute md:-bottom-12 md:left-4 md:mt-0 md:block xl:-left-4">
+            <Phone className="-rotate-[3deg] md:-rotate-[4deg]">
               <SellerHomeScreen storeName={store?.name} />
             </Phone>
           </div>
+          {store && (
+            <a
+              href={`https://${store.domain}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 flex items-center justify-center gap-1 text-xs text-stone-500 md:hidden"
+            >
+              Live on Shopora · {store.domain}
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </a>
+          )}
         </motion.div>
       </div>
     </section>

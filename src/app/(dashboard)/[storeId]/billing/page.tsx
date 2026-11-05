@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BillingClient } from "./BillingClient"
+import { ChangePlan } from "./ChangePlan"
 
 export default async function BillingPage({ params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params
@@ -118,6 +119,18 @@ export default async function BillingPage({ params }: { params: Promise<{ storeI
           </Card>
         )}
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Change plan</CardTitle>
+          <CardDescription>
+            Switch any time — new tools turn on straight away, and your next payment is at the new price.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ChangePlan storeId={store.id} currentPlan={plan.name} interval={plan.interval} />
+        </CardContent>
+      </Card>
 
       {(!latestPayment || latestPayment.status !== "PENDING") && (
         <Card>

@@ -2,37 +2,15 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { TRIAL_PACKAGES } from "@/lib/plans";
 
-const everyPlan = [
-  "0% commission on sales",
-  "MoMo & bank payments to you",
-  "Seller app for iOS & Android",
-  "Shopora Delivery in Accra",
-];
-
-const plans = [
-  {
-    name: "Starter",
-    price: "100",
-    description: "For a new shop getting its first products online.",
-    features: ["Up to 25 products", ...everyPlan, "yourstore.shopora.space", "Standard support"],
-    highlighted: false,
-  },
-  {
-    name: "Professional",
-    price: "200",
-    description: "For a store already taking orders and ready to grow.",
-    features: ["Up to 50 products", ...everyPlan, "Your own domain", "Advanced analytics", "Priority support"],
-    highlighted: true,
-  },
-  {
-    name: "Business",
-    price: "300",
-    description: "For a high-volume shop that wants a dedicated contact.",
-    features: ["Unlimited products", ...everyPlan, "Your own domain", "Dedicated account manager", "Custom integrations"],
-    highlighted: false,
-  },
-];
+const plans = TRIAL_PACKAGES.map((p) => ({
+  name: p.name,
+  price: String(p.priceMonthly),
+  description: p.description,
+  features: p.name === "Starter" ? ["0% commission on sales", ...p.features] : [...p.features],
+  highlighted: p.name === "Professional",
+}));
 
 export function Pricing() {
   return (
