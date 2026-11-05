@@ -9,7 +9,7 @@ const features = [
   },
   {
     title: "A store that feels like your brand",
-    body: "Your logo, cover, colour, announcement bar and story — on yourstore.shopora.space or your own domain.",
+    body: "Your logo, cover, colour, announcement bar and story — all on your own address, yourstore.shopora.space.",
   },
   {
     title: "Product pages that sell",

@@ -87,7 +87,7 @@ export function OnboardingClient() {
                 <span className="text-sm text-slate-500 font-medium">.shopora.space</span>
               </div>
               <p className="text-xs text-slate-500">
-                This will be your initial store address. You can connect a custom domain later.
+                This is your store&apos;s web address. Share it anywhere your customers are.
               </p>
             </div>
 

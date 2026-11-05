@@ -27,7 +27,6 @@ export const TRIAL_PACKAGES = [
       "Share kit for WhatsApp Status & Instagram",
       "Customer notes & tags",
       "Sales reports & monthly goal",
-      "Your own domain",
       "Priority support",
     ],
   },

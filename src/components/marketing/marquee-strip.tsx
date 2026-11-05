@@ -6,7 +6,7 @@ const items = [
   "0% commission",
   "Delivery across Accra",
   "iOS & Android app",
-  "Your own domain",
+  "Record WhatsApp orders",
 ]
 
 export function MarqueeStrip() {
