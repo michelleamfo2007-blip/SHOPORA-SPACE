@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { RIDER_TERMS } from "@/lib/rider-terms"
+import { DropdownSection } from "@/components/DropdownSection"
 
 export default function RiderTermsPage() {
   return (
@@ -20,12 +21,11 @@ export default function RiderTermsPage() {
           </p>
         </div>
 
-        <div className="mt-10 space-y-10">
+        <div className="mt-10 divide-y divide-stone-200 border-y border-stone-200">
           {RIDER_TERMS.sections.map((section) => (
-            <section key={section.heading}>
-              <h2 className="font-display text-2xl">{section.heading}</h2>
+            <DropdownSection key={section.heading} title={section.heading}>
               {section.paragraphs?.map((p) => (
-                <p key={p.slice(0, 48)} className="mt-3 text-sm leading-relaxed text-stone-700">
+                <p key={p.slice(0, 48)} className="mt-3 text-sm leading-relaxed text-stone-700 first:mt-0">
                   {p}
                 </p>
               ))}
@@ -46,7 +46,7 @@ export default function RiderTermsPage() {
               {"note" in section && section.note && (
                 <p className="mt-3 text-sm leading-relaxed text-stone-700">{section.note}</p>
               )}
-            </section>
+            </DropdownSection>
           ))}
         </div>
 

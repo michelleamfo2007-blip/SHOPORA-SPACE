@@ -23,6 +23,14 @@ export default async function ShippingPage({ params }: { params: Promise<{ domai
       <PolicySection title="Delivery fee">
         The delivery fee is not included in your order total. You pay the rider when your order arrives.
       </PolicySection>
+      {store.shoporaDeliveryEnabled && (
+        <PolicySection title="Shopora Delivery in Accra">
+          {`Orders in Accra can be delivered by a Shopora rider. Drop a pin at checkout so the rider finds you. When the rider picks up your order we email you a 6-digit code — give it to them when your order arrives.`}
+        </PolicySection>
+      )}
+      <PolicySection title="Tracking my order">
+        {`You'll get an email when ${store.name} confirms your payment and again when your order is on its way. For updates, message the store with your order reference.`}
+      </PolicySection>
     </PolicyPage>
   )
 }
