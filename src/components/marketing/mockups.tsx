@@ -19,7 +19,7 @@ function Label({ children }: { children: ReactNode }) {
   return <p className="text-[7.5px] uppercase tracking-[0.2em] text-stone-500">{children}</p>
 }
 
-export function SellerHomeScreen({ withAlert = true }: { withAlert?: boolean }) {
+export function SellerHomeScreen({ withAlert = true, storeName }: { withAlert?: boolean; storeName?: string }) {
   return (
     <>
       {withAlert && (
@@ -29,8 +29,8 @@ export function SellerHomeScreen({ withAlert = true }: { withAlert?: boolean }) 
           <p className="text-[9px] text-stone-300">Ama placed ORD-482193. Verify the payment.</p>
         </div>
       )}
-      <Label>Atelier Accra</Label>
-      <p className="mt-0.5 font-display text-[22px] leading-none">Hi Akosua</p>
+      <Label>{storeName ?? "Atelier Accra"}</Label>
+      <p className="mt-0.5 font-display text-[22px] leading-none">{storeName ? "Welcome back" : "Hi Akosua"}</p>
       <div className="mt-3 grid grid-cols-2 gap-1.5">
         {[
           ["Revenue", "GHS 8,420"],
@@ -174,46 +174,80 @@ const products = [
   { name: "Beaded bracelet", price: "GHS 60", g: "from-[#e5c2ae] via-[#bf8c73] to-[#7f4f3b]" },
 ]
 
+/** A live Shopora store, shown inside the landing page browser mockup. */
+export type FeaturedStorefront = {
+  name: string
+  domain: string
+  announcement: string
+  headline: string
+  subtext: string | null
+  heroImage: string
+  products: { name: string; price: string; image: string }[]
+}
+
 /** A seller's storefront as customers see it, in a browser window. */
-export function BrowserStorefront() {
+export function BrowserStorefront({ store }: { store?: FeaturedStorefront | null }) {
+  const items = store
+    ? store.products.map((p) => ({ ...p, g: "from-stone-200 to-stone-300" }))
+    : products.map((p) => ({ ...p, image: null }))
+
   return (
     <div className="overflow-hidden rounded-2xl bg-white shadow-[0_60px_120px_-50px_rgba(18,16,14,0.5)] ring-1 ring-stone-900/10">
       <div className="flex items-center gap-2 border-b border-stone-100 bg-[#f4f1ec] px-4 py-2.5">
         <span className="h-2.5 w-2.5 rounded-full bg-stone-300" />
         <span className="h-2.5 w-2.5 rounded-full bg-stone-300" />
         <span className="h-2.5 w-2.5 rounded-full bg-stone-300" />
-        <span className="ml-3 flex-1 rounded-md bg-white px-3 py-1 text-[11px] text-stone-500">
-          atelier.shopora.space
+        <span className="ml-3 flex-1 truncate rounded-md bg-white px-3 py-1 text-[11px] text-stone-500">
+          {store?.domain ?? "atelier.shopora.space"}
         </span>
       </div>
       <div className="bg-[#faf8f5]">
-        <div className="bg-[#1c1917] py-1.5 text-center text-[8px] uppercase tracking-[0.25em] text-white">
-          Free Accra delivery this weekend
+        <div className="truncate bg-[#1c1917] px-6 py-1.5 text-center text-[8px] uppercase tracking-[0.25em] text-white">
+          {store?.announcement ?? "Free Accra delivery this weekend"}
         </div>
-        <div className="flex items-center justify-between px-6 py-3">
+        <div className="flex items-center justify-between gap-4 px-6 py-3">
           <span className="text-[8px] uppercase tracking-[0.2em] text-stone-500">Shop · Collections</span>
-          <span className="font-display text-xl">Atelier</span>
+          <span className="truncate font-display text-xl">{store?.name ?? "Atelier"}</span>
           <span className="text-[8px] uppercase tracking-[0.2em] text-stone-500">Bag (2)</span>
         </div>
         <div className="grid grid-cols-[1.1fr_1fr] items-center gap-5 px-6 pb-5">
-          <div>
+          <div className="min-w-0">
             <p className="text-[8px] uppercase tracking-[0.25em] text-stone-500">New season</p>
-            <p className="mt-1.5 font-display text-[34px] leading-[0.95]">
-              Made in Accra,
-              <br />
-              <span className="italic">worn everywhere.</span>
-            </p>
+            {store ? (
+              <>
+                <p className="mt-1.5 line-clamp-3 font-display text-[34px] leading-[0.95]">{store.headline}</p>
+                {store.subtext && (
+                  <p className="mt-2 line-clamp-2 text-[10px] leading-relaxed text-stone-500">{store.subtext}</p>
+                )}
+              </>
+            ) : (
+              <p className="mt-1.5 font-display text-[34px] leading-[0.95]">
+                Made in Accra,
+                <br />
+                <span className="italic">worn everywhere.</span>
+              </p>
+            )}
             <span className="mt-3 inline-block rounded-full bg-[#1c1917] px-4 py-1.5 text-[9px] text-white">
               Shop the collection
             </span>
           </div>
-          <div className="aspect-[4/5] rounded-sm bg-gradient-to-br from-[#d8c3a3] via-[#b08a5f] to-[#5e4329]" />
+          {store ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={store.heroImage} alt="" className="aspect-[4/5] w-full rounded-sm bg-stone-200 object-cover" />
+          ) : (
+            <div className="aspect-[4/5] rounded-sm bg-gradient-to-br from-[#d8c3a3] via-[#b08a5f] to-[#5e4329]" />
+          )}
         </div>
         <div className="grid grid-cols-3 gap-3 border-t border-stone-200/70 px-6 py-4">
-          {products.map((p) => (
-            <div key={p.name}>
-              <div className={`aspect-[3/4] rounded-sm bg-gradient-to-br ${p.g}`} />
-              <p className="mt-1.5 text-[9px] text-stone-800">{p.name}</p>
+          {items.map((p) => (
+            <div key={p.name} className="min-w-0">
+              {p.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={p.image} alt="" className="aspect-[3/4] w-full rounded-sm bg-stone-200 object-cover" />
+              ) : (
+                <div className={`aspect-[3/4] rounded-sm bg-gradient-to-br ${p.g}`} />
+              )}
+              <p className="mt-1.5 truncate text-[9px] text-stone-800">{p.name}</p>
               <p className="text-[9px] text-stone-500">{p.price}</p>
             </div>
           ))}

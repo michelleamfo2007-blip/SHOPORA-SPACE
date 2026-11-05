@@ -7,15 +7,20 @@ import { Payments } from "@/components/marketing/payments";
 import { Pricing } from "@/components/marketing/pricing";
 import { Footer } from "@/components/marketing/footer";
 import { PlatformAnalyticsTracker } from "@/components/marketing/PlatformAnalyticsTracker";
+import { getFeaturedStorefront } from "@/lib/featured-storefront";
 
-export default function Home() {
+export const revalidate = 300;
+
+export default async function Home() {
+  const featuredStore = await getFeaturedStorefront();
+
   return (
     <div className="min-h-screen bg-[#f6f2ea] text-[#12100e] lining-nums selection:bg-[#12100e] selection:text-white">
       <PlatformAnalyticsTracker />
       <Navbar />
 
       <main>
-        <Hero />
+        <Hero store={featuredStore} />
         <MarqueeStrip />
         <Features />
         <AppShowcase />

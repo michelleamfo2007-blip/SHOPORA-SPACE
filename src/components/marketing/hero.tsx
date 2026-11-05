@@ -2,10 +2,15 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { BrowserStorefront, Phone, SellerHomeScreen } from "@/components/marketing/mockups";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import {
+  BrowserStorefront,
+  Phone,
+  SellerHomeScreen,
+  type FeaturedStorefront,
+} from "@/components/marketing/mockups";
 
-export function Hero() {
+export function Hero({ store }: { store?: FeaturedStorefront | null }) {
   return (
     <section className="relative overflow-hidden px-5 pb-16 pt-32 md:pb-24 md:pt-40">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_70%_20%,rgba(200,161,101,0.18),transparent_70%),radial-gradient(40%_40%_at_10%_80%,rgba(28,25,23,0.06),transparent_70%)]" />
@@ -50,11 +55,22 @@ export function Hero() {
           className="relative mx-auto mt-16 max-w-5xl md:mt-24"
         >
           <div className="hidden md:block md:pl-28 lg:pl-40">
-            <BrowserStorefront />
+            <BrowserStorefront store={store} />
+            {store && (
+              <a
+                href={`https://${store.domain}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 flex items-center justify-end gap-1 text-xs text-stone-500 hover:text-stone-900"
+              >
+                Live on Shopora · {store.domain}
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </a>
+            )}
           </div>
           <div className="flex justify-center md:absolute md:-bottom-12 md:left-4 md:block xl:-left-4">
             <Phone className="rotate-0 md:-rotate-[4deg]">
-              <SellerHomeScreen />
+              <SellerHomeScreen storeName={store?.name} />
             </Phone>
           </div>
         </motion.div>
