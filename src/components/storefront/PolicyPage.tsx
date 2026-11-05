@@ -1,3 +1,5 @@
+import { Minus, Plus } from "lucide-react"
+
 type Contact = {
   storeName: string
   whatsappNumber?: string | null
@@ -53,6 +55,20 @@ export function PolicyPage({
         </div>
       )}
     </div>
+  )
+}
+
+/** A question that opens to show its answer. */
+export function FaqItem({ question, children }: { question: string; children: React.ReactNode }) {
+  return (
+    <details className="group">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 [&::-webkit-details-marker]:hidden">
+        <h2 className="font-display text-2xl leading-snug">{question}</h2>
+        <Plus aria-hidden className="h-5 w-5 shrink-0 text-stone-500 group-open:hidden" strokeWidth={1.25} />
+        <Minus aria-hidden className="hidden h-5 w-5 shrink-0 text-stone-500 group-open:block" strokeWidth={1.25} />
+      </summary>
+      <div className="whitespace-pre-line pb-7 pr-10 leading-relaxed text-stone-600">{children}</div>
+    </details>
   )
 }
 
