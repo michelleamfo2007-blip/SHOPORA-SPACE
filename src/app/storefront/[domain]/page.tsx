@@ -3,7 +3,7 @@ import Link from "next/link"
 import { ArrowRight, MessageCircle, Smartphone, Truck, BadgeCheck } from "lucide-react"
 import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
-import { getStorefrontBasePath, whatsappLink } from "@/lib/storefront"
+import { formatMoney, getStorefrontBasePath, whatsappLink } from "@/lib/storefront"
 import { ProductCard } from "@/components/storefront/ProductCard"
 
 export default async function StorefrontHomePage({ params }: { params: Promise<{ domain: string }> }) {
@@ -51,11 +51,21 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
     store.whatsappNumber ? "Order easily on WhatsApp" : "Every order personally confirmed",
   ]
   const headline = store.heroHeadline || store.name
-  const subtext = store.heroSubtext || store.description
+  const subtext =
+    store.heroSubtext ||
+    store.description ||
+    (store.shoporaDeliveryEnabled
+      ? "Shop online, pay with Mobile Money or bank transfer, and get it delivered across Accra."
+      : "Shop online and pay with Mobile Money or bank transfer.")
   const whatsappHref = store.whatsappNumber ? whatsappLink(store.whatsappNumber, `Hi ${store.name}, I'd like to place an order.`) : null
-  const mosaicImages = products
-    .map((p) => p.variants[0]?.imageUrl || p.images[0])
-    .filter((img): img is string => !!img)
+  const coverTiles = products
+    .map((p) => ({
+      id: p.id,
+      name: p.name,
+      image: p.variants[0]?.imageUrl || p.images[0],
+      price: p.variants[0]?.price ?? p.price,
+    }))
+    .filter((p): p is typeof p & { image: string } => !!p.image)
     .slice(0, 3)
 
   const actions = (
@@ -95,25 +105,47 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
             <img src={store.heroImage} alt={headline} className="mx-auto h-auto max-h-[40vh] w-auto max-w-full object-contain md:max-h-[75vh] md:w-full" />
           </div>
         </section>
+      ) : coverTiles.length > 0 ? (
+        <section className="mx-auto grid max-w-7xl items-center gap-8 px-5 pb-4 pt-6 md:grid-cols-[1fr_1.2fr] md:gap-14 md:px-8 md:py-16">
+          <div className="order-2 md:order-1">
+            <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">{store.heroHeadline ? store.name : "Welcome to"}</p>
+            <h1 className="mt-3 font-display text-5xl leading-[0.95] tracking-tight md:mt-4 md:text-7xl lg:text-8xl">{headline}</h1>
+            <p className="mt-4 max-w-md text-base leading-relaxed text-stone-600 md:mt-6">{subtext}</p>
+            <div className="mt-6 md:mt-10">{actions}</div>
+          </div>
+          <div
+            className={`order-1 grid h-[78vw] max-h-[660px] gap-2.5 md:order-2 md:h-[min(72vh,660px)] md:gap-4 ${
+              coverTiles.length === 3 ? "grid-cols-[1.4fr_1fr] grid-rows-2" : coverTiles.length === 2 ? "grid-cols-2" : "grid-cols-1"
+            }`}
+          >
+            {coverTiles.map((tile, i) => (
+              <Link
+                key={tile.id}
+                href={`${basePath}/product/${tile.id}`}
+                className={`group relative overflow-hidden bg-[#efebe4] ${coverTiles.length === 3 && i === 0 ? "row-span-2" : ""}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={tile.image}
+                  alt={tile.name}
+                  className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
+                />
+                <span className="absolute bottom-2 left-2 right-2 bg-[#faf8f5]/90 px-2.5 py-1.5 text-[10px] leading-snug text-stone-900 md:bottom-3 md:left-3 md:right-3 md:px-3 md:py-2 md:text-xs">
+                  <span className="block truncate">{tile.name}</span>
+                  {tile.price != null && <span className="block text-stone-500">{formatMoney(store.currency, tile.price)}</span>}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
       ) : (
         <section className="mx-auto max-w-7xl px-5 pt-10 md:px-8 md:pt-24">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Welcome to</p>
             <h1 className="mt-4 font-display text-5xl leading-[0.95] tracking-tight md:mt-5 md:text-8xl">{headline}</h1>
-            {subtext && <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-stone-600 md:mt-6">{subtext}</p>}
+            <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-stone-600 md:mt-6">{subtext}</p>
             <div className="mt-8 flex justify-center md:mt-10">{actions}</div>
           </div>
-
-          {mosaicImages.length === 3 && (
-            <div className="mt-10 grid grid-cols-3 items-end gap-3 md:mt-20 md:gap-6">
-              {mosaicImages.map((img, i) => (
-                <div key={img} className={`overflow-hidden bg-[#efebe4] ${i === 1 ? "aspect-[3/4]" : "aspect-[4/5]"}`}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img} alt="" className="h-full w-full object-cover" />
-                </div>
-              ))}
-            </div>
-          )}
         </section>
       )}
 

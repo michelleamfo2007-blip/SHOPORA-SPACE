@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { resend } from "@/lib/resend"
 import { submitSubscriptionPayment } from "@/lib/subscription-payment"
+import { DEFAULT_BRAND_COLOR } from "@/lib/store-brand"
 
 export async function startTrialAction(planName: string, interval: string = "month") {
   const session = await getServerSession(authOptions)
@@ -68,6 +69,7 @@ export async function startTrialAction(planName: string, interval: string = "mon
       slug: tempSlug,
       country: "GH",
       currency: "GHS",
+      primaryColor: DEFAULT_BRAND_COLOR,
       members: {
         create: {
           userId: userId,

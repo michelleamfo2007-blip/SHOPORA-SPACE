@@ -7,6 +7,7 @@ import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { requireStoreAccess } from "@/lib/store-access"
 import { storeSettingsFromFormData, updateStoreSettings } from "@/lib/store-settings"
+import { DEFAULT_BRAND_COLOR } from "@/lib/store-brand"
 
 export async function createStoreAction(formData: FormData) {
   const session = await getServerSession(authOptions)
@@ -45,6 +46,7 @@ export async function createStoreAction(formData: FormData) {
       slug,
       country,
       currency,
+      primaryColor: DEFAULT_BRAND_COLOR,
       members: {
         create: {
           userId: session.user.id,

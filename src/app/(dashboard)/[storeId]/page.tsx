@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
+import { getStoreSetup } from "@/lib/store-setup"
 import { DashboardOverviewClient } from "./DashboardOverviewClient"
 
 export default async function DashboardOverview({ params }: { params: Promise<{ storeId: string }> }) {
@@ -173,6 +174,7 @@ export default async function DashboardOverview({ params }: { params: Promise<{ 
       lowStockItems={lowStockItems}
       bestSellers={bestSellers}
       chartData={chartData}
+      setup={await getStoreSetup(storeId)}
     />
   )
 }

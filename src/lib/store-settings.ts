@@ -1,4 +1,5 @@
 import { db } from "@/lib/db"
+import { DEFAULT_BRAND_COLOR } from "@/lib/store-brand"
 
 export const STORE_SETTING_FIELDS = [
   "name",
@@ -39,7 +40,7 @@ export async function updateStoreSettings(storeId: string, input: StoreSettingsI
 
   if ("name" in data && !data.name) delete data.name
   if ("currency" in data && (!data.currency || !CURRENCIES.includes(data.currency))) delete data.currency
-  if ("primaryColor" in data && !data.primaryColor) data.primaryColor = "#2563eb"
+  if ("primaryColor" in data && !/^#[0-9a-f]{6}$/i.test(data.primaryColor ?? "")) data.primaryColor = DEFAULT_BRAND_COLOR
 
   await db.store.update({ where: { id: storeId }, data })
   return { success: true as const }

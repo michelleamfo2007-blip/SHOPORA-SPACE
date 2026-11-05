@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { updateStoreBrandingAction } from "@/server/actions/store"
 import { MediaUploader } from "@/components/dashboard/MediaUploader"
+import { BRAND_COLORS, getStoreAccent } from "@/lib/store-brand"
 
 export function SettingsForm({ store }: { store: any }) {
   const router = useRouter()
@@ -20,7 +21,11 @@ export function SettingsForm({ store }: { store: any }) {
   
   const [logoUrl, setLogoUrl] = useState(store.logoUrl || "")
   const [heroImageUrl, setHeroImageUrl] = useState(store.heroImage || "")
-  const [primaryColor, setPrimaryColor] = useState(store.primaryColor || "#000000")
+  const savedColor = getStoreAccent(store.primaryColor)
+  const [primaryColor, setPrimaryColor] = useState(savedColor)
+  const colorChoices: readonly { name: string; hex: string }[] = BRAND_COLORS.some((c) => c.hex.toLowerCase() === savedColor.toLowerCase())
+    ? BRAND_COLORS
+    : [...BRAND_COLORS, { name: "Current", hex: savedColor }]
   
   const [instagramHandle, setInstagramHandle] = useState(store.instagramHandle || "")
   const [whatsappNumber, setWhatsappNumber] = useState(store.whatsappNumber || "")
@@ -110,21 +115,28 @@ export function SettingsForm({ store }: { store: any }) {
         <h3 className="text-lg font-medium border-b pb-2">Branding</h3>
         
         <div className="grid gap-2">
-          <Label>Brand Color</Label>
-          <div className="flex gap-4 items-center">
-            <Input 
-              type="color" 
-              value={primaryColor} 
-              onChange={e => setPrimaryColor(e.target.value)} 
-              className="w-16 h-10 p-1 cursor-pointer" 
-            />
-            <Input 
-              value={primaryColor} 
-              onChange={e => setPrimaryColor(e.target.value)} 
-              placeholder="#000000"
-              className="w-32" 
-            />
+          <Label>Brand colour</Label>
+          <div className="flex flex-wrap gap-3">
+            {colorChoices.map((c) => {
+              const selected = c.hex.toLowerCase() === primaryColor.toLowerCase()
+              return (
+                <button
+                  key={c.hex}
+                  type="button"
+                  onClick={() => setPrimaryColor(c.hex)}
+                  aria-pressed={selected}
+                  className="flex flex-col items-center gap-1.5"
+                >
+                  <span
+                    className={`h-10 w-10 rounded-full ring-offset-2 transition ${selected ? "ring-2 ring-stone-900" : "ring-1 ring-stone-200 hover:ring-stone-400"}`}
+                    style={{ backgroundColor: c.hex }}
+                  />
+                  <span className={`text-[11px] ${selected ? "text-stone-900" : "text-stone-500"}`}>{c.name}</span>
+                </button>
+              )
+            })}
           </div>
+          <p className="text-xs text-stone-500">Used for buttons, the announcement bar and stars on your store.</p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">

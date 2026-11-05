@@ -11,6 +11,8 @@ import {
   AlertTriangle, 
   Eye
 } from "lucide-react"
+import { StoreSetupCard } from "@/components/dashboard/StoreSetupCard"
+import type { StoreSetup } from "@/lib/store-setup"
 
 interface DashboardOverviewClientProps {
   storeId: string
@@ -54,6 +56,7 @@ interface DashboardOverviewClientProps {
     label: string
     amount: number
   }>
+  setup: StoreSetup | null
 }
 
 export function DashboardOverviewClient({
@@ -66,7 +69,8 @@ export function DashboardOverviewClient({
   recentOrders,
   lowStockItems,
   bestSellers,
-  chartData
+  chartData,
+  setup,
 }: DashboardOverviewClientProps) {
   const router = useRouter()
 
@@ -114,6 +118,8 @@ export function DashboardOverviewClient({
           {storeName}
         </p>
       </div>
+
+      {setup && <StoreSetupCard storeId={storeId} setup={setup} />}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {[

@@ -1,5 +1,6 @@
 import { db } from "@/lib/db"
 import { requireMobileStoreAccess } from "@/lib/mobile-auth"
+import { getStoreSetup } from "@/lib/store-setup"
 
 /** Same numbers as the web dashboard Overview page. */
 export async function GET(req: Request, { params }: { params: Promise<{ storeId: string }> }) {
@@ -16,7 +17,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
     })
     .reverse()
 
-  const [revenue, totalOrders, totalProducts, lowStockCount, analytics, statuses, recent, lowStock, orderItems, dailyOrders] =
+  const [revenue, totalOrders, totalProducts, lowStockCount, analytics, statuses, recent, lowStock, orderItems, dailyOrders, setup] =
     await Promise.all([
       db.order.aggregate({ where: { storeId }, _sum: { totalAmount: true } }),
       db.order.count({ where: { storeId } }),
@@ -47,6 +48,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
         where: { storeId, createdAt: { gte: last7Days[0] } },
         select: { totalAmount: true, createdAt: true },
       }),
+      getStoreSetup(storeId),
     ])
 
   const count = (...s: string[]) => statuses.filter((g) => s.includes(g.status)).reduce((n, g) => n + g._count._all, 0)
@@ -95,5 +97,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
       .sort((a, b) => b.unitsSold - a.unitsSold)
       .slice(0, 5),
     chart,
+    setup,
   })
 }
