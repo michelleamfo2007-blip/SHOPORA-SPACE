@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/marketing/navbar";
 import { Hero } from "@/components/marketing/hero";
+import { MarqueeStrip } from "@/components/marketing/marquee-strip";
 import { Features } from "@/components/marketing/features";
 import { AppShowcase } from "@/components/marketing/app-showcase";
 import { Payments } from "@/components/marketing/payments";
@@ -9,12 +10,13 @@ import { PlatformAnalyticsTracker } from "@/components/marketing/PlatformAnalyti
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-950 selection:bg-stone-950 selection:text-white">
+    <div className="min-h-screen bg-[#f6f2ea] text-[#12100e] lining-nums selection:bg-[#12100e] selection:text-white">
       <PlatformAnalyticsTracker />
       <Navbar />
 
       <main>
         <Hero />
+        <MarqueeStrip />
         <Features />
         <AppShowcase />
         <Payments />

@@ -1,96 +1,60 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Bell, Bike, Boxes, Palette, Shirt, Wallet } from "lucide-react";
 
 const features = [
   {
-    title: "Paid straight to your MoMo or bank",
-    description:
-      "Customers pay you directly by Mobile Money or bank transfer. Shopora never sits in the middle of a sale and takes 0% of it.",
-    icon: Wallet,
-    className: "md:col-span-2 bg-stone-950 text-white",
-    iconClass: "bg-white/10 text-white",
-    bodyClass: "text-stone-300",
+    title: "Paid straight to you",
+    body: "Customers pay by Mobile Money or bank transfer into your own account. Shopora never holds your money and takes 0% of the sale.",
   },
   {
-    title: "A store that looks like your brand",
-    description:
-      "Your logo, cover, colour, announcement bar and story on yourstore.shopora.space, or your own domain.",
-    icon: Palette,
-    className: "bg-white",
-    iconClass: "bg-emerald-50 text-emerald-700",
-    bodyClass: "text-stone-600",
+    title: "A store that feels like your brand",
+    body: "Your logo, cover, colour, announcement bar and story — on yourstore.shopora.space or your own domain.",
   },
   {
     title: "Product pages that sell",
-    description:
-      "Sizes and colours, swipeable photos, reviews with star ratings, sold-out badges, and one-tap sharing to WhatsApp.",
-    icon: Shirt,
-    className: "bg-white",
-    iconClass: "bg-emerald-50 text-emerald-700",
-    bodyClass: "text-stone-600",
+    body: "Sizes and colours, swipeable photos, star reviews, sold-out states and one-tap sharing to WhatsApp and Instagram.",
   },
   {
-    title: "Shopora Delivery in Accra",
-    description:
-      "Riders pick up from you and deliver to the customer’s exact GPS pin. Live delivery rates at checkout, a 6-digit code at the door, and a tracking link for the customer.",
-    icon: Bike,
-    className: "md:col-span-2 bg-white",
-    iconClass: "bg-emerald-50 text-emerald-700",
-    bodyClass: "text-stone-600",
+    title: "Delivery across Accra",
+    body: "Shopora riders collect from you and deliver to the customer’s exact GPS pin, with a live rate at checkout and a 6-digit code at the door.",
   },
   {
-    title: "Orders that update themselves",
-    description:
-      "Lock-screen alerts for new orders, plus confirmation, shipping and delivery emails to your customers, sent for you.",
-    icon: Bell,
-    className: "bg-white",
-    iconClass: "bg-emerald-50 text-emerald-700",
-    bodyClass: "text-stone-600",
+    title: "Orders that look after themselves",
+    body: "Lock-screen alerts for every order, and confirmation, shipping and delivery emails sent to customers for you.",
   },
   {
     title: "Stock you can trust",
-    description:
-      "Customers can’t order more than you have. Cancelled orders go back into stock, and low-stock items show on your dashboard.",
-    icon: Boxes,
-    className: "md:col-span-2 bg-white",
-    iconClass: "bg-emerald-50 text-emerald-700",
-    bodyClass: "text-stone-600",
+    body: "Nobody can buy more than you have. Cancelled orders return to stock, and low-stock items surface on your dashboard.",
   },
 ];
 
 export function Features() {
   return (
-    <section id="features" className="px-5 py-20 md:py-28">
+    <section id="features" className="px-5 py-24 md:py-36">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-12 max-w-2xl">
-          <p className="text-sm font-medium text-emerald-700">The product</p>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-stone-950 md:text-4xl">
-            A shop, a back office and delivery, without a cut of the sale.
+        <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] md:items-end">
+          <p className="text-[11px] uppercase tracking-[0.32em] text-stone-500">01 — The platform</p>
+          <h2 className="font-display text-4xl leading-[1.02] tracking-[-0.01em] text-[#12100e] md:text-6xl">
+            Everything a modern Ghanaian shop needs. <span className="italic text-stone-500">Nothing it doesn’t.</span>
           </h2>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
-            return (
-              <motion.article
-                key={feature.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.06 }}
-                className={`rounded-3xl border border-stone-200 p-7 ${feature.className}`}
-              >
-                <div className={`mb-8 flex h-11 w-11 items-center justify-center rounded-2xl ${feature.iconClass}`}>
-                  <Icon className="h-5 w-5" />
-                </div>
-                <h3 className="text-xl font-semibold tracking-tight">{feature.title}</h3>
-                <p className={`mt-2 max-w-md text-sm leading-relaxed ${feature.bodyClass}`}>{feature.description}</p>
-              </motion.article>
-            );
-          })}
+        <div className="mt-16 grid border-t border-stone-900/10 md:mt-24 md:grid-cols-3">
+          {features.map((feature, index) => (
+            <motion.article
+              key={feature.title}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ delay: (index % 3) * 0.08, duration: 0.5 }}
+              className="border-b border-stone-900/10 py-10 md:px-8 md:[&:nth-child(3n+1)]:pl-0 md:[&:nth-child(3n)]:pr-0 md:[&:not(:nth-child(3n))]:border-r"
+            >
+              <p className="font-display text-lg italic text-[#8a6a3d]">{String(index + 1).padStart(2, "0")}</p>
+              <h3 className="mt-6 font-display text-[1.9rem] leading-tight text-[#12100e]">{feature.title}</h3>
+              <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-stone-600">{feature.body}</p>
+            </motion.article>
+          ))}
         </div>
       </div>
     </section>

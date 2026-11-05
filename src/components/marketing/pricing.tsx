@@ -1,13 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
 import Link from "next/link";
 
 const everyPlan = [
-  "0% platform fee on sales",
-  "Customers pay you by MoMo or bank",
-  "Seller app for your phone",
+  "0% commission on sales",
+  "MoMo & bank payments to you",
+  "Seller app for iOS & Android",
   "Shopora Delivery in Accra",
 ];
 
@@ -15,111 +14,86 @@ const plans = [
   {
     name: "Starter",
     price: "100",
-    currency: "GHS",
-    period: "/mo",
     description: "For a new shop getting its first products online.",
-    features: ["Up to 25 products", ...everyPlan, "Free .shopora.space address", "Standard support"],
+    features: ["Up to 25 products", ...everyPlan, "yourstore.shopora.space", "Standard support"],
     highlighted: false,
-    cta: "Start free trial",
-    href: "/signup",
   },
   {
     name: "Professional",
     price: "200",
-    currency: "GHS",
-    period: "/mo",
-    description: "For a store that is already taking orders and wants room to grow.",
-    features: [
-      "Up to 50 products",
-      ...everyPlan,
-      "Free .shopora.space address",
-      "Your own domain",
-      "Advanced analytics",
-      "Priority support",
-    ],
+    description: "For a store already taking orders and ready to grow.",
+    features: ["Up to 50 products", ...everyPlan, "Your own domain", "Advanced analytics", "Priority support"],
     highlighted: true,
-    cta: "Start free trial",
-    href: "/signup",
   },
   {
     name: "Business",
     price: "300",
-    currency: "GHS",
-    period: "/mo",
-    description: "For a higher-volume shop that wants a person on the account.",
-    features: [
-      "Unlimited products",
-      ...everyPlan,
-      "Your own domain",
-      "Dedicated account manager",
-      "Custom integrations",
-    ],
+    description: "For a high-volume shop that wants a dedicated contact.",
+    features: ["Unlimited products", ...everyPlan, "Your own domain", "Dedicated account manager", "Custom integrations"],
     highlighted: false,
-    cta: "Start free trial",
-    href: "/signup",
   },
 ];
 
 export function Pricing() {
   return (
-    <section id="pricing" className="px-5 py-20 md:py-28">
+    <section id="pricing" className="px-5 py-24 md:py-36">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-12 max-w-2xl">
-          <p className="text-sm font-medium text-emerald-700">Pricing</p>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-stone-950 md:text-4xl">
-            One monthly price. The sale stays yours.
-          </h2>
-          <p className="mt-3 text-stone-600">
-            Every plan starts with a 1-month free trial. No share of revenue. Pay your plan by MoMo or bank transfer.
-          </p>
+        <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] md:items-end">
+          <p className="text-[11px] uppercase tracking-[0.32em] text-stone-500">04 — Pricing</p>
+          <div>
+            <h2 className="font-display text-4xl leading-[1.02] tracking-[-0.01em] text-[#12100e] md:text-6xl">
+              One monthly price. <span className="italic text-stone-500">The sale stays yours.</span>
+            </h2>
+            <p className="mt-5 max-w-lg text-[15px] text-stone-600">
+              Every plan starts with a free month. No share of revenue, ever. Pay your plan by MoMo or bank transfer.
+            </p>
+          </div>
         </div>
 
-        <div className="grid items-stretch gap-4 md:grid-cols-3">
+        <div className="mt-16 grid gap-5 md:mt-20 md:grid-cols-3">
           {plans.map((plan, index) => (
             <motion.article
               key={plan.name}
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.06 }}
-              className={`flex flex-col rounded-3xl p-7 ${
+              transition={{ delay: index * 0.08, duration: 0.5 }}
+              className={`flex flex-col rounded-[1.75rem] p-8 ${
                 plan.highlighted
-                  ? "bg-stone-950 text-white shadow-[0_24px_60px_-36px_rgba(28,25,23,0.8)]"
-                  : "border border-stone-200 bg-white text-stone-950"
+                  ? "bg-[#12100e] text-white shadow-[0_40px_90px_-45px_rgba(18,16,14,0.9)]"
+                  : "bg-white text-stone-950 ring-1 ring-stone-900/10"
               }`}
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">{plan.name}</h3>
+                <h3 className="font-display text-3xl">{plan.name}</h3>
                 {plan.highlighted && (
-                  <span className="rounded-full bg-emerald-400/15 px-2.5 py-1 text-[11px] font-medium text-emerald-300">
-                    Recommended
+                  <span className="rounded-full border border-[#c8a165]/40 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[#c8a165]">
+                    Most chosen
                   </span>
                 )}
               </div>
-              <p className={`mt-2 min-h-12 text-sm ${plan.highlighted ? "text-stone-300" : "text-stone-500"}`}>
+              <p className={`mt-2 text-sm md:min-h-16 ${plan.highlighted ? "text-stone-400" : "text-stone-500"}`}>
                 {plan.description}
               </p>
-              <p className="mt-6">
-                <span className="text-4xl font-semibold tracking-tight">{plan.currency} {plan.price}</span>
-                <span className={plan.highlighted ? "text-stone-400" : "text-stone-500"}>{plan.period}</span>
+              <p className="mt-8 flex items-baseline gap-2">
+                <span className={`text-sm ${plan.highlighted ? "text-stone-400" : "text-stone-500"}`}>GHS</span>
+                <span className="font-display text-6xl leading-none">{plan.price}</span>
+                <span className={`text-sm ${plan.highlighted ? "text-stone-400" : "text-stone-500"}`}>/ month</span>
               </p>
-              <ul className="mt-6 flex-1 space-y-3">
+              <ul className={`mt-8 flex-1 divide-y border-t ${plan.highlighted ? "divide-white/10 border-white/10" : "divide-stone-900/10 border-stone-900/10"}`}>
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2.5 text-sm">
-                    <Check className={`mt-0.5 h-4 w-4 shrink-0 ${plan.highlighted ? "text-emerald-300" : "text-emerald-700"}`} />
-                    <span>{feature}</span>
+                  <li key={feature} className={`py-2.5 text-sm ${plan.highlighted ? "text-stone-300" : "text-stone-700"}`}>
+                    {feature}
                   </li>
                 ))}
               </ul>
               <Link
-                href={plan.href}
-                className={`mt-8 block rounded-full py-3 text-center text-sm font-medium transition-colors ${
-                  plan.highlighted
-                    ? "bg-white text-stone-950 hover:bg-stone-100"
-                    : "bg-stone-950 text-white hover:bg-stone-800"
+                href="/signup"
+                className={`mt-8 block rounded-full py-3.5 text-center text-sm font-medium transition-colors ${
+                  plan.highlighted ? "bg-white text-stone-950 hover:bg-stone-100" : "bg-[#12100e] text-white hover:bg-stone-800"
                 }`}
               >
-                {plan.cta}
+                Start free month
               </Link>
             </motion.article>
           ))}

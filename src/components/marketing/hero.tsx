@@ -3,91 +3,59 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-
-const previewOrders = [
-  { name: "Silk set · M", status: "Paid · MoMo", amount: "GHS 420" },
-  { name: "Linen shirt · L", status: "Verify", amount: "GHS 180" },
-  { name: "Canvas tote", status: "With rider", amount: "GHS 95" },
-];
+import { BrowserStorefront, Phone, SellerHomeScreen } from "@/components/marketing/mockups";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden px-5 pb-20 pt-28 md:pb-28 md:pt-36">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.12),transparent_55%)]" />
+    <section className="relative overflow-hidden px-5 pb-16 pt-32 md:pb-24 md:pt-40">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_70%_20%,rgba(200,161,101,0.18),transparent_70%),radial-gradient(40%_40%_at_10%_80%,rgba(28,25,23,0.06),transparent_70%)]" />
 
-      <div className="mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="mx-auto max-w-6xl">
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="mx-auto max-w-3xl text-center"
         >
-          <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            0% platform fees · 1-month free trial · Now with the Shopora app
+          <p className="text-[11px] uppercase tracking-[0.32em] text-stone-500">
+            Online store · Seller app · Accra delivery
           </p>
-          <h1 className="max-w-xl text-5xl font-semibold tracking-tight text-stone-950 md:text-6xl md:leading-[1.05]">
-            Sell global.
-            <span className="block text-stone-500">Manage local.</span>
+          <h1 className="mt-6 font-display text-[3.4rem] leading-[0.92] tracking-[-0.02em] text-[#12100e] md:text-[6.2rem]">
+            Your shop,
+            <br />
+            <span className="italic text-[#8a6a3d]">beautifully</span> run.
           </h1>
-          <p className="mt-5 max-w-lg text-base leading-relaxed text-stone-600 md:text-lg">
-            Your own online store, a seller app on your phone, and Shopora Delivery in Accra. Customers pay you directly by MoMo or bank, and every cedi from the sale stays yours.
+          <p className="mx-auto mt-7 max-w-xl text-[15px] leading-relaxed text-stone-600 md:text-lg">
+            A storefront that looks like your brand, an app to run it from your phone, and riders who deliver across
+            Accra. Customers pay you directly by Mobile Money or bank — Shopora takes nothing from the sale.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/signup"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-stone-950 px-6 py-3.5 text-sm font-medium text-white transition-colors hover:bg-stone-800"
+              className="inline-flex h-12 items-center gap-2 rounded-full bg-[#12100e] px-7 text-sm font-medium text-white transition-colors hover:bg-stone-800"
             >
-              Create an account <ArrowRight className="h-4 w-4" />
+              Start your free month <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link
-              href="#app"
-              className="inline-flex items-center justify-center rounded-full border border-stone-300 bg-white px-6 py-3.5 text-sm font-medium text-stone-900 transition-colors hover:bg-stone-100"
-            >
-              See the app
+            <Link href="#app" className="text-sm font-medium text-stone-700 underline decoration-stone-300 underline-offset-[6px] hover:text-stone-950">
+              See the iOS & Android app
             </Link>
           </div>
+          <p className="mt-6 text-xs text-stone-500">1-month free trial · 0% commission · Plans from GHS 100/month</p>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.08 }}
-          className="rounded-3xl border border-stone-200 bg-white p-3 shadow-[0_30px_80px_-40px_rgba(28,25,23,0.45)]"
+          transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          className="relative mx-auto mt-16 max-w-5xl md:mt-24"
         >
-          <div className="rounded-2xl bg-stone-950 p-5 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-stone-400">Your store</p>
-                <p className="mt-1 text-lg font-medium">Atelier</p>
-              </div>
-              <span className="rounded-full bg-emerald-400/15 px-2.5 py-1 text-xs font-medium text-emerald-300">Live</span>
-            </div>
-            <div className="mt-6 grid grid-cols-3 gap-3">
-              {[
-                ["Today", "GHS 695"],
-                ["Orders", "3"],
-                ["Fees", "0%"],
-              ].map(([label, value]) => (
-                <div key={label} className="rounded-xl bg-white/5 px-3 py-3">
-                  <p className="text-[11px] uppercase tracking-wide text-stone-400">{label}</p>
-                  <p className="mt-1 text-sm font-semibold">{value}</p>
-                </div>
-              ))}
-            </div>
+          <div className="hidden md:block md:pl-28 lg:pl-40">
+            <BrowserStorefront />
           </div>
-          <div className="px-2 pb-2 pt-4">
-            <p className="px-2 pb-2 text-xs font-medium uppercase tracking-wide text-stone-400">Recent orders</p>
-            <ul className="divide-y divide-stone-100">
-              {previewOrders.map((order) => (
-                <li key={order.name} className="flex items-center justify-between px-2 py-3 text-sm">
-                  <span className="font-medium text-stone-900">{order.name}</span>
-                  <span className="flex items-center gap-3 text-stone-500">
-                    <span>{order.status}</span>
-                    <span className="font-medium text-stone-900">{order.amount}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
+          <div className="flex justify-center md:absolute md:-bottom-12 md:left-4 md:block xl:-left-4">
+            <Phone className="rotate-0 md:-rotate-[4deg]">
+              <SellerHomeScreen />
+            </Phone>
           </div>
         </motion.div>
       </div>
