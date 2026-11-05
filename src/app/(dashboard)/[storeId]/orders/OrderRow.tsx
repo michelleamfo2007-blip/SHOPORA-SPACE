@@ -81,8 +81,26 @@ export function OrderRow({ order, store }: { order: any; store: any }) {
             Shopora Delivery
           </div>
         )}
+        {order.sourceLabel && (
+          <div className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-stone-500">
+            {order.sourceLabel} order
+          </div>
+        )}
       </td>
-      <td className="px-6 py-4 font-semibold text-slate-700">{order.customer.name}</td>
+      <td className="px-6 py-4 font-semibold text-slate-700">
+        {order.customer.name}
+        {order.reminderUrl && (
+          <a
+            href={order.reminderUrl}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="mt-1.5 flex w-fit items-center gap-1 rounded-full border border-emerald-600/30 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100"
+          >
+            Remind on WhatsApp
+          </a>
+        )}
+      </td>
       <td className="px-6 py-4">
         <span
           className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset ${
@@ -113,14 +131,14 @@ export function OrderRow({ order, store }: { order: any; store: any }) {
         {store.currency} {order.totalAmount.toFixed(2)}
       </td>
       <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-        {order.status === "PENDING_VERIFICATION" ? (
+        {order.status === "PENDING_VERIFICATION" || order.status === "PENDING" ? (
           <Button
             size="sm"
             onClick={onVerify}
             disabled={loading}
             className="border-0 bg-amber-100 font-bold text-amber-700 hover:bg-amber-200"
           >
-            {loading ? "Verifying..." : "Verify Payment"}
+            {loading ? "Saving..." : order.status === "PENDING" ? "Mark as paid" : "Verify Payment"}
           </Button>
         ) : (
           <div className="flex flex-col items-end gap-1">

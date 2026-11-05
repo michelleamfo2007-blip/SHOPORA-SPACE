@@ -2,10 +2,10 @@
 
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
-import { requireStoreAccess } from "@/lib/store-access"
+import { requireStoreManager } from "@/lib/store-access"
 
 export async function createShippingZoneAction(storeId: string, formData: FormData) {
-  await requireStoreAccess(storeId)
+  await requireStoreManager(storeId)
 
   const name = formData.get("name") as string
   if (!name) throw new Error("Name is required")
@@ -22,7 +22,7 @@ export async function createShippingZoneAction(storeId: string, formData: FormDa
 }
 
 export async function createShippingRateAction(storeId: string, zoneId: string, formData: FormData) {
-  await requireStoreAccess(storeId)
+  await requireStoreManager(storeId)
 
   const name = formData.get("name") as string
   const price = parseFloat(formData.get("price") as string)
@@ -46,7 +46,7 @@ export async function createShippingRateAction(storeId: string, zoneId: string, 
 }
 
 export async function deleteShippingZoneAction(storeId: string, zoneId: string) {
-  await requireStoreAccess(storeId)
+  await requireStoreManager(storeId)
 
   await db.shippingZone.deleteMany({
     where: { id: zoneId, storeId } // Relies on Cascade delete to remove rates
@@ -56,7 +56,7 @@ export async function deleteShippingZoneAction(storeId: string, zoneId: string) 
 }
 
 export async function deleteShippingRateAction(storeId: string, rateId: string) {
-  await requireStoreAccess(storeId)
+  await requireStoreManager(storeId)
 
   await db.shippingRate.deleteMany({
     where: { id: rateId, zone: { storeId } }

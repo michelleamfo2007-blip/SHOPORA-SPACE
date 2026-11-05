@@ -1,11 +1,11 @@
 import { db } from "@/lib/db"
-import { requireMobileStoreAccess } from "@/lib/mobile-auth"
+import { requireMobileStoreManager } from "@/lib/mobile-auth"
 import { amountDue, submitSubscriptionPayment } from "@/lib/subscription-payment"
 
 /** Billing stays reachable when a subscription has lapsed, so the seller can pay to reactivate. */
 export async function GET(req: Request, { params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params
-  const access = await requireMobileStoreAccess(req, storeId, { allowLapsed: true })
+  const access = await requireMobileStoreManager(req, storeId, { allowLapsed: true })
   if ("error" in access) return Response.json({ error: access.error }, { status: access.status })
 
   const subscription = await db.subscription.findUnique({
@@ -42,7 +42,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
 
 export async function POST(req: Request, { params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params
-  const access = await requireMobileStoreAccess(req, storeId, { allowLapsed: true })
+  const access = await requireMobileStoreManager(req, storeId, { allowLapsed: true })
   if ("error" in access) return Response.json({ error: access.error }, { status: access.status })
 
   const body = await req.json().catch(() => ({}))

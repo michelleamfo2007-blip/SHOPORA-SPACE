@@ -1,8 +1,11 @@
 import { db } from "@/lib/db"
 import { OrderRow } from "./OrderRow"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ShoppingBag } from "lucide-react"
+import Link from "next/link"
+import { Plus, ShoppingBag } from "lucide-react"
 import { OrderStatus } from "@prisma/client"
+import { ORDER_SOURCE_LABELS } from "@/lib/manual-order"
+import { orderPaymentReminder } from "@/lib/payment-reminder"
 
 export default async function OrdersPage({ 
   params,
@@ -33,6 +36,16 @@ export default async function OrdersPage({
 
   if (!store) return null
 
+  const paymentSetting = await db.storePaymentSetting.findUnique({
+    where: { storeId },
+    select: { mobileMoneyNumber: true, accountName: true, bankName: true, accountNumber: true },
+  })
+  const orders = store.orders.map((order) => ({
+    ...order,
+    sourceLabel: order.source === "WEBSITE" ? null : ORDER_SOURCE_LABELS[order.source],
+    reminderUrl: orderPaymentReminder(order, store, paymentSetting)?.url ?? null,
+  }))
+
   return (
     <div className="space-y-8 pb-10">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -44,9 +57,12 @@ export default async function OrdersPage({
           <p className="text-slate-500 mt-1">Manage and fulfill your store's orders.</p>
         </div>
         
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
-          {/* Status filters removed by user request */}
-        </div>
+        <Link
+          href={`/${storeId}/orders/new`}
+          className="inline-flex h-10 items-center gap-2 self-start rounded-full bg-stone-950 px-5 text-sm font-medium text-white hover:bg-stone-800 sm:self-auto"
+        >
+          <Plus className="h-4 w-4" /> Record an order
+        </Link>
       </div>
 
       <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">
@@ -67,14 +83,14 @@ export default async function OrdersPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {store.orders.length === 0 ? (
+                {orders.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-slate-500 font-medium">
                       No orders found.
                     </td>
                   </tr>
                 ) : (
-                  store.orders.map((order) => (
+                  orders.map((order) => (
                     <OrderRow key={order.id} order={order} store={store} />
                   ))
                 )}

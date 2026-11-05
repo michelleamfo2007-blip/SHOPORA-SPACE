@@ -3,7 +3,7 @@ import { db } from "@/lib/db"
 import { MAX_PRODUCT_IMAGES } from "@/lib/compress-image"
 import { requireMobileStoreAccess } from "@/lib/mobile-auth"
 import { buildVariantInputs, DEFAULT_VARIANT_NAME, syncProductVariants } from "@/lib/product-variants"
-import { optionCreateData, parseOptions, variantRows } from "@/lib/product-options"
+import { optionCreateData, parseCostPrice, parseOptions, variantRows } from "@/lib/product-options"
 
 const STATUSES = ["ACTIVE", "DRAFT", "ARCHIVED"] as const
 const VISIBILITIES = ["VISIBLE", "HIDDEN"] as const
@@ -38,6 +38,7 @@ export async function GET(
       description: product.description,
       price: product.price,
       compareAtPrice: product.compareAtPrice,
+      costPrice: product.costPrice,
       stockCount: product.stockCount,
       status: product.status,
       visibility: product.visibility,
@@ -83,6 +84,7 @@ export async function PATCH(
       description: body.description === undefined ? existing.description : String(body.description).trim() || null,
       price,
       compareAtPrice: compareAtPrice != null && Number.isFinite(compareAtPrice) ? compareAtPrice : null,
+      costPrice: body.costPrice === undefined ? existing.costPrice : parseCostPrice(body.costPrice),
       status,
       isActive: status === "ACTIVE",
       visibility,

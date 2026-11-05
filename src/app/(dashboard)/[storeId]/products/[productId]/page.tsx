@@ -28,9 +28,14 @@ export default async function ProductEditPage({
           <h2 className="text-3xl font-bold tracking-tight">Edit Product</h2>
           <p className="text-slate-500">Make changes to {product.name}</p>
         </div>
-        <Link href={`/${storeId}/products`}>
-          <Button variant="outline">Back to Products</Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href={`/${storeId}/products/${productId}/share`}>
+            <Button className="bg-emerald-600 text-white hover:bg-emerald-700">Share kit</Button>
+          </Link>
+          <Link href={`/${storeId}/products`}>
+            <Button variant="outline">Back to Products</Button>
+          </Link>
+        </div>
       </div>
 
       <ProductForm storeId={storeId} initialData={product} />

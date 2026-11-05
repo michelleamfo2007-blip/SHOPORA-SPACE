@@ -2,11 +2,14 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
 import { getStoreSetup } from "@/lib/store-setup"
+import { getMonthlyGoal } from "@/lib/sales-goal"
+import { requireStoreManagerPage } from "@/lib/store-access"
 import { DashboardOverviewClient } from "./DashboardOverviewClient"
 
 export default async function DashboardOverview({ params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params
-  
+  await requireStoreManagerPage(storeId)
+
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return null
 
@@ -175,6 +178,7 @@ export default async function DashboardOverview({ params }: { params: Promise<{ 
       bestSellers={bestSellers}
       chartData={chartData}
       setup={await getStoreSetup(storeId)}
+      goal={await getMonthlyGoal(storeId)}
     />
   )
 }

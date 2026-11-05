@@ -7,6 +7,7 @@ import { getProductLimitMessage } from "@/lib/plan-limits"
 import { getStoreAccess } from "@/lib/store-access"
 import { buildVariantInputs, syncProductVariants } from "@/lib/product-variants"
 import { MAX_PRODUCT_IMAGES } from "@/lib/compress-image"
+import { parseCostPrice } from "@/lib/product-options"
 
 export async function POST(
   req: Request,
@@ -22,7 +23,7 @@ export async function POST(
     const body = await req.json()
     const { 
       name, description, status, visibility,
-      price, compareAtPrice, sku, stockCount, lowStockThreshold,
+      price, compareAtPrice, costPrice, sku, stockCount, lowStockThreshold,
       images, sizeGuideUrl, videoUrl,
       seoTitle, seoDescription,
       options, variants 
@@ -63,6 +64,7 @@ export async function POST(
         visibility: visibility as ProductVisibility,
         price,
         compareAtPrice,
+        costPrice: parseCostPrice(costPrice),
         sku,
         stockCount,
         lowStockThreshold,

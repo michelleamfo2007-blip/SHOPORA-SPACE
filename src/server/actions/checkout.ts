@@ -14,10 +14,11 @@ import { pushToStoreMembers } from "@/lib/push"
 const variantSelect = {
   id: true,
   price: true,
+  costPrice: true,
   name: true,
   stockCount: true,
   productId: true,
-  product: { select: { name: true, _count: { select: { options: true } } } },
+  product: { select: { name: true, costPrice: true, _count: { select: { options: true } } } },
 } as const
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
@@ -152,7 +153,16 @@ export async function processCheckoutAction(formData: FormData) {
 
   const lineItems = new Map<
     string,
-    { variantId: string; productId: string; simple: boolean; name: string; quantity: number; price: number; stock: number }
+    {
+      variantId: string
+      productId: string
+      simple: boolean
+      name: string
+      quantity: number
+      price: number
+      costPrice: number | null
+      stock: number
+    }
   >()
   for (const item of requestedItems) {
     const variant = resolved.get(item.variantId)!
@@ -166,6 +176,7 @@ export async function processCheckoutAction(formData: FormData) {
         name: variant.name && variant.name !== DEFAULT_VARIANT_NAME ? `${variant.product.name} (${variant.name})` : variant.product.name,
         quantity: item.quantity,
         price: variant.price,
+        costPrice: variant.costPrice ?? variant.product.costPrice ?? null,
         stock: variant.stockCount,
       })
   }
@@ -246,7 +257,8 @@ export async function processCheckoutAction(formData: FormData) {
         create: cartItems.map(item => ({
           variantId: item.variantId,
           quantity: item.quantity,
-          price: item.price
+          price: item.price,
+          costPrice: item.costPrice,
         }))
       },
       payments: {

@@ -77,6 +77,7 @@ export async function submitPaymentReference(storeId: string, formData: FormData
     where: { storeId_userId: { storeId, userId: session.user.id } },
   })
   if (!membership) throw new Error("Unauthorized")
+  if (membership.role === "STAFF") throw new Error("Only the store owner or an admin can pay for the plan.")
 
   const result = await submitSubscriptionPayment(storeId, {
     method: (formData.get("paymentMethod") as string) || "",

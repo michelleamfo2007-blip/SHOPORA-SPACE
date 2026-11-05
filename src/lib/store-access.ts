@@ -4,6 +4,8 @@ import { getToken } from "next-auth/jwt"
 import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
 import { isSubscriptionLapsed } from "@/lib/subscription"
+import { isStoreManager } from "@/lib/store-roles"
+import { redirect } from "next/navigation"
 
 export const LAPSED_STORE_MESSAGE =
   "Your subscription has ended. Renew it on the Billing page to make changes."
@@ -109,4 +111,31 @@ export async function requireStoreAccess(storeId: string) {
   const access = await getStoreAccess(storeId)
   if ("error" in access) throw new Error(access.error)
   return access
+}
+
+export const MANAGER_ONLY_MESSAGE = "Only the store owner or an admin can do this."
+
+/** For server actions that staff must not use (money, reports, settings, team). */
+export async function getStoreManagerAccess(storeId: string) {
+  const access = await getStoreAccess(storeId)
+  if ("error" in access) return access
+  if (!isStoreManager(access.member.role)) return { error: MANAGER_ONLY_MESSAGE, status: 403 } as const
+  return access
+}
+
+export async function requireStoreManager(storeId: string) {
+  const access = await getStoreManagerAccess(storeId)
+  if ("error" in access) throw new Error(access.error)
+  return access
+}
+
+/** For dashboard pages staff must not open: sends them to Orders instead. */
+export async function requireStoreManagerPage(storeId: string) {
+  const userId = await resolveUserId()
+  if (!userId) redirect("/login")
+  const member = await db.storeMember.findUnique({
+    where: { storeId_userId: { storeId, userId } },
+    select: { role: true },
+  })
+  if (member && !isStoreManager(member.role)) redirect(`/${storeId}/orders`)
 }

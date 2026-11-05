@@ -4,7 +4,7 @@ import { MAX_PRODUCT_IMAGES } from "@/lib/compress-image"
 import { requireMobileStoreAccess } from "@/lib/mobile-auth"
 import { getProductLimitMessage } from "@/lib/plan-limits"
 import { buildVariantInputs, syncProductVariants } from "@/lib/product-variants"
-import { optionCreateData, parseOptions, variantRows } from "@/lib/product-options"
+import { optionCreateData, parseCostPrice, parseOptions, variantRows } from "@/lib/product-options"
 
 /** Seller's products, newest first. */
 export async function GET(req: Request, { params }: { params: Promise<{ storeId: string }> }) {
@@ -52,6 +52,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ storeId
     const name = String(body.name || "").trim()
     const price = Number(body.price)
     const compareAtPrice = body.compareAtPrice ? Number(body.compareAtPrice) : null
+    const costPrice = parseCostPrice(body.costPrice)
     const stockCount = Math.max(0, Math.floor(Number(body.stockCount) || 0))
     const description = String(body.description || "").trim() || null
     const images: string[] = Array.isArray(body.images)
@@ -78,6 +79,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ storeId
         visibility: "VISIBLE",
         price,
         compareAtPrice: compareAtPrice && Number.isFinite(compareAtPrice) ? compareAtPrice : null,
+        costPrice,
         stockCount: rows.length ? rows.reduce((sum, r) => sum + r.stockCount, 0) : stockCount,
         images,
         options: { create: optionCreateData(parsed.options) },

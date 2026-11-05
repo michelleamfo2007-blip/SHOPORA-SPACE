@@ -3,6 +3,13 @@
 export type OptionInput = { name: string; values: string[] }
 export type VariantRow = { name: string; price: number; stockCount: number }
 
+/** What the seller paid per item. Empty / invalid means "not set" (profit is then left out of reports). */
+export function parseCostPrice(raw: unknown) {
+  if (raw === null || raw === undefined || raw === "") return null
+  const n = Number(raw)
+  return Number.isFinite(n) && n >= 0 && n <= 10_000_000 ? Math.round(n * 100) / 100 : null
+}
+
 const MAX_OPTIONS = 3
 const MAX_VALUES = 20
 const MAX_COMBINATIONS = 100

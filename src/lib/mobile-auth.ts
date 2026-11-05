@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { normalizeRiderPhone, riderPhoneLookupVariants } from "@/lib/rider-phone"
 import { LAPSED_STORE_MESSAGE } from "@/lib/store-access"
 import { isSubscriptionLapsed } from "@/lib/subscription"
+import { isStoreManager } from "@/lib/store-roles"
 
 /** Bearer tokens for the Shopora mobile app (vendors + riders). Website cookies are unaffected. */
 
@@ -88,6 +89,14 @@ export async function requireMobileStoreAccess(req: Request, storeId: string, op
   }
 
   return { user: auth.user, store: { id: store.id, currency: store.currency }, role: member?.role ?? "OWNER" }
+}
+
+/** Same as requireMobileStoreAccess, but staff are turned away (money, reports, settings, team). */
+export async function requireMobileStoreManager(req: Request, storeId: string, options: { allowLapsed?: boolean } = {}) {
+  const access = await requireMobileStoreAccess(req, storeId, options)
+  if ("error" in access) return access
+  if (!isStoreManager(access.role)) return { error: "Only the store owner or an admin can do this." as const, status: 403 }
+  return access
 }
 
 export async function requireMobileRider(req: Request) {

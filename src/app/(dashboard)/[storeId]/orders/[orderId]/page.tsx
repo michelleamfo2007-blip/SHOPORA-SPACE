@@ -6,6 +6,8 @@ import { OrderStatusUpdater } from "./OrderStatusUpdater"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
+import { ORDER_SOURCE_LABELS } from "@/lib/manual-order"
+import { orderPaymentReminder } from "@/lib/payment-reminder"
 
 export default async function OrderDetailsPage({
   params
@@ -40,7 +42,11 @@ export default async function OrderDetailsPage({
   if (!order) notFound()
 
   const payment = order.payments?.[0]
-
+  const paymentSetting = await db.storePaymentSetting.findUnique({
+    where: { storeId },
+    select: { mobileMoneyNumber: true, accountName: true, bankName: true, accountNumber: true },
+  })
+  const reminder = orderPaymentReminder(order, store, paymentSetting)
 
   return (
     <div className="grid gap-6">
@@ -129,6 +135,25 @@ export default async function OrderDetailsPage({
                 {order.customer.email && <p className="text-sm text-slate-500">{order.customer.email}</p>}
                 {order.customer.phone && <p className="text-sm text-slate-500">{order.customer.phone}</p>}
               </div>
+              <p className="text-sm text-slate-500">
+                Order from: <span className="font-medium text-slate-900">{ORDER_SOURCE_LABELS[order.source] ?? order.source}</span>
+              </p>
+              {order.notes && (
+                <p className="rounded-lg bg-stone-50 p-3 text-sm text-slate-700">
+                  <span className="block text-xs font-medium uppercase tracking-wide text-slate-400">Your note</span>
+                  {order.notes}
+                </p>
+              )}
+              {reminder && (
+                <a
+                  href={reminder.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex h-10 w-full items-center justify-center rounded-full bg-emerald-600 text-sm font-semibold text-white hover:bg-emerald-700"
+                >
+                  Remind to pay on WhatsApp
+                </a>
+              )}
             </CardContent>
           </Card>
 

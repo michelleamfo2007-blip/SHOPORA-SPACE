@@ -12,6 +12,7 @@ import {
   Eye
 } from "lucide-react"
 import { StoreSetupCard } from "@/components/dashboard/StoreSetupCard"
+import { GoalCard } from "@/components/dashboard/GoalCard"
 import type { StoreSetup } from "@/lib/store-setup"
 
 interface DashboardOverviewClientProps {
@@ -57,6 +58,7 @@ interface DashboardOverviewClientProps {
     amount: number
   }>
   setup: StoreSetup | null
+  goal: { goal: number | null; achieved: number; percent: number | null; daysLeft: number; monthLabel: string }
 }
 
 export function DashboardOverviewClient({
@@ -71,6 +73,7 @@ export function DashboardOverviewClient({
   bestSellers,
   chartData,
   setup,
+  goal,
 }: DashboardOverviewClientProps) {
   const router = useRouter()
 
@@ -120,6 +123,8 @@ export function DashboardOverviewClient({
       </div>
 
       {setup && <StoreSetupCard storeId={storeId} setup={setup} />}
+
+      <GoalCard storeId={storeId} currency={currency} goal={goal} />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {[

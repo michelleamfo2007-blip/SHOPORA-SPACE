@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db"
 import { hash } from "bcryptjs"
+import { claimStoreInvites } from "@/lib/team"
 
 
 export async function signUpAction(formData: FormData) {
@@ -25,13 +26,14 @@ export async function signUpAction(formData: FormData) {
 
     const passwordHash = await hash(password, 10)
 
-    await db.user.create({
+    const user = await db.user.create({
       data: {
         name,
         email,
         passwordHash,
       }
     })
+    await claimStoreInvites(user.id, user.email)
 
     return { success: true }
   } catch (error: any) {

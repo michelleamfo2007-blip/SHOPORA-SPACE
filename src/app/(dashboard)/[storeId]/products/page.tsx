@@ -30,12 +30,19 @@ export default async function ProductsPage({ params }: { params: Promise<{ store
           </h2>
           <p className="text-slate-500 mt-1">Manage your store's products and inventory.</p>
         </div>
-        <Link href={`/${store.id}/products/new`}>
-          <Button className="bg-slate-900 text-white rounded-xl px-5 py-2.5 font-bold hover:bg-slate-800 transition-colors shadow-sm flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Add Product
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href={`/${store.id}/products/bulk`}>
+            <Button variant="outline" className="rounded-xl px-5 py-2.5 font-bold">
+              Bulk edit prices &amp; stock
+            </Button>
+          </Link>
+          <Link href={`/${store.id}/products/new`}>
+            <Button className="bg-slate-900 text-white rounded-xl px-5 py-2.5 font-bold hover:bg-slate-800 transition-colors shadow-sm flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Add Product
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Card className="border-0 shadow-sm bg-white overflow-hidden rounded-xl">

@@ -38,6 +38,7 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
   // Pricing
   const [price, setPrice] = useState(initialData?.price?.toString() || "")
   const [compareAtPrice, setCompareAtPrice] = useState(initialData?.compareAtPrice?.toString() || "")
+  const [costPrice, setCostPrice] = useState(initialData?.costPrice?.toString() || "")
   
   // Inventory
   const [sku, setSku] = useState(initialData?.sku || "")
@@ -162,6 +163,7 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
           name, description, status, visibility,
           price: parseFloat(price) || 0,
           compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : null,
+          costPrice: costPrice === "" ? null : parseFloat(costPrice),
           sku, stockCount: parseInt(stockCount) || 0,
           lowStockThreshold: parseInt(lowStockThreshold) || 5,
           images, sizeGuideUrl, videoUrl,
@@ -266,6 +268,22 @@ export function ProductForm({ storeId, initialData }: ProductFormProps) {
                     <span className="absolute left-3 top-2.5 text-slate-500">$</span>
                     <Input type="number" step="0.01" className="pl-7" value={compareAtPrice} onChange={e => setCompareAtPrice(e.target.value)} placeholder="0.00" />
                   </div>
+                </div>
+                <div className="col-span-2 grid gap-2">
+                  <Label>Cost price (what you paid, per item)</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={costPrice}
+                    onChange={e => setCostPrice(e.target.value)}
+                    placeholder="Optional — used for your profit reports"
+                  />
+                  {costPrice !== "" && Number(price) > 0 && (
+                    <p className="text-xs text-slate-500">
+                      Profit each: {(Number(price) - Number(costPrice)).toFixed(2)} · Customers never see this.
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>

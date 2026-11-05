@@ -54,6 +54,15 @@ enum OrderStatus {
   REFUNDED
 }
 
+enum OrderSource {
+  WEBSITE
+  WHATSAPP
+  INSTAGRAM
+  WALK_IN
+  PHONE
+  OTHER
+}
+
 enum PaymentProvider {
   PAYSTACK
   STRIPE
@@ -146,11 +155,15 @@ model Store {
   pickupLat              Float?
   pickupLng              Float?
 
+  /// Sales target for the current month, shown on the seller's home screen
+  monthlyGoal    Float?
+
   status         StoreStatus @default(ACTIVE)
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
   members      StoreMember[]
+  invites      StoreInvite[]
   domains      Domain[]
   products     Product[]
   categories   Category[]
@@ -177,6 +190,21 @@ model StoreMember {
 
   @@unique([storeId, userId])
   @@index([userId])
+}
+
+/// Someone invited to help run a store who doesn't have a Shopora account yet; claimed when they sign up or log in.
+model StoreInvite {
+  id          String          @id @default(cuid())
+  storeId     String
+  email       String
+  role        StoreMemberRole @default(STAFF)
+  invitedById String?
+  createdAt   DateTime        @default(now())
+
+  store       Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, email])
+  @@index([email])
 }
 
 model Domain {
@@ -259,6 +287,8 @@ model Product {
   // Pricing & Inventory (Global)
   price       Float?
   compareAtPrice Float?
+  /// What the seller paid per item, for profit reports (variants inherit it unless they set their own)
+  costPrice   Float?
   sku         String?
   stockCount  Int      @default(0)
   lowStockThreshold Int @default(5)
@@ -318,6 +348,7 @@ model ProductVariant {
   sku            String?
   price          Float
   compareAtPrice Float?
+  costPrice      Float?
   stockCount     Int      @default(0)
   imageUrl       String?
   
@@ -369,6 +400,9 @@ model Customer {
   email      String?
   phone      String?
   totalSpent Float    @default(0)
+  /// Private notes and labels the seller keeps about this customer
+  notes      String?
+  tags       String[] @default([])
   createdAt  DateTime @default(now())
 
   store      Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
@@ -450,6 +484,10 @@ model Order {
   dropoffLng      Float?
   /// True while this order's items are taken out of stock (set at checkout, cleared on cancel/refund)
   stockReserved   Boolean     @default(false)
+  /// Where the sale came from; anything but WEBSITE was recorded by the seller
+  source          OrderSource @default(WEBSITE)
+  /// Seller's private note on the order
+  notes           String?
   trackingToken   String?     @unique
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
@@ -626,6 +664,8 @@ model OrderItem {
   variantId String
   quantity  Int
   price     Float
+  /// Cost per item when it sold, so later cost changes don't rewrite past profit
+  costPrice Float?
 
   order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   variant   ProductVariant @relation(fields: [variantId], references: [id])

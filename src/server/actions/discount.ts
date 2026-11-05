@@ -2,12 +2,12 @@
 
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
-import { requireStoreAccess } from "@/lib/store-access"
+import { requireStoreManager } from "@/lib/store-access"
 import { redirect } from "next/navigation"
 import { createDiscount } from "@/lib/discount-service"
 
 export async function createDiscountAction(storeId: string, formData: FormData) {
-  await requireStoreAccess(storeId)
+  await requireStoreManager(storeId)
 
   const code = formData.get("code") as string
   const type = formData.get("type") as string
@@ -22,7 +22,7 @@ export async function createDiscountAction(storeId: string, formData: FormData) 
 }
 
 export async function toggleDiscountAction(storeId: string, discountId: string, isActive: boolean) {
-  await requireStoreAccess(storeId)
+  await requireStoreManager(storeId)
 
   await db.discount.update({
     where: { id: discountId, storeId },
@@ -34,7 +34,7 @@ export async function toggleDiscountAction(storeId: string, discountId: string, 
 }
 
 export async function deleteDiscountAction(storeId: string, discountId: string) {
-  await requireStoreAccess(storeId)
+  await requireStoreManager(storeId)
 
   await db.discount.delete({
     where: { id: discountId, storeId }

@@ -1,4 +1,5 @@
 import { authenticateVendor, signMobileToken, vendorStoresFor } from "@/lib/mobile-auth"
+import { claimStoreInvites } from "@/lib/team"
 
 export async function POST(req: Request) {
   try {
@@ -7,6 +8,7 @@ export async function POST(req: Request) {
     if ("error" in result) return Response.json({ error: result.error }, { status: 401 })
 
     const { user } = result
+    await claimStoreInvites(user.id, user.email)
     const memberships = await vendorStoresFor(user.id)
     return Response.json({
       token: signMobileToken("vendor", user.id),

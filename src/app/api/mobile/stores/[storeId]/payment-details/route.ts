@@ -1,10 +1,10 @@
 import { db } from "@/lib/db"
-import { requireMobileStoreAccess } from "@/lib/mobile-auth"
+import { requireMobileStoreManager } from "@/lib/mobile-auth"
 import { savePaymentDetails } from "@/lib/payment-settings"
 
 export async function GET(req: Request, { params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params
-  const access = await requireMobileStoreAccess(req, storeId)
+  const access = await requireMobileStoreManager(req, storeId)
   if ("error" in access) return Response.json({ error: access.error }, { status: access.status })
 
   const s = await db.storePaymentSetting.findUnique({ where: { storeId } })
@@ -19,7 +19,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
 
 export async function POST(req: Request, { params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params
-  const access = await requireMobileStoreAccess(req, storeId)
+  const access = await requireMobileStoreManager(req, storeId)
   if ("error" in access) return Response.json({ error: access.error }, { status: access.status })
 
   const body = await req.json().catch(() => ({}))

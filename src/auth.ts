@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { db } from "@/lib/db"
 import { compare } from "bcryptjs"
+import { claimStoreInvites } from "@/lib/team"
 
 declare module "next-auth" {
   interface Session {
@@ -51,6 +52,8 @@ export const authOptions: NextAuthOptions = {
         if (!isPasswordValid) {
           return null
         }
+
+        await claimStoreInvites(user.id, user.email)
 
         return {
           id: user.id,

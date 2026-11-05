@@ -1,6 +1,8 @@
 import { db } from "@/lib/db"
 import { requireMobileStoreAccess } from "@/lib/mobile-auth"
 import { DEFAULT_VARIANT_NAME } from "@/lib/product-variants"
+import { ORDER_SOURCE_LABELS } from "@/lib/manual-order"
+import { orderPaymentReminder } from "@/lib/payment-reminder"
 
 export async function GET(
   req: Request,
@@ -37,6 +39,14 @@ export async function GET(
   if (!order) return Response.json({ error: "Order not found." }, { status: 404 })
 
   const payment = order.payments[0]
+  const [store, paymentSetting] = await Promise.all([
+    db.store.findUnique({ where: { id: storeId }, select: { name: true, currency: true } }),
+    db.storePaymentSetting.findUnique({
+      where: { storeId },
+      select: { mobileMoneyNumber: true, accountName: true, bankName: true, accountNumber: true },
+    }),
+  ])
+  const reminder = store ? orderPaymentReminder(order, store, paymentSetting) : null
 
   return Response.json({
     currency: access.store.currency,
@@ -56,6 +66,10 @@ export async function GET(
       dropoffLat: order.dropoffLat,
       dropoffLng: order.dropoffLng,
       customer: order.customer,
+      source: order.source,
+      sourceLabel: ORDER_SOURCE_LABELS[order.source] ?? order.source,
+      notes: order.notes,
+      reminder,
       items: order.orderItems.map((item) => ({
         id: item.id,
         name: item.variant?.product?.name || "Deleted product",

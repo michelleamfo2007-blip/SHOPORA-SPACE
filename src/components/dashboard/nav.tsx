@@ -20,16 +20,20 @@ import {
   Wallet,
   Menu,
   X,
+  FileSpreadsheet,
+  UserPlus,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { isStoreManager, staffCanOpen, type StoreRole } from "@/lib/store-roles"
 
 interface DashboardNavProps {
   storeId: string
+  role: StoreRole
   isMobileMenu?: boolean
 }
 
-export function DashboardNav({ storeId, isMobileMenu }: DashboardNavProps) {
+export function DashboardNav({ storeId, role, isMobileMenu }: DashboardNavProps) {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
 
@@ -42,7 +46,7 @@ export function DashboardNav({ storeId, isMobileMenu }: DashboardNavProps) {
     }
   }, [isOpen])
 
-  const groups = [
+  const allGroups = [
     {
       label: "Shop",
       routes: [
@@ -65,14 +69,25 @@ export function DashboardNav({ storeId, isMobileMenu }: DashboardNavProps) {
     {
       label: "Account",
       routes: [
+        { href: `/${storeId}/reports`, label: "Reports", icon: FileSpreadsheet, active: pathname === `/${storeId}/reports` },
         { href: `/${storeId}/settings/payments`, label: "Payments", icon: CreditCard, active: pathname === `/${storeId}/settings/payments` },
         { href: `/${storeId}/analytics`, label: "Analytics", icon: BarChart3, active: pathname === `/${storeId}/analytics` },
+        { href: `/${storeId}/team`, label: "Team", icon: UserPlus, active: pathname === `/${storeId}/team` },
         { href: `/${storeId}/billing`, label: "Billing", icon: Wallet, active: pathname === `/${storeId}/billing` },
         { href: `/${storeId}/support`, label: "Support", icon: LifeBuoy, active: pathname === `/${storeId}/support` },
         { href: `/${storeId}/settings`, label: "Settings", icon: Settings, active: pathname === `/${storeId}/settings` },
       ],
     },
   ]
+
+  const groups = isStoreManager(role)
+    ? allGroups
+    : allGroups
+        .map((g) => ({
+          ...g,
+          routes: g.routes.filter((r) => staffCanOpen(r.href.slice(storeId.length + 2).split("/")[0])),
+        }))
+        .filter((g) => g.routes.length > 0)
 
   const linkClass = (active: boolean) =>
     cn(

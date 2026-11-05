@@ -1,5 +1,6 @@
 import { db } from "@/lib/db"
 import { requireMobileStoreAccess } from "@/lib/mobile-auth"
+import { SUGGESTED_CUSTOMER_TAGS } from "@/lib/customer-notes"
 
 export async function GET(req: Request, { params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params
@@ -14,6 +15,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
       email: true,
       phone: true,
       totalSpent: true,
+      notes: true,
+      tags: true,
       createdAt: true,
       _count: { select: { orders: true } },
     },
@@ -30,7 +33,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
       phone: c.phone,
       totalSpent: c.totalSpent,
       orderCount: c._count.orders,
+      notes: c.notes,
+      tags: c.tags,
       createdAt: c.createdAt,
     })),
+    suggestedTags: SUGGESTED_CUSTOMER_TAGS,
   })
 }

@@ -1,6 +1,7 @@
 import type { OrderStatus } from "@prisma/client"
 import { db } from "@/lib/db"
 import { requireMobileStoreAccess } from "@/lib/mobile-auth"
+import { ORDER_SOURCE_LABELS } from "@/lib/manual-order"
 
 const FILTERS: Record<string, OrderStatus[] | null> = {
   all: null,
@@ -28,6 +29,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
         status: true,
         totalAmount: true,
         deliveryMethod: true,
+        source: true,
         createdAt: true,
         customer: { select: { name: true } },
         payments: { select: { reference: true }, orderBy: { createdAt: "desc" }, take: 1 },
@@ -54,6 +56,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
       status: o.status,
       totalAmount: o.totalAmount,
       deliveryMethod: o.deliveryMethod,
+      source: o.source,
+      sourceLabel: ORDER_SOURCE_LABELS[o.source] ?? o.source,
       createdAt: o.createdAt,
       customerName: o.customer.name,
       paymentReference: o.payments[0]?.reference ?? null,

@@ -1,11 +1,12 @@
 import { db } from "@/lib/db"
-import { requireMobileStoreAccess } from "@/lib/mobile-auth"
+import { requireMobileStoreManager } from "@/lib/mobile-auth"
 import { getStoreSetup } from "@/lib/store-setup"
+import { getMonthlyGoal } from "@/lib/sales-goal"
 
 /** Same numbers as the web dashboard Overview page. */
 export async function GET(req: Request, { params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params
-  const access = await requireMobileStoreAccess(req, storeId)
+  const access = await requireMobileStoreManager(req, storeId)
   if ("error" in access) return Response.json({ error: access.error }, { status: access.status })
 
   const last7Days = Array.from({ length: 7 })
@@ -17,7 +18,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
     })
     .reverse()
 
-  const [revenue, totalOrders, totalProducts, lowStockCount, analytics, statuses, recent, lowStock, orderItems, dailyOrders, setup] =
+  const [revenue, totalOrders, totalProducts, lowStockCount, analytics, statuses, recent, lowStock, orderItems, dailyOrders, setup, goal] =
     await Promise.all([
       db.order.aggregate({ where: { storeId }, _sum: { totalAmount: true } }),
       db.order.count({ where: { storeId } }),
@@ -49,6 +50,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
         select: { totalAmount: true, createdAt: true },
       }),
       getStoreSetup(storeId),
+      getMonthlyGoal(storeId),
     ])
 
   const count = (...s: string[]) => statuses.filter((g) => s.includes(g.status)).reduce((n, g) => n + g._count._all, 0)
@@ -98,5 +100,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
       .slice(0, 5),
     chart,
     setup,
+    goal,
   })
 }

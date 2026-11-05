@@ -1,10 +1,10 @@
 import { db } from "@/lib/db"
-import { requireMobileStoreAccess } from "@/lib/mobile-auth"
+import { requireMobileStoreManager } from "@/lib/mobile-auth"
 
 /** Same numbers as the web Analytics page. */
 export async function GET(req: Request, { params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params
-  const access = await requireMobileStoreAccess(req, storeId)
+  const access = await requireMobileStoreManager(req, storeId)
   if ("error" in access) return Response.json({ error: access.error }, { status: access.status })
 
   const [totalOrders, totalProducts, totalCustomers, traffic, revenue, recent] = await Promise.all([
