@@ -4,6 +4,7 @@ import { MAX_PRODUCT_IMAGES } from "@/lib/compress-image"
 import { requireMobileStoreAccess } from "@/lib/mobile-auth"
 import { getProductLimitMessage } from "@/lib/plan-limits"
 import { buildVariantInputs, syncProductVariants } from "@/lib/product-variants"
+import { optionCreateData, parseOptions, variantRows } from "@/lib/product-options"
 
 /** Seller's products, newest first. */
 export async function GET(req: Request, { params }: { params: Promise<{ storeId: string }> }) {
@@ -40,7 +41,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
   })
 }
 
-/** Simple product from the phone: name, price, stock, description, up to 2 photos. */
+/** Product from the phone: name, price, stock, description, up to 2 photos, optional sizes/colours. */
 export async function POST(req: Request, { params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params
   const access = await requireMobileStoreAccess(req, storeId)
@@ -61,6 +62,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ storeId
     if (!Number.isFinite(price) || price <= 0) return Response.json({ error: "Add a selling price." }, { status: 400 })
     if (images.length === 0) return Response.json({ error: "Add at least one photo." }, { status: 400 })
 
+    const parsed = parseOptions(body.options)
+    if ("error" in parsed) return Response.json({ error: parsed.error }, { status: 400 })
+    const rows = parsed.options.length ? variantRows(parsed.options, body.variants, price) : []
+
     const limitMessage = await getProductLimitMessage(storeId)
     if (limitMessage) return Response.json({ error: limitMessage }, { status: 403 })
 
@@ -73,13 +78,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ storeId
         visibility: "VISIBLE",
         price,
         compareAtPrice: compareAtPrice && Number.isFinite(compareAtPrice) ? compareAtPrice : null,
-        stockCount,
+        stockCount: rows.length ? rows.reduce((sum, r) => sum + r.stockCount, 0) : stockCount,
         images,
+        options: { create: optionCreateData(parsed.options) },
       },
       include: { options: { include: { values: true } } },
     })
 
-    await syncProductVariants(product.id, buildVariantInputs(product, []))
+    await syncProductVariants(product.id, buildVariantInputs(product, rows))
     revalidatePath(`/${storeId}/products`)
 
     return Response.json({ success: true, product: { id: product.id, name: product.name } })

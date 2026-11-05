@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import { MAX_PRODUCT_IMAGES } from "@/lib/compress-image"
 import { requireMobileStoreAccess } from "@/lib/mobile-auth"
 import { buildVariantInputs, DEFAULT_VARIANT_NAME, syncProductVariants } from "@/lib/product-variants"
+import { optionCreateData, parseOptions, variantRows } from "@/lib/product-options"
 
 const STATUSES = ["ACTIVE", "DRAFT", "ARCHIVED"] as const
 const VISIBILITIES = ["VISIBLE", "HIDDEN"] as const
@@ -77,19 +78,42 @@ export async function PATCH(
     if (!name) return Response.json({ error: "Add a product name." }, { status: 400 })
     if (!Number.isFinite(price) || price <= 0) return Response.json({ error: "Add a selling price." }, { status: 400 })
 
+    const baseData = {
+      name,
+      description: body.description === undefined ? existing.description : String(body.description).trim() || null,
+      price,
+      compareAtPrice: compareAtPrice != null && Number.isFinite(compareAtPrice) ? compareAtPrice : null,
+      status,
+      isActive: status === "ACTIVE",
+      visibility,
+      images,
+    }
+
+    // New app editor: sizes/colours sent as option names + per-combination rows (rebuilt like the web form).
+    if (Array.isArray(body.options)) {
+      const parsed = parseOptions(body.options)
+      if ("error" in parsed) return Response.json({ error: parsed.error }, { status: 400 })
+      const rows = parsed.options.length ? variantRows(parsed.options, body.variants, price) : []
+
+      await db.productOption.deleteMany({ where: { productId } })
+      const rebuilt = await db.product.update({
+        where: { id: productId },
+        data: {
+          ...baseData,
+          stockCount: rows.length ? rows.reduce((sum, r) => sum + r.stockCount, 0) : stockCount,
+          options: { create: optionCreateData(parsed.options) },
+        },
+        include: { options: { include: { values: true } } },
+      })
+      // Variants are matched by name, so ones with past orders are kept.
+      await syncProductVariants(rebuilt.id, buildVariantInputs(rebuilt, rows))
+      revalidatePath("/", "layout")
+      return Response.json({ success: true })
+    }
+
     const product = await db.product.update({
       where: { id: productId },
-      data: {
-        name,
-        description: body.description === undefined ? existing.description : String(body.description).trim() || null,
-        price,
-        compareAtPrice: compareAtPrice != null && Number.isFinite(compareAtPrice) ? compareAtPrice : null,
-        stockCount,
-        status,
-        isActive: status === "ACTIVE",
-        visibility,
-        images,
-      },
+      data: { ...baseData, stockCount },
       include: { options: { include: { values: true } } },
     })
 
