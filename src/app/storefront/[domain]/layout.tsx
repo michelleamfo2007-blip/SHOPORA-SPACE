@@ -97,10 +97,11 @@ export default async function StorefrontLayout({
 
   return (
     <div className={`${fontClasses} flex min-h-screen w-full max-w-[100vw] flex-col overflow-x-clip bg-[#faf8f5] text-stone-900`} style={themeStyle}>
-      <div className="bg-[var(--store-accent)] px-4 py-2 text-center text-[11px] uppercase tracking-[0.2em] text-white">
-        {store.announcementText ||
-          (store.shoporaDeliveryEnabled ? "Delivery across Accra · Fee paid on arrival" : "Delivery fee paid on arrival")}
-      </div>
+      {store.announcementText && (
+        <div className="bg-[var(--store-accent)] px-4 py-2 text-center text-[11px] uppercase tracking-[0.2em] text-white">
+          {store.announcementText}
+        </div>
+      )}
 
       {/* No backdrop-filter here: it would trap the fixed menu and bag panels inside the header. */}
       <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-[#faf8f5]">

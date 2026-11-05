@@ -178,7 +178,7 @@ const products = [
 export type FeaturedStorefront = {
   name: string
   domain: string
-  announcement: string
+  announcement: string | null
   headline: string
   subtext: string | null
   heroImage: string
@@ -202,9 +202,11 @@ export function BrowserStorefront({ store }: { store?: FeaturedStorefront | null
         </span>
       </div>
       <div className="bg-[#faf8f5]">
-        <div className="truncate bg-[#1c1917] px-6 py-1.5 text-center text-[8px] uppercase tracking-[0.25em] text-white">
-          {store?.announcement ?? "Free Accra delivery this weekend"}
-        </div>
+        {(!store || store.announcement) && (
+          <div className="truncate bg-[#1c1917] px-6 py-1.5 text-center text-[8px] uppercase tracking-[0.25em] text-white">
+            {store ? store.announcement : "Free Accra delivery this weekend"}
+          </div>
+        )}
         <div className="flex items-center justify-between gap-4 px-6 py-3">
           <span className="text-[8px] uppercase tracking-[0.2em] text-stone-500">Shop · Collections</span>
           <span className="truncate font-display text-xl">{store?.name ?? "Atelier"}</span>

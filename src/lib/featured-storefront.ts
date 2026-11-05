@@ -59,7 +59,7 @@ export async function getFeaturedStorefront(): Promise<FeaturedStorefront | null
     return {
       name: pick.name,
       domain: `${pick.slug}.shopora.space`,
-      announcement: pick.announcementText || "Shopora Delivery across Accra",
+      announcement: pick.announcementText,
       headline: pick.heroHeadline || "New arrivals",
       subtext: pick.heroSubtext || pick.description,
       heroImage,

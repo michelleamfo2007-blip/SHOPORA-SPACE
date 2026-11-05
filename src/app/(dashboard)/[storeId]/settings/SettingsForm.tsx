@@ -170,9 +170,9 @@ export function SettingsForm({ store }: { store: any }) {
             value={announcementText}
             onChange={e => setAnnouncementText(e.target.value)}
             maxLength={80}
-            placeholder="Delivery fee paid on arrival"
+            placeholder="e.g. Free delivery in Accra this weekend"
           />
-          <p className="text-xs text-stone-500">The thin line at the very top of your store. Leave empty for the default.</p>
+          <p className="text-xs text-stone-500">A thin bar at the very top of your store. Leave empty to hide it.</p>
         </div>
 
         <div className="grid gap-2">
