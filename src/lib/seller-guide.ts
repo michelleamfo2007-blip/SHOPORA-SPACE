@@ -27,6 +27,7 @@ export const SELLER_GUIDE: GuideSection[] = [
       "Homepage headline and a short description",
       "WhatsApp, Instagram or email so customers can reach you",
       "Your story, shown on your homepage",
+      "Your own privacy and returns policies (or keep our standard wording)",
     ],
     tip: "The store setup checklist on your dashboard shows what is still missing.",
   },

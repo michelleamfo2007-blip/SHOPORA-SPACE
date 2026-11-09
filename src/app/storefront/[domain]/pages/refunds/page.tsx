@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import { getStoreByHost } from "@/lib/tenant"
-import { PolicyPage, PolicySection } from "@/components/storefront/PolicyPage"
+import { PolicyPage, PolicySection, PolicyText } from "@/components/storefront/PolicyPage"
 
 export default async function RefundsPage({ params }: { params: Promise<{ domain: string }> }) {
   const { domain } = await params
@@ -16,6 +16,19 @@ export default async function RefundsPage({ params }: { params: Promise<{ domain
       title="Returns"
       contact={{ storeName: store.name, whatsappNumber: store.whatsappNumber, contactEmail: store.contactEmail }}
     >
+      {store.returnPolicy?.trim() ? (
+        <PolicyText text={store.returnPolicy} />
+      ) : (
+        <DefaultReturns storeName={store.name} />
+      )}
+    </PolicyPage>
+  )
+}
+
+function DefaultReturns({ storeName }: { storeName: string }) {
+  const store = { name: storeName }
+  return (
+    <>
       <PolicySection title="Our policy">
         Returns for {store.name} are handled by the store. Contact them before you send anything back.
       </PolicySection>
@@ -25,6 +38,6 @@ export default async function RefundsPage({ params }: { params: Promise<{ domain
       <PolicySection title="How refunds are paid">
         {`If ${store.name} agrees to a refund, they send it back the way you paid — Mobile Money or bank transfer.`}
       </PolicySection>
-    </PolicyPage>
+    </>
   )
 }

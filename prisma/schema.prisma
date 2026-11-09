@@ -147,6 +147,10 @@ model Store {
   snapchatHandle String?
   contactEmail   String?
   deliveryPolicy String?
+  /// Seller's own privacy policy for their storefront (a default is shown when empty)
+  privacyPolicy  String?
+  /// Seller's own returns & refunds policy (a default is shown when empty)
+  returnPolicy   String?
 
   // Shopora Delivery (Accra v1)
   shoporaDeliveryEnabled Boolean @default(false)

@@ -18,6 +18,8 @@ export const STORE_SETTING_FIELDS = [
   "contactEmail",
   "currency",
   "deliveryPolicy",
+  "privacyPolicy",
+  "returnPolicy",
 ] as const
 
 export type StoreSettingField = (typeof STORE_SETTING_FIELDS)[number]

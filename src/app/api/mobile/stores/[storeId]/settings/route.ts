@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import { requireMobileStoreAccess } from "@/lib/mobile-auth"
 import { STORE_SETTING_FIELDS, updateStoreSettings, type StoreSettingsInput } from "@/lib/store-settings"
+import { defaultPrivacyPolicy, defaultReturnPolicy } from "@/lib/store-policies"
 
 const EDITABLE = [
   "name",
@@ -19,6 +20,8 @@ const EDITABLE = [
   "heroSubtext",
   "aboutText",
   "announcementText",
+  "privacyPolicy",
+  "returnPolicy",
   "slug",
 ] as const
 
@@ -33,7 +36,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
   })
   if (!store) return Response.json({ error: "Store not found." }, { status: 404 })
 
-  return Response.json({ canEdit: access.role === "OWNER" || access.role === "ADMIN", settings: store })
+  return Response.json({
+    canEdit: access.role === "OWNER" || access.role === "ADMIN",
+    settings: store,
+    templates: { privacyPolicy: defaultPrivacyPolicy(store), returnPolicy: defaultReturnPolicy(store) },
+  })
 }
 
 /** Store details & branding. Only the fields sent are changed. */

@@ -475,6 +475,17 @@ export function CheckoutForm({
         >
           {isSubmitting ? "Placing your order..." : `Place order · ${money(currency, productTotal)}`}
         </button>
+        <p className="text-center text-xs text-stone-500">
+          By placing your order you agree to our{" "}
+          <Link href={`${basePath}/pages/privacy`} className="underline underline-offset-2 hover:text-stone-900">
+            privacy policy
+          </Link>{" "}
+          and{" "}
+          <Link href={`${basePath}/pages/refunds`} className="underline underline-offset-2 hover:text-stone-900">
+            returns policy
+          </Link>
+          .
+        </p>
       </form>
 
       <aside className="order-1 lg:order-2">

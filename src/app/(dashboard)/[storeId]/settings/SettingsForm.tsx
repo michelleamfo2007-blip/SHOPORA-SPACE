@@ -10,6 +10,7 @@ import { toast } from "sonner"
 import { updateStoreBrandingAction } from "@/server/actions/store"
 import { MediaUploader } from "@/components/dashboard/MediaUploader"
 import { BRAND_COLORS, getStoreAccent } from "@/lib/store-brand"
+import { defaultPrivacyPolicy, defaultReturnPolicy } from "@/lib/store-policies"
 
 export function SettingsForm({ store }: { store: any }) {
   const router = useRouter()
@@ -37,6 +38,8 @@ export function SettingsForm({ store }: { store: any }) {
   const [heroHeadline, setHeroHeadline] = useState(store.heroHeadline || "")
   const [heroSubtext, setHeroSubtext] = useState(store.heroSubtext || "")
   const [aboutText, setAboutText] = useState(store.aboutText || "")
+  const [privacyPolicy, setPrivacyPolicy] = useState(store.privacyPolicy || "")
+  const [returnPolicy, setReturnPolicy] = useState(store.returnPolicy || "")
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -59,6 +62,8 @@ export function SettingsForm({ store }: { store: any }) {
       formData.append("heroHeadline", heroHeadline)
       formData.append("heroSubtext", heroSubtext)
       formData.append("aboutText", aboutText)
+      formData.append("privacyPolicy", privacyPolicy)
+      formData.append("returnPolicy", returnPolicy)
       
       await updateStoreBrandingAction(store.id, formData)
       
@@ -205,6 +210,53 @@ export function SettingsForm({ store }: { store: any }) {
             placeholder="Who you are and why customers love your products. Shown on your homepage."
           />
         </div>
+      </div>
+
+      <div className="grid gap-6">
+        <div className="border-b pb-2">
+          <h3 className="text-lg font-medium">Store policies</h3>
+          <p className="text-sm text-stone-500">
+            Shown on your store&apos;s Privacy and Returns pages. Leave empty to use Shopora&apos;s standard wording with your store name.
+          </p>
+        </div>
+
+        {[
+          {
+            label: "Privacy policy",
+            value: privacyPolicy,
+            set: setPrivacyPolicy,
+            template: defaultPrivacyPolicy({ name, contactEmail, whatsappNumber }),
+          },
+          {
+            label: "Returns & refunds policy",
+            value: returnPolicy,
+            set: setReturnPolicy,
+            template: defaultReturnPolicy({ name, contactEmail, whatsappNumber }),
+          },
+        ].map((policy) => (
+          <div key={policy.label} className="grid gap-2">
+            <div className="flex items-center justify-between gap-3">
+              <Label>{policy.label}</Label>
+              <button
+                type="button"
+                onClick={() => {
+                  if (policy.value.trim() && !confirm("Replace what you've written with the template?")) return
+                  policy.set(policy.template)
+                }}
+                className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Start from our template
+              </button>
+            </div>
+            <Textarea
+              value={policy.value}
+              onChange={(e) => policy.set(e.target.value)}
+              rows={8}
+              maxLength={8000}
+              placeholder="Write your own, or tap “Start from our template” and edit it."
+            />
+          </div>
+        ))}
       </div>
 
       <div className="grid gap-6">

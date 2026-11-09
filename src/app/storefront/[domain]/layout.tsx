@@ -163,6 +163,7 @@ export default async function StorefrontLayout({
               <li><Link href={`${basePath}/pages/shipping`} className="hover:text-stone-950">Delivery</Link></li>
               <li><Link href={`${basePath}/pages/refunds`} className="hover:text-stone-950">Returns</Link></li>
               <li><Link href={`${basePath}/pages/faq`} className="hover:text-stone-950">FAQs</Link></li>
+              <li><Link href={`${basePath}/pages/privacy`} className="hover:text-stone-950">Privacy</Link></li>
             </ul>
           </div>
         </div>

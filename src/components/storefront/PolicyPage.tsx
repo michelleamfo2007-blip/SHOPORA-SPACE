@@ -57,3 +57,25 @@ export function PolicyPage({
 }
 
 export { DropdownSection as PolicySection } from "@/components/DropdownSection"
+
+/**
+ * A seller-written policy. Blank lines split paragraphs; a short first line with no full stop
+ * (e.g. "What we collect") is shown as a heading.
+ */
+export function PolicyText({ text }: { text: string }) {
+  const blocks = text.trim().split(/\n\s*\n/)
+  return (
+    <article className="space-y-6 py-8 text-[15px] leading-relaxed text-stone-700">
+      {blocks.map((block, i) => {
+        const [first, ...rest] = block.split("\n")
+        const isHeading = rest.length > 0 && first.trim().length <= 60 && !/[.!?:]$/.test(first.trim())
+        return (
+          <section key={i}>
+            {isHeading && <h2 className="mb-1.5 font-display text-2xl text-stone-950">{first.trim()}</h2>}
+            <p className="whitespace-pre-line">{isHeading ? rest.join("\n") : block}</p>
+          </section>
+        )
+      })}
+    </article>
+  )
+}
