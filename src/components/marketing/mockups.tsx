@@ -118,6 +118,93 @@ export function VerifyScreen() {
   )
 }
 
+/** A small street map of Accra (Osu → East Legon) drawn in SVG, styled like a navigation app. */
+function RiderMap() {
+  const block = "#f7f5f0"
+  return (
+    <svg viewBox="0 0 200 112" className="absolute inset-0 h-full w-full" aria-hidden>
+      <rect width="200" height="112" fill="#ebe7df" />
+
+      {/* City blocks */}
+      {[
+        [6, 6, 30, 22], [42, 6, 34, 16], [84, 4, 26, 24], [118, 6, 30, 18], [156, 4, 38, 20],
+        [6, 36, 26, 26], [40, 30, 30, 22], [124, 32, 28, 22], [160, 30, 34, 26],
+        [8, 78, 28, 28], [44, 86, 36, 20], [92, 80, 30, 26], [134, 70, 26, 18], [168, 66, 26, 22],
+      ].map(([x, y, w, h], i) => (
+        <rect key={i} x={x} y={y} width={w} height={h} rx="2" fill={block} />
+      ))}
+
+      {/* Park and lagoon */}
+      <rect x="80" y="32" width="36" height="28" rx="4" fill="#d9e6cf" />
+      <circle cx="90" cy="42" r="3" fill="#c6dab8" />
+      <circle cx="104" cy="50" r="4" fill="#c6dab8" />
+      <path d="M128 112 C 140 96, 160 98, 172 92 C 184 86, 192 92, 200 88 L200 112 Z" fill="#cfe1ec" />
+
+      {/* Main roads: grey casing under white */}
+      <g fill="none" strokeLinecap="round">
+        <path d="M0 70 C 50 66, 90 72, 130 60 S 180 34, 200 28" stroke="#d8d2c6" strokeWidth="9" />
+        <path d="M0 70 C 50 66, 90 72, 130 60 S 180 34, 200 28" stroke="#fffdf8" strokeWidth="6.5" />
+        <path d="M38 0 L 42 112" stroke="#d8d2c6" strokeWidth="6" />
+        <path d="M38 0 L 42 112" stroke="#ffffff" strokeWidth="4" />
+        <path d="M152 0 L 156 112" stroke="#d8d2c6" strokeWidth="6" />
+        <path d="M152 0 L 156 112" stroke="#ffffff" strokeWidth="4" />
+        <path d="M0 28 L 200 26" stroke="#ffffff" strokeWidth="2.5" />
+        <path d="M78 0 L 80 112" stroke="#ffffff" strokeWidth="2.5" />
+        <path d="M116 0 L 120 112" stroke="#ffffff" strokeWidth="2.5" />
+      </g>
+
+      {/* Area names */}
+      <g fontSize="6" fontFamily="ui-sans-serif, system-ui" fill="#8a8275" letterSpacing="0.6">
+        <text x="8" y="100">OSU</text>
+        <text x="158" y="64">EAST LEGON</text>
+        <text x="86" y="23">AIRPORT</text>
+      </g>
+
+      {/* Route with white casing, and the rider's position */}
+      <path
+        d="M26 80 C 40 70, 60 68, 90 68 S 128 62, 140 52 S 160 32, 172 30"
+        fill="none"
+        stroke="#ffffff"
+        strokeWidth="5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M26 80 C 40 70, 60 68, 90 68 S 128 62, 140 52 S 160 32, 172 30"
+        fill="none"
+        stroke="#1c1917"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+      />
+      <circle cx="98" cy="67" r="5" fill="#2563eb" fillOpacity="0.18" />
+      <circle cx="98" cy="67" r="2.6" fill="#2563eb" stroke="#ffffff" strokeWidth="1.2" />
+
+      {/* Pickup pin */}
+      <g transform="translate(26 80)">
+        <circle r="4.5" fill="#1c1917" stroke="#ffffff" strokeWidth="1.5" />
+        <circle r="1.6" fill="#ffffff" />
+      </g>
+      <g transform="translate(6 84)">
+        <rect width="30" height="11" rx="5.5" fill="#1c1917" />
+        <text x="15" y="7.6" textAnchor="middle" fontSize="6" fontWeight="600" fill="#ffffff" fontFamily="ui-sans-serif, system-ui">
+          Pickup
+        </text>
+      </g>
+
+      {/* Customer pin (teardrop) */}
+      <g transform="translate(172 30)">
+        <path d="M0 0 C -6 -7, -7 -10, -7 -13 A 7 7 0 1 1 7 -13 C 7 -10, 6 -7, 0 0 Z" fill="#b45309" stroke="#ffffff" strokeWidth="1.2" />
+        <circle cy="-13" r="2.6" fill="#ffffff" />
+      </g>
+      <g transform="translate(128 36)">
+        <rect width="36" height="11" rx="5.5" fill="#b45309" />
+        <text x="18" y="7.6" textAnchor="middle" fontSize="6" fontWeight="600" fill="#ffffff" fontFamily="ui-sans-serif, system-ui">
+          Customer
+        </text>
+      </g>
+    </svg>
+  )
+}
+
 export function RiderScreen() {
   return (
     <>
@@ -141,19 +228,8 @@ export function RiderScreen() {
         <p className="text-[8px] text-stone-600">
           <span className="text-stone-400">DROPOFF</span> East Legon
         </p>
-        <div className="relative mt-2 h-[104px] overflow-hidden rounded-lg bg-[#e9eee4]">
-          <svg viewBox="0 0 200 104" className="absolute inset-0 h-full w-full">
-            <path d="M0 74 L60 58 L112 66 L200 30" stroke="#fff" strokeWidth="7" fill="none" />
-            <path d="M42 0 L56 104" stroke="#fff" strokeWidth="5" fill="none" />
-            <path d="M132 0 L150 104" stroke="#fff" strokeWidth="5" fill="none" />
-            <path d="M48 60 Q102 40 152 38" stroke="#1c1917" strokeWidth="2" strokeDasharray="4 3" fill="none" />
-          </svg>
-          <span className="absolute left-6 top-12 rounded-full bg-[#1c1917] px-1.5 py-0.5 text-[7px] font-semibold text-white">
-            Pickup
-          </span>
-          <span className="absolute right-6 top-5 rounded-full bg-[#b45309] px-1.5 py-0.5 text-[7px] font-semibold text-white">
-            Customer
-          </span>
+        <div className="relative mt-2 h-[112px] overflow-hidden rounded-lg">
+          <RiderMap />
         </div>
         <p className="mt-1.5 text-[8px] text-stone-500">7.2 km · ~22 mins · You keep GHS 27.20</p>
         <div className="mt-1.5 rounded-full bg-[#1c1917] py-2 text-center text-[9px] font-semibold text-white">
