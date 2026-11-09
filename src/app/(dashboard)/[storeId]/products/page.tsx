@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { db } from "@/lib/db"
 import { Button } from "@/components/ui/button"
+import { productPublicUrl } from "@/lib/share-kit"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Package, Plus } from "lucide-react"
 
@@ -58,12 +59,13 @@ export default async function ProductsPage({ params }: { params: Promise<{ store
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Inventory</th>
                   <th className="px-6 py-4 text-right">Price</th>
+                  <th className="px-6 py-4 text-right">Share</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {store.products.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-slate-500 font-medium">
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-medium">
                       No products found. Add your first product!
                     </td>
                   </tr>
@@ -101,6 +103,18 @@ export default async function ProductsPage({ params }: { params: Promise<{ store
                           <Link href={`/${store.id}/products/${product.id}`} className="block font-extrabold text-slate-900">
                             {store.currency} {price.toFixed(2)}
                           </Link>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <a
+                            href={`https://wa.me/?text=${encodeURIComponent(
+                              `${product.name} · ${store.currency} ${price.toFixed(2)}\nOrder here: ${productPublicUrl(store.slug, product.id)}`
+                            )}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center rounded-full border border-emerald-600/30 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                          >
+                            WhatsApp
+                          </a>
                         </td>
                       </tr>
                     )

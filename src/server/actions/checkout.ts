@@ -10,6 +10,7 @@ import { NewOrderEmail } from "@/emails/NewOrderEmail"
 import { OrderReceivedEmail } from "@/emails/OrderReceivedEmail"
 import { inAccraBounds, isAccraArea, quoteShoporaDelivery } from "@/lib/shopora-delivery"
 import { pushToStoreMembers } from "@/lib/push"
+import { sendOrderAlertOnWhatsApp } from "@/lib/whatsapp"
 
 const variantSelect = {
   id: true,
@@ -380,6 +381,16 @@ export async function processCheckoutAction(formData: FormData) {
     body: `${firstName} placed order ${orderNumber}. Check the payment and verify it.`,
     data: { screen: "order", orderId: order.id },
   })
+
+  if (store.whatsappOrderAlerts && store.whatsappNumber) {
+    await sendOrderAlertOnWhatsApp({
+      sellerPhone: store.whatsappNumber,
+      orderNumber,
+      storeName: store.name,
+      amount: `${store.currency} ${totalAmount.toFixed(2)}`,
+      customerName: `${firstName} ${lastName}`.trim(),
+    })
+  }
 
   return { orderId: order.id, orderNumber, trackingToken }
 }

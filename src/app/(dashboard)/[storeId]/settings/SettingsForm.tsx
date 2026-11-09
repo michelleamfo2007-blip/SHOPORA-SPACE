@@ -12,7 +12,7 @@ import { MediaUploader } from "@/components/dashboard/MediaUploader"
 import { BRAND_COLORS, getStoreAccent } from "@/lib/store-brand"
 import { defaultPrivacyPolicy, defaultReturnPolicy } from "@/lib/store-policies"
 
-export function SettingsForm({ store }: { store: any }) {
+export function SettingsForm({ store, whatsappAlertsAvailable }: { store: any; whatsappAlertsAvailable: boolean }) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   
@@ -38,6 +38,7 @@ export function SettingsForm({ store }: { store: any }) {
   const [heroHeadline, setHeroHeadline] = useState(store.heroHeadline || "")
   const [heroSubtext, setHeroSubtext] = useState(store.heroSubtext || "")
   const [aboutText, setAboutText] = useState(store.aboutText || "")
+  const [whatsappOrderAlerts, setWhatsappOrderAlerts] = useState<boolean>(!!store.whatsappOrderAlerts)
   const [privacyPolicy, setPrivacyPolicy] = useState(store.privacyPolicy || "")
   const [returnPolicy, setReturnPolicy] = useState(store.returnPolicy || "")
 
@@ -55,6 +56,7 @@ export function SettingsForm({ store }: { store: any }) {
       formData.append("primaryColor", primaryColor)
       formData.append("instagramHandle", instagramHandle)
       formData.append("whatsappNumber", whatsappNumber)
+      formData.append("whatsappOrderAlerts", String(whatsappOrderAlerts))
       formData.append("tiktokHandle", tiktokHandle)
       formData.append("snapchatHandle", snapchatHandle)
       formData.append("contactEmail", contactEmail)
@@ -279,6 +281,22 @@ export function SettingsForm({ store }: { store: any }) {
               onChange={e => setWhatsappNumber(e.target.value)} 
               placeholder="e.g. +233 24 123 4567"
             />
+            <label className="mt-1 flex items-start gap-2 text-sm text-stone-700">
+              <input
+                type="checkbox"
+                checked={whatsappOrderAlerts}
+                onChange={(e) => setWhatsappOrderAlerts(e.target.checked)}
+                className="mt-0.5 h-4 w-4"
+              />
+              <span>
+                Get new orders on WhatsApp
+                <span className="block text-xs text-stone-500">
+                  {whatsappAlertsAvailable
+                    ? "We'll message this number for every new website order."
+                    : "Coming soon. Turn it on now and alerts start as soon as Shopora's WhatsApp line is live."}
+                </span>
+              </span>
+            </label>
           </div>
           <div className="grid gap-2">
             <Label>Instagram Link</Label>

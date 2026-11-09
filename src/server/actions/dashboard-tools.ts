@@ -9,6 +9,7 @@ import { inviteTeamMember, removeTeamEntry } from "@/lib/team"
 import { updateCustomerNotes } from "@/lib/customer-notes"
 import { setMonthlyGoal } from "@/lib/sales-goal"
 import { changeStorePlan, featureGate } from "@/lib/store-plan"
+import { createTillSale, getTillSummary, type TillSaleInput } from "@/lib/pos"
 
 export async function recordManualOrderAction(storeId: string, input: ManualOrderInput) {
   const access = await getStoreAccess(storeId)
@@ -20,6 +21,17 @@ export async function recordManualOrderAction(storeId: string, input: ManualOrde
   revalidatePath(`/${storeId}/orders`)
   revalidatePath(`/${storeId}`)
   return { success: true as const, orderId: result.order.id }
+}
+
+export async function tillSaleAction(storeId: string, input: TillSaleInput) {
+  const access = await getStoreAccess(storeId)
+  if ("error" in access) return { error: access.error }
+  const locked = await featureGate(storeId, "pos")
+  if (locked) return { error: locked }
+  const result = await createTillSale(storeId, input)
+  if ("error" in result) return { error: result.error }
+  revalidatePath(`/${storeId}/orders`)
+  return { ...result, summary: await getTillSummary(storeId) }
 }
 
 export async function bulkUpdateProductsAction(storeId: string, updates: BulkUpdate[]) {

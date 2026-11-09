@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/auth"
 import { db } from "@/lib/db"
 import { DashboardNav } from "@/components/dashboard/nav"
+import { StoreSwitcher } from "@/components/dashboard/StoreSwitcher"
 import { ExternalLink } from "lucide-react"
 import { SubscriptionGuard } from "@/components/dashboard/SubscriptionGuard"
 import { Toaster } from "sonner"
@@ -49,12 +50,20 @@ export default async function DashboardLayout({
     }
   }
 
+  const myStores = (
+    await db.storeMember.findMany({
+      where: { userId: session.user.id, NOT: { store: { slug: { startsWith: "draft-" } } } },
+      orderBy: { createdAt: "asc" },
+      select: { role: true, store: { select: { id: true, name: true, logoUrl: true } } },
+    })
+  ).map((m) => ({ ...m.store, role: m.role }))
+
   return (
     <div className="flex min-h-screen flex-col bg-stone-50 text-stone-950 lg:flex-row">
       <div className="hidden w-60 border-r border-stone-200 bg-stone-50 lg:block">
         <div className="flex h-full max-h-screen flex-col">
-          <div className="flex h-14 items-center px-5">
-            <p className="truncate text-sm font-semibold">{storeMember.store.name}</p>
+          <div className="flex h-14 items-center px-3">
+            <StoreSwitcher currentId={storeId} stores={myStores} />
           </div>
           <div className="flex-1 overflow-auto px-3 pb-6">
             <DashboardNav storeId={storeId} role={storeMember.role} />
@@ -66,7 +75,9 @@ export default async function DashboardLayout({
         <header className="sticky top-0 z-40 flex h-14 flex-shrink-0 items-center justify-between border-b border-stone-200 bg-stone-50 px-4 md:px-6">
           <div className="flex items-center gap-2">
             <DashboardNav storeId={storeId} role={storeMember.role} isMobileMenu />
-            <p className="text-sm font-semibold lg:hidden">{storeMember.store.name}</p>
+            <div className="max-w-[55vw] lg:hidden">
+              <StoreSwitcher currentId={storeId} stores={myStores} />
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <a

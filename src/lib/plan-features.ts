@@ -7,6 +7,7 @@ export type PlanName = (typeof PLAN_ORDER)[number]
 
 export const PLAN_FEATURES = {
   manualOrders: { label: "Record WhatsApp, Instagram & walk-in orders", plan: "Professional" },
+  pos: { label: "Shop till (POS) for walk-in sales", plan: "Professional" },
   paymentReminders: { label: "WhatsApp payment reminders", plan: "Professional" },
   shareKit: { label: "Share kit for WhatsApp Status & Instagram", plan: "Professional" },
   customerNotes: { label: "Customer notes & tags", plan: "Professional" },

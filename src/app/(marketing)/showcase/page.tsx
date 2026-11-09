@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { ArrowRight, ArrowUpRight } from "lucide-react"
 import { db } from "@/lib/db"
 import { isSubscriptionLapsed } from "@/lib/subscription"
@@ -7,9 +8,14 @@ import { Footer } from "@/components/marketing/footer"
 
 export const revalidate = 300
 
+/** Hidden until there are enough finished stores to show off. Set to true to bring the page back. */
+const SHOWCASE_ENABLED = false
+
 const visibleWithPhotos = { status: "ACTIVE", visibility: "VISIBLE", images: { isEmpty: false } } as const
 
 export default async function ShowcasePage() {
+  if (!SHOWCASE_ENABLED) redirect("/")
+
   const stores = await db.store.findMany({
     where: { status: "ACTIVE", products: { some: visibleWithPhotos } },
     orderBy: { createdAt: "desc" },

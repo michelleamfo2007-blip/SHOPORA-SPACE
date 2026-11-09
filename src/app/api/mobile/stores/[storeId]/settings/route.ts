@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import { requireMobileStoreAccess } from "@/lib/mobile-auth"
 import { STORE_SETTING_FIELDS, updateStoreSettings, type StoreSettingsInput } from "@/lib/store-settings"
 import { defaultPrivacyPolicy, defaultReturnPolicy } from "@/lib/store-policies"
+import { isWhatsAppConfigured } from "@/lib/whatsapp"
 
 const EDITABLE = [
   "name",
@@ -22,6 +23,7 @@ const EDITABLE = [
   "announcementText",
   "privacyPolicy",
   "returnPolicy",
+  "whatsappOrderAlerts",
   "slug",
 ] as const
 
@@ -40,6 +42,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
     canEdit: access.role === "OWNER" || access.role === "ADMIN",
     settings: store,
     templates: { privacyPolicy: defaultPrivacyPolicy(store), returnPolicy: defaultReturnPolicy(store) },
+    whatsappAlertsAvailable: isWhatsAppConfigured(),
   })
 }
 
@@ -59,6 +62,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ storeI
       input[field] = body[field] == null ? null : String(body[field])
     }
   }
+  if (typeof body.whatsappOrderAlerts === "boolean") input.whatsappOrderAlerts = body.whatsappOrderAlerts
 
   try {
     await updateStoreSettings(storeId, input)

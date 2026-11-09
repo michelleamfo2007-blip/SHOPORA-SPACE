@@ -22,6 +22,7 @@ import {
   X,
   FileSpreadsheet,
   UserPlus,
+  Calculator,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -60,6 +61,7 @@ export function DashboardNav({ storeId, role, isMobileMenu }: DashboardNavProps)
       label: "Sales",
       routes: [
         { href: `/${storeId}/orders`, label: "Orders", icon: ShoppingCart, active: pathname === `/${storeId}/orders` },
+        { href: `/${storeId}/pos`, label: "Shop till", icon: Calculator, active: pathname === `/${storeId}/pos` },
         { href: `/${storeId}/customers`, label: "Customers", icon: Users, active: pathname === `/${storeId}/customers` },
         { href: `/${storeId}/shipping`, label: "Delivery", icon: Truck, active: pathname === `/${storeId}/shipping` },
         { href: `/${storeId}/discounts`, label: "Discounts", icon: Ticket, active: pathname === `/${storeId}/discounts` },

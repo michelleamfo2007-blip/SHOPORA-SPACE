@@ -9,7 +9,6 @@ const links = [
   { href: "/#app", label: "App" },
   { href: "/#payments", label: "Payments" },
   { href: "/#pricing", label: "Pricing" },
-  { href: "/showcase", label: "Showcase" },
 ];
 
 function Logo() {

@@ -22,6 +22,7 @@ export const TRIAL_PACKAGES = [
     features: [
       "Everything in Starter",
       "Up to 50 products",
+      "Shop till (POS) for your physical shop",
       "Record WhatsApp, Instagram & walk-in orders",
       "WhatsApp payment reminders",
       "Share kit for WhatsApp Status & Instagram",

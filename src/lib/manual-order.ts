@@ -14,8 +14,15 @@ export type ManualOrderSource = (typeof MANUAL_ORDER_SOURCES)[number]["value"]
 
 export const ORDER_SOURCE_LABELS: Record<string, string> = {
   WEBSITE: "Website",
+  POS: "Shop till",
   ...Object.fromEntries(MANUAL_ORDER_SOURCES.map((s) => [s.value, s.label])),
 }
+
+/** Name used for till sales where the seller doesn't take the customer's details. */
+export const WALK_IN_CUSTOMER_NAME = "Walk-in customer"
+
+/** How a till sale was paid. Only set by the POS, never by the manual-order form. */
+type TillSale = { paymentMethod: string; amountTendered: number | null }
 
 export type ManualOrderInput = {
   items: { variantId: string; quantity: number; price?: number | null }[]
@@ -63,7 +70,7 @@ export async function listSellableVariants(storeId: string) {
  * Records a sale made outside the website (WhatsApp, Instagram, walk-in…). Stock is taken
  * the same way checkout does, so the website never oversells what was sold in person.
  */
-export async function createManualOrder(storeId: string, input: ManualOrderInput) {
+export async function createManualOrder(storeId: string, input: ManualOrderInput, till?: TillSale) {
   const name = input.customer.name?.trim() ?? ""
   if (name.length < 2) return { error: "Enter the customer's name." }
   const phone = input.customer.phone?.trim() || null
@@ -73,7 +80,9 @@ export async function createManualOrder(storeId: string, input: ManualOrderInput
   const email = input.customer.email?.trim().toLowerCase() || null
   if (email && !EMAIL_RE.test(email)) return { error: "Enter a valid email address or leave it empty." }
 
-  const source = (MANUAL_ORDER_SOURCES.find((s) => s.value === input.source)?.value ?? "OTHER") as ManualOrderSource
+  const source = till
+    ? "POS"
+    : ((MANUAL_ORDER_SOURCES.find((s) => s.value === input.source)?.value ?? "OTHER") as ManualOrderSource)
   const deliveryFee = Math.max(0, Number(input.deliveryFee) || 0)
   const notes = input.notes?.trim().slice(0, 500) || null
   const address = input.deliveryAddress?.trim().slice(0, 300) || null
@@ -133,7 +142,9 @@ export async function createManualOrder(storeId: string, input: ManualOrderInput
           OR: [...(email ? [{ email }] : []), ...(phone ? [{ phone }] : [])],
         },
       })
-    : null
+    : name === WALK_IN_CUSTOMER_NAME
+      ? await db.customer.findFirst({ where: { storeId, name: WALK_IN_CUSTOMER_NAME, phone: null, email: null } })
+      : null
   if (!customer) {
     customer = await db.customer.create({ data: { storeId, name, phone, email } })
   } else if (!customer.phone && phone) {
@@ -161,28 +172,34 @@ export async function createManualOrder(storeId: string, input: ManualOrderInput
           orderNumber: `ORD-${Date.now().toString().slice(-6)}`,
           totalAmount,
           shippingAmount: deliveryFee,
-          status: input.paid ? "PROCESSING" : "PENDING",
+          status: till ? "DELIVERED" : input.paid ? "PROCESSING" : "PENDING",
           shippingAddress: address,
           deliveryMethod: "VENDOR",
           stockReserved: true,
           source,
           notes,
+          tillPaymentMethod: till?.paymentMethod ?? null,
+          amountTendered: till?.amountTendered ?? null,
           orderItems: {
             create: lines.map((l) => ({ variantId: l.variantId, quantity: l.quantity, price: l.price, costPrice: l.costPrice })),
           },
           payments: {
             create: {
               provider: "MANUAL_TRANSFER",
-              status: input.paid ? "COMPLETED" : "PENDING",
+              status: input.paid || till ? "COMPLETED" : "PENDING",
               amount: totalAmount,
-              reference: `Recorded by seller · ${ORDER_SOURCE_LABELS[source]}`,
+              reference: till ? `Shop till · ${till.paymentMethod}` : `Recorded by seller · ${ORDER_SOURCE_LABELS[source]}`,
             },
           },
         },
-        select: { id: true, orderNumber: true },
+        select: { id: true, orderNumber: true, totalAmount: true, createdAt: true },
       })
     })
-    return { success: true as const, order }
+    return {
+      success: true as const,
+      order,
+      lines: lines.map((l) => ({ name: l.name, quantity: l.quantity, price: l.price })),
+    }
   } catch (err) {
     if (err instanceof OutOfStockError) return { error: `${err.itemName} just ran out. Update the quantity and try again.` }
     console.error("Failed to record manual order", err)

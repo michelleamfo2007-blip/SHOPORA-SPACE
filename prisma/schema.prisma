@@ -61,6 +61,8 @@ enum OrderSource {
   WALK_IN
   PHONE
   OTHER
+  /// Sold at the seller's physical shop through the Shopora till
+  POS
 }
 
 enum PaymentProvider {
@@ -161,6 +163,8 @@ model Store {
 
   /// Sales target for the current month, shown on the seller's home screen
   monthlyGoal    Float?
+  /// Send new-order alerts to the store's WhatsApp number (needs the WhatsApp Business API set up)
+  whatsappOrderAlerts Boolean @default(false)
 
   status         StoreStatus @default(ACTIVE)
   createdAt      DateTime    @default(now())
@@ -492,6 +496,9 @@ model Order {
   source          OrderSource @default(WEBSITE)
   /// Seller's private note on the order
   notes           String?
+  /// Till sales: how the customer paid (CASH, MOMO, CARD, BANK) and cash handed over
+  tillPaymentMethod String?
+  amountTendered  Float?
   trackingToken   String?     @unique
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt

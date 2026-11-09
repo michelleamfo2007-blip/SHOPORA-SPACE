@@ -21,7 +21,7 @@ export function isStoreManager(role: string | null | undefined) {
 }
 
 /** Dashboard sections (path after /[storeId]/) staff may open. */
-export const STAFF_SECTIONS = ["orders", "products", "categories", "inventory", "customers", "reviews", "support", "guide"]
+export const STAFF_SECTIONS = ["orders", "pos", "products", "categories", "inventory", "customers", "reviews", "support", "guide"]
 
 export function staffCanOpen(section: string) {
   return STAFF_SECTIONS.includes(section)

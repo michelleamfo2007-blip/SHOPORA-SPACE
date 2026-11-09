@@ -1,6 +1,7 @@
 import { db } from "@/lib/db"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SettingsForm } from "./SettingsForm"
+import { isWhatsAppConfigured } from "@/lib/whatsapp"
 import { Settings } from "lucide-react"
 
 export default async function SettingsPage({ params }: { params: Promise<{ storeId: string }> }) {
@@ -31,7 +32,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ store
           <p className="text-sm text-slate-500 mt-1">Update your store information, colors, and logo.</p>
         </CardHeader>
         <CardContent className="p-6">
-          <SettingsForm store={store} />
+          <SettingsForm store={store} whatsappAlertsAvailable={isWhatsAppConfigured()} />
         </CardContent>
       </Card>
     </div>

@@ -47,7 +47,6 @@ export function Footer() {
               <li><Link href="/#app" className="hover:text-white">The app</Link></li>
               <li><Link href="/#payments" className="hover:text-white">Payments</Link></li>
               <li><Link href="/#pricing" className="hover:text-white">Pricing</Link></li>
-              <li><Link href="/showcase" className="hover:text-white">Showcase</Link></li>
             </ul>
           </div>
           <div>
