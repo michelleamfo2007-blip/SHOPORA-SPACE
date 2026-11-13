@@ -36,10 +36,12 @@ export default function proxy(req: NextRequest) {
     hostname.endsWith(".vercel.app") // Vercel preview/production domains pass through
 
   const path = url.pathname
+  // Rewrites must carry the query string over, or pages lose filters, links and form values.
+  const search = url.search
 
   // 1. Rewrite for the main platform (Marketing pages, Dashboard, Auth)
   if (isPlatformDomain) {
-    return NextResponse.rewrite(new URL(`${path === "/" ? "" : path}`, req.url))
+    return NextResponse.rewrite(new URL(`${path}${search}`, req.url))
   }
 
   // 2. Rewrite everything else to `/storefront/[domain]/[path]` dynamic route
@@ -53,6 +55,6 @@ export default function proxy(req: NextRequest) {
     domainParam = hostname.replace(`.${rootDomain}`, "")
   }
   
-  return NextResponse.rewrite(new URL(`/storefront/${domainParam}${path}`, req.url))
+  return NextResponse.rewrite(new URL(`/storefront/${domainParam}${path}${search}`, req.url))
 }
 
