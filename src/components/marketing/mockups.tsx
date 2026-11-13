@@ -2,13 +2,21 @@ import type { ReactNode } from "react"
 
 /** Device frames and screens drawn in CSS so the landing page mockups stay crisp and on-brand. */
 
-export function Phone({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function Phone({
+  children,
+  className = "",
+  screenClassName = "bg-[#faf8f5] px-4 pb-3 pt-11 text-[#1c1917]",
+}: {
+  children: ReactNode
+  className?: string
+  screenClassName?: string
+}) {
   return (
     <div
       className={`relative w-[236px] shrink-0 rounded-[2.6rem] bg-[#12100e] p-[9px] shadow-[0_50px_100px_-40px_rgba(18,16,14,0.65),inset_0_0_0_1px_rgba(255,255,255,0.08)] ${className}`}
     >
       <div className="absolute left-1/2 top-[18px] z-10 h-[18px] w-[72px] -translate-x-1/2 rounded-full bg-[#12100e]" />
-      <div className="h-[480px] overflow-hidden rounded-[2.05rem] bg-[#faf8f5] px-4 pb-3 pt-11 text-[#1c1917]">
+      <div className={`relative h-[480px] overflow-hidden rounded-[2.05rem] ${screenClassName}`}>
         {children}
       </div>
     </div>
