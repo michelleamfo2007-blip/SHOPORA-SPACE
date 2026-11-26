@@ -2,7 +2,7 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 import { useCart } from "@/lib/cart";
-import { ShoppingBag, X, Plus, Minus } from "lucide-react";
+import { ShoppingBag, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 function subscribeToNothing() {
@@ -44,7 +44,7 @@ export function CartDrawer({ currency, basePath }: CartDrawerProps) {
     >
       <ShoppingBag className="h-5 w-5" strokeWidth={1.5} />
       {totalItems > 0 && (
-        <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center bg-[var(--store-ink)] px-1 text-[10px] font-medium text-[#f7f3ec]">
+        <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center bg-[var(--store-gold)] px-1 text-[10px] font-medium text-[#f7f3ec]">
           {totalItems > 99 ? "99+" : totalItems}
         </span>
       )}
@@ -71,10 +71,13 @@ export function CartDrawer({ currency, basePath }: CartDrawerProps) {
         aria-hidden={!isOpen}
         inert={!isOpen}
       >
-        <div className="flex h-16 items-center justify-between border-b border-[var(--store-line)] px-6">
-          <h2 className="font-display text-2xl text-[var(--store-ink)]">
-            Your bag {totalItems > 0 && <span className="font-store text-sm text-stone-500">({totalItems})</span>}
-          </h2>
+        <div className="flex items-center justify-between border-b border-[var(--store-line)] px-6 py-4">
+          <div>
+            <p className="store-kicker">The bag</p>
+            <h2 className="font-display text-2xl italic text-[var(--store-ink)]">
+              {totalItems > 0 ? `${totalItems} piece${totalItems === 1 ? "" : "s"}` : "Your bag"}
+            </h2>
+          </div>
           <button
             onClick={cart.closeDrawer}
             className="-mr-2 flex h-10 w-10 items-center justify-center text-stone-500 hover:text-stone-900"
@@ -101,10 +104,10 @@ export function CartDrawer({ currency, basePath }: CartDrawerProps) {
               </button>
             </div>
           ) : (
-            <ul className="divide-y divide-stone-200">
+            <ul className="divide-y divide-[var(--store-line)]">
               {cart.items.map((item) => (
                 <li key={item.variantId} className="flex gap-4 py-6">
-                  <div className="h-28 w-22 shrink-0 overflow-hidden bg-stone-100">
+                  <div className="h-28 w-22 shrink-0 overflow-hidden bg-[#efe8dc] ring-1 ring-[var(--store-line)]">
                     {item.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
@@ -117,28 +120,28 @@ export function CartDrawer({ currency, basePath }: CartDrawerProps) {
 
                   <div className="flex min-w-0 flex-1 flex-col">
                     <div className="flex justify-between gap-3">
-                      <h3 className="line-clamp-2 text-sm text-stone-900">{item.name}</h3>
-                      <p className="whitespace-nowrap text-sm text-stone-900">{money(currency, item.price * item.quantity)}</p>
+                      <h3 className="line-clamp-2 font-display text-lg italic leading-tight text-[var(--store-ink)]">{item.name}</h3>
+                      <p className="whitespace-nowrap text-sm text-[var(--store-gold)]">{money(currency, item.price * item.quantity)}</p>
                     </div>
-                    <p className="mt-1 text-xs text-stone-500">{money(currency, item.price)} each</p>
+                    <p className="mt-1 text-xs text-[var(--store-muted)]">{money(currency, item.price)} each</p>
 
                     <div className="mt-auto flex items-center justify-between pt-3">
-                      <div className="flex items-center border border-stone-300">
+                      <div className="flex items-center gap-3 text-[var(--store-ink)]">
                         <button
                           onClick={() => cart.updateQuantity(item.variantId, item.quantity - 1)}
-                          className="flex h-8 w-8 items-center justify-center text-stone-600 hover:text-stone-900"
+                          className="text-lg leading-none text-[var(--store-muted)] hover:text-[var(--store-ink)]"
                           aria-label="Decrease quantity"
                         >
-                          <Minus className="h-3 w-3" />
+                          −
                         </button>
-                        <span className="w-8 text-center text-sm">{item.quantity}</span>
+                        <span className="min-w-5 text-center text-sm">{item.quantity}</span>
                         <button
                           onClick={() => cart.updateQuantity(item.variantId, item.quantity + 1)}
                           disabled={typeof item.maxQuantity === "number" && item.quantity >= item.maxQuantity}
-                          className="flex h-8 w-8 items-center justify-center text-stone-600 hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-30"
+                          className="text-lg leading-none text-[var(--store-muted)] hover:text-[var(--store-ink)] disabled:cursor-not-allowed disabled:opacity-30"
                           aria-label="Increase quantity"
                         >
-                          <Plus className="h-3 w-3" />
+                          +
                         </button>
                       </div>
                       {typeof item.maxQuantity === "number" && item.quantity >= item.maxQuantity && (

@@ -248,10 +248,10 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       </section>
 
       {store.aboutText && (
-        <section className="mt-20 bg-[#1c1917] text-[#f7f3ec] md:mt-28">
+        <section className="store-ink-band mt-20 bg-[#1c1917] text-[#f7f3ec] md:mt-28">
           <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 md:grid-cols-[1fr_2fr] md:gap-20 md:px-8 md:py-24">
             <div>
-              <p className="store-kicker !text-[#c8a165]">The house</p>
+              <p className="store-kicker">The house</p>
               <h2 className="mt-4 font-display text-4xl md:text-6xl">Our story</h2>
             </div>
             <p className="font-display text-2xl italic leading-snug text-white/75 md:text-3xl">{store.aboutText}</p>
@@ -287,11 +287,11 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
 
       {whatsappHref && (
         <section className="mx-auto max-w-7xl px-5 pt-20 md:px-8 md:pt-28">
-          <div className="border border-[var(--store-ink)] bg-[var(--store-ink)] px-6 py-16 text-center text-[#f7f3ec] md:py-20">
-            <p className="store-kicker !text-[#c8a165]">Private appointment</p>
+          <div className="store-ink-band border border-[var(--store-ink)] bg-[var(--store-ink)] px-6 py-16 text-center text-[#f7f3ec] md:py-20">
+            <p className="store-kicker">Private appointment</p>
             <h2 className="mt-4 font-display text-4xl md:text-5xl">Need help choosing?</h2>
             <p className="mx-auto mt-4 max-w-md text-sm text-white/70">Send us a message and we&apos;ll help you find the right piece, check sizes, or arrange delivery.</p>
-            <a href={whatsappHref} target="_blank" rel="noreferrer" className="store-btn mt-8 !border-[#f7f3ec] !bg-[#f7f3ec] !text-[var(--store-ink)] hover:!bg-[#c8a165] hover:!border-[#c8a165] hover:!text-[#1c1917]">
+            <a href={whatsappHref} target="_blank" rel="noreferrer" className="store-btn mt-8 !border-[#f7f3ec] !bg-[#f7f3ec] !text-[var(--store-ink)] hover:!bg-[var(--store-gold)] hover:!border-[var(--store-gold)] hover:!text-[#f7f3ec]">
               Chat on WhatsApp
             </a>
           </div>

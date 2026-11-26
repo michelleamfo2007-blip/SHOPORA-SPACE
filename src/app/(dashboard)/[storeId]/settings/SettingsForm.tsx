@@ -146,7 +146,7 @@ export function SettingsForm({ store, whatsappAlertsAvailable }: { store: any; w
               )
             })}
           </div>
-          <p className="text-xs text-stone-500">Used for buttons, the announcement bar and stars on your store.</p>
+          <p className="text-xs text-stone-500">Used for buttons, sale prices, the announcement bar and details on your storefront.</p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">

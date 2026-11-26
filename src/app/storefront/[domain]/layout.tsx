@@ -95,8 +95,8 @@ export default async function StorefrontLayout({
   return (
     <div className={`store-atelier ${fontClasses} flex min-h-screen w-full max-w-[100vw] flex-col overflow-x-clip`} style={themeStyle}>
       {store.announcementText && (
-        <div className="border-b border-[var(--store-line)] bg-[var(--store-ink)] px-4 py-2.5 text-center text-[10px] uppercase tracking-[0.28em] text-[#f7f3ec]">
-          {store.announcementText}
+        <div className="bg-[var(--store-gold)] px-4 py-1.5 text-center text-[10px] tracking-[0.14em] text-[#f7f3ec]">
+          <p className="mx-auto line-clamp-1 max-w-5xl">{store.announcementText}</p>
         </div>
       )}
 
@@ -135,10 +135,10 @@ export default async function StorefrontLayout({
 
       <main className="flex-1">{children}</main>
 
-      <footer className="mt-24 border-t-2 border-[#c8a165]/50 bg-[#1c1917] text-[#f7f3ec]">
+      <footer className="mt-24 border-t-2 border-[var(--store-gold)] bg-[#1c1917] text-[#f7f3ec]">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 md:grid-cols-[1.5fr_1fr_1fr] md:px-8 md:py-20">
           <div>
-            <p className="store-kicker !text-[#c8a165]">The house of</p>
+            <p className="store-kicker">The house of</p>
             <p className="mt-3 font-display text-4xl italic">{store.name}</p>
             {store.description && <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/60">{store.description}</p>}
             <div className="mt-8">
@@ -147,29 +147,29 @@ export default async function StorefrontLayout({
           </div>
 
           <div>
-            <p className="store-kicker !text-[#c8a165]">Shop</p>
+            <p className="store-kicker">Shop</p>
             <ul className="mt-5 space-y-3 text-sm text-white/65">
-              <li><Link href={`${basePath}/products`} className="hover:text-[#c8a165]">The collection</Link></li>
-              {hasCategories && <li><Link href={`${basePath}/categories`} className="hover:text-[#c8a165]">Collections</Link></li>}
-              {whatsappHref && <li><a href={whatsappHref} target="_blank" rel="noreferrer" className="hover:text-[#c8a165]">Order on WhatsApp</a></li>}
+              <li><Link href={`${basePath}/products`} className="hover:text-[var(--store-gold)]">The collection</Link></li>
+              {hasCategories && <li><Link href={`${basePath}/categories`} className="hover:text-[var(--store-gold)]">Collections</Link></li>}
+              {whatsappHref && <li><a href={whatsappHref} target="_blank" rel="noreferrer" className="hover:text-[var(--store-gold)]">Order on WhatsApp</a></li>}
             </ul>
           </div>
 
           <div>
-            <p className="store-kicker !text-[#c8a165]">Atelier</p>
+            <p className="store-kicker">Atelier</p>
             <ul className="mt-5 space-y-3 text-sm text-white/65">
-              <li><Link href={`${basePath}/pages/shipping`} className="hover:text-[#c8a165]">Delivery</Link></li>
-              <li><Link href={`${basePath}/pages/refunds`} className="hover:text-[#c8a165]">Returns</Link></li>
-              <li><Link href={`${basePath}/pages/faq`} className="hover:text-[#c8a165]">FAQs</Link></li>
-              <li><Link href={`${basePath}/pages/privacy`} className="hover:text-[#c8a165]">Privacy</Link></li>
+              <li><Link href={`${basePath}/pages/shipping`} className="hover:text-[var(--store-gold)]">Delivery</Link></li>
+              <li><Link href={`${basePath}/pages/refunds`} className="hover:text-[var(--store-gold)]">Returns</Link></li>
+              <li><Link href={`${basePath}/pages/faq`} className="hover:text-[var(--store-gold)]">FAQs</Link></li>
+              <li><Link href={`${basePath}/pages/privacy`} className="hover:text-[var(--store-gold)]">Privacy</Link></li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-[#c8a165]/30">
+        <div className="border-t border-white/10">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 text-[11px] uppercase tracking-[0.18em] text-white/45 md:px-8">
             <p>© {new Date().getFullYear()} {store.name}</p>
-            <a href="https://shopora.space" target="_blank" rel="noreferrer" className="hover:text-[#c8a165]">
+            <a href="https://shopora.space" target="_blank" rel="noreferrer" className="hover:text-[var(--store-gold)]">
               Powered by Shopora
             </a>
           </div>

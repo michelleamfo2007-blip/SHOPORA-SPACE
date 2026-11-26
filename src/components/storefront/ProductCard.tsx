@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Heart, Plus } from "lucide-react"
+import { Heart } from "lucide-react"
 import { useCart } from "@/lib/cart"
 import { useFavorites } from "@/lib/favorites"
 
@@ -96,39 +96,30 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
         )}
 
         {(soldOut || onSale) && (
-          <span className="absolute left-3 top-3 border border-[var(--store-line)] bg-[var(--store-paper)] px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-[var(--store-ink)]">
+          <span className="absolute left-3 top-3 font-display text-sm italic tracking-wide text-white drop-shadow">
             {soldOut ? "Sold out" : "Sale"}
           </span>
         )}
 
         <button
           onClick={handleToggleFavorite}
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center border border-[var(--store-line)] bg-[var(--store-paper)]/90 text-[var(--store-ink)] opacity-100 transition-opacity lg:opacity-0 lg:group-hover:opacity-100"
+          className="absolute right-2.5 top-2.5 text-white drop-shadow-md transition-opacity lg:opacity-0 lg:group-hover:opacity-100"
           aria-label={isFaved ? "Remove from favourites" : "Add to favourites"}
         >
-          <Heart className={`h-4 w-4 ${isFaved ? "fill-stone-900" : ""}`} strokeWidth={1.5} />
+          <Heart className={`h-4 w-4 ${isFaved ? "fill-white" : ""}`} strokeWidth={1.5} />
         </button>
 
         {soldOut ? null : hasChoices ? (
-          <span className="absolute inset-x-3 bottom-3 hidden translate-y-2 border border-[var(--store-line)] bg-[var(--store-paper)] py-3 text-center text-[11px] uppercase tracking-[0.22em] text-[var(--store-ink)] opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:block">
+          <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent px-3 pb-2.5 pt-8 text-center text-[10px] uppercase tracking-[0.18em] text-white lg:pb-3 lg:opacity-0 lg:transition lg:duration-300 lg:group-hover:opacity-100">
             Choose options
           </span>
         ) : (
           <button
             onClick={handleAddToCart}
-            className="absolute inset-x-3 bottom-3 hidden translate-y-2 border border-[var(--store-ink)] bg-[var(--store-paper)] py-3 text-[11px] uppercase tracking-[0.22em] text-[var(--store-ink)] opacity-0 transition duration-300 hover:bg-[var(--store-ink)] hover:text-[#f7f3ec] group-hover:translate-y-0 group-hover:opacity-100 lg:block"
-          >
-            Add to bag
-          </button>
-        )}
-
-        {!hasChoices && !soldOut && (
-          <button
-            onClick={handleAddToCart}
-            className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center border border-[var(--store-line)] bg-[var(--store-paper)] text-[var(--store-ink)] lg:hidden"
+            className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent px-3 pb-2.5 pt-8 text-center text-[10px] uppercase tracking-[0.18em] text-white lg:pb-3 lg:opacity-0 lg:transition lg:duration-300 lg:group-hover:opacity-100"
             aria-label="Add to bag"
           >
-            <Plus className="h-4 w-4" strokeWidth={1.75} />
+            Add to bag
           </button>
         )}
       </div>
