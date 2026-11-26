@@ -89,7 +89,7 @@ export function ProductsClient({
 
   return (
     <div className="mx-auto max-w-7xl px-5 md:px-8">
-      <div className="sticky top-16 z-30 -mx-5 mb-6 border-b border-[var(--store-line)] bg-[#f7f3ec] px-5 py-3 md:top-[5.25rem] md:mx-0 md:px-0">
+      <div className="-mx-5 mb-6 border-b border-[var(--store-line)] px-5 py-3 md:mx-0 md:px-0">
         <div className="flex items-center justify-between gap-4">
           <label className="relative flex flex-1 items-center md:max-w-sm">
             <Search className="pointer-events-none absolute left-0 h-4 w-4 text-stone-500" strokeWidth={1.5} />

@@ -194,7 +194,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
               <div className="flex h-full items-center justify-center font-display text-2xl italic text-stone-400">{product.name}</div>
             )}
             {(soldOut || onSale) && (
-              <span className="absolute left-4 top-4 font-display text-lg italic tracking-wide text-white drop-shadow">
+              <span className="absolute left-4 top-4 bg-[var(--store-paper)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--store-ink)]">
                 {soldOut ? "Sold out" : "Sale"}
               </span>
             )}

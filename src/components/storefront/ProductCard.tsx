@@ -96,7 +96,7 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
         )}
 
         {(soldOut || onSale) && (
-          <span className="absolute left-3 top-3 font-display text-sm italic tracking-wide text-white drop-shadow">
+          <span className="absolute left-3 top-3 bg-[var(--store-paper)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--store-ink)]">
             {soldOut ? "Sold out" : "Sale"}
           </span>
         )}
@@ -110,13 +110,13 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
         </button>
 
         {soldOut ? null : hasChoices ? (
-          <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent px-3 pb-2.5 pt-8 text-center text-[10px] uppercase tracking-[0.18em] text-white lg:pb-3 lg:opacity-0 lg:transition lg:duration-300 lg:group-hover:opacity-100">
+          <span className="absolute inset-x-3 bottom-3 bg-[var(--store-paper)] py-2 text-center text-[10px] font-medium uppercase tracking-[0.16em] text-[var(--store-ink)] lg:opacity-0 lg:transition lg:duration-300 lg:group-hover:opacity-100">
             Choose options
           </span>
         ) : (
           <button
             onClick={handleAddToCart}
-            className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent px-3 pb-2.5 pt-8 text-center text-[10px] uppercase tracking-[0.18em] text-white lg:pb-3 lg:opacity-0 lg:transition lg:duration-300 lg:group-hover:opacity-100"
+            className="absolute inset-x-3 bottom-3 bg-[var(--store-paper)] py-2 text-center text-[10px] font-medium uppercase tracking-[0.16em] text-[var(--store-ink)] lg:opacity-0 lg:transition lg:duration-300 lg:group-hover:opacity-100"
             aria-label="Add to bag"
           >
             Add to bag
