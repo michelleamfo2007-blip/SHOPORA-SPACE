@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Store } from "lucide-react";
+import { BlackFridayAccessButton } from "./BlackFridayAccessButton";
 
 export default async function SellersPage() {
   const stores = await db.store.findMany({
@@ -43,13 +44,14 @@ export default async function SellersPage() {
                   <th className="px-6 py-4 font-medium">Owner Email</th>
                   <th className="px-6 py-4 font-medium">Products</th>
                   <th className="px-6 py-4 font-medium">Status</th>
+                  <th className="px-6 py-4 font-medium">Black Friday</th>
                   <th className="px-6 py-4 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {stores.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-slate-500">
+                    <td colSpan={7} className="px-6 py-8 text-center text-slate-500">
                       No sellers found on the platform yet.
                     </td>
                   </tr>
@@ -73,10 +75,22 @@ export default async function SellersPage() {
                           </span>
                         )}
                       </td>
+                      <td className="px-6 py-4">
+                        {store.blackFridayAccess ? (
+                          <span className="inline-flex items-center rounded-full bg-stone-900 px-2.5 py-1 text-xs font-bold text-white">
+                            {store.blackFridayOn ? "Live" : "Granted"}
+                          </span>
+                        ) : (
+                          <span className="text-xs font-medium text-slate-400">Off</span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 text-right">
-                        <Button variant="outline" size="sm" className="font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200">
-                          Suspend
-                        </Button>
+                        <div className="flex items-center justify-end gap-2">
+                          <BlackFridayAccessButton storeId={store.id} granted={store.blackFridayAccess} />
+                          <Button variant="outline" size="sm" className="font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200">
+                            Suspend
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))

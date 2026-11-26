@@ -66,7 +66,7 @@ export default async function DashboardLayout({
             <StoreSwitcher currentId={storeId} stores={myStores} />
           </div>
           <div className="flex-1 overflow-auto px-3 pb-6">
-            <DashboardNav storeId={storeId} role={storeMember.role} />
+            <DashboardNav storeId={storeId} role={storeMember.role} blackFridayAccess={storeMember.store.blackFridayAccess} />
           </div>
         </div>
       </div>
@@ -74,7 +74,7 @@ export default async function DashboardLayout({
       <div className="flex min-h-screen w-full max-w-full flex-1 flex-col overflow-x-clip">
         <header className="sticky top-0 z-40 flex h-14 flex-shrink-0 items-center justify-between border-b border-stone-200 bg-stone-50 px-4 md:px-6">
           <div className="flex items-center gap-2">
-            <DashboardNav storeId={storeId} role={storeMember.role} isMobileMenu />
+            <DashboardNav storeId={storeId} role={storeMember.role} isMobileMenu blackFridayAccess={storeMember.store.blackFridayAccess} />
             <div className="max-w-[55vw] lg:hidden">
               <StoreSwitcher currentId={storeId} stores={myStores} />
             </div>

@@ -23,6 +23,7 @@ import {
   FileSpreadsheet,
   UserPlus,
   Calculator,
+  Percent,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -32,9 +33,10 @@ interface DashboardNavProps {
   storeId: string
   role: StoreRole
   isMobileMenu?: boolean
+  blackFridayAccess?: boolean
 }
 
-export function DashboardNav({ storeId, role, isMobileMenu }: DashboardNavProps) {
+export function DashboardNav({ storeId, role, isMobileMenu, blackFridayAccess }: DashboardNavProps) {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
 
@@ -65,6 +67,9 @@ export function DashboardNav({ storeId, role, isMobileMenu }: DashboardNavProps)
         { href: `/${storeId}/customers`, label: "Customers", icon: Users, active: pathname === `/${storeId}/customers` },
         { href: `/${storeId}/shipping`, label: "Delivery", icon: Truck, active: pathname === `/${storeId}/shipping` },
         { href: `/${storeId}/discounts`, label: "Discounts", icon: Ticket, active: pathname === `/${storeId}/discounts` },
+        ...(blackFridayAccess
+          ? [{ href: `/${storeId}/black-friday`, label: "Black Friday", icon: Percent, active: pathname === `/${storeId}/black-friday` }]
+          : []),
         { href: `/${storeId}/reviews`, label: "Reviews", icon: Star, active: pathname === `/${storeId}/reviews` },
       ],
     },

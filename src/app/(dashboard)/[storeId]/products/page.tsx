@@ -32,6 +32,13 @@ export default async function ProductsPage({ params }: { params: Promise<{ store
           <p className="text-slate-500 mt-1">Manage your store's products and inventory.</p>
         </div>
         <div className="flex items-center gap-2">
+          {store.blackFridayAccess && (
+            <Link href={`/${store.id}/black-friday`}>
+              <Button variant="outline" className="rounded-xl px-5 py-2.5 font-bold">
+                Black Friday prices
+              </Button>
+            </Link>
+          )}
           <Link href={`/${store.id}/products/bulk`}>
             <Button variant="outline" className="rounded-xl px-5 py-2.5 font-bold">
               Bulk edit prices &amp; stock

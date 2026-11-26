@@ -3,6 +3,7 @@ import { getStoreByHost } from "@/lib/tenant";
 import { db } from "@/lib/db";
 import { getStorefrontBasePath } from "@/lib/storefront";
 import { ProductsClient } from "./ProductsClient";
+import { blackFridayIsLive, withSaleOnProduct } from "@/lib/black-friday";
 
 export default async function ProductsPage({
   params,
@@ -45,7 +46,7 @@ export default async function ProductsPage({
         <div className="store-rule mx-auto mt-6 w-16" />
       </div>
       <ProductsClient
-        products={products.map((p) => ({ ...p, categorySlugs: p.categories.map((c) => c.slug) }))}
+        products={products.map((p) => ({ ...withSaleOnProduct(p, blackFridayIsLive(store)), categorySlugs: p.categories.map((c) => c.slug) }))}
         categories={categories}
         currency={store.currency}
         basePath={basePath}

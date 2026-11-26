@@ -5,6 +5,7 @@ import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
 import { getStorefrontBasePath, whatsappLink } from "@/lib/storefront"
 import { ProductCard } from "@/components/storefront/ProductCard"
+import { blackFridayIsLive, withSaleOnProduct } from "@/lib/black-friday"
 
 export default async function StorefrontHomePage({ params }: { params: Promise<{ domain: string }> }) {
   const { domain } = await params
@@ -42,6 +43,8 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
     }),
   ])
 
+  const saleLive = blackFridayIsLive(store)
+  const shopProducts = products.map((p) => withSaleOnProduct(p, saleLive))
   const collections = categories.filter((cat) => cat.products.length > 0)
   const ribbon = [
     `Welcome to ${store.name}`,
@@ -56,7 +59,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
     store.description ||
     "Shop online and pay with Mobile Money or bank transfer."
   const whatsappHref = store.whatsappNumber ? whatsappLink(store.whatsappNumber, `Hi ${store.name}, I'd like to place an order.`) : null
-  const coverTiles = products
+  const coverTiles = shopProducts
     .map((p) => ({
       id: p.id,
       name: p.name,
@@ -195,7 +198,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
               <p className="store-kicker">The collection</p>
               <h2 className="mt-3 font-display text-4xl md:text-5xl">New arrivals</h2>
           </div>
-          {products.length > 0 && (
+          {shopProducts.length > 0 && (
             <Link href={`${basePath}/products`} className="group hidden items-center gap-2 text-sm text-stone-900 sm:flex">
               <span className="border-b border-stone-900 pb-0.5">View all</span>
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={1.5} />
@@ -203,10 +206,10 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
           )}
         </div>
 
-        {products.length > 0 ? (
+        {shopProducts.length > 0 ? (
           <>
             <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4">
-              {products.map((product) => (
+              {shopProducts.map((product) => (
                 <ProductCard key={product.id} product={product} currency={store.currency} basePath={basePath} />
               ))}
             </div>

@@ -5,6 +5,7 @@ import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
 import { getStorefrontBasePath } from "@/lib/storefront"
 import { ProductClient } from "./ProductClient"
+import { blackFridayIsLive, withSaleOnProduct } from "@/lib/black-friday"
 
 type Props = { params: Promise<{ domain: string; productId: string }> }
 
@@ -94,12 +95,14 @@ export default async function ProductPage({ params }: Props) {
   // Prefer items from the same collection, topped up with the newest pieces.
   const related = [...sameCategory, ...latest.filter((p) => !sameCategory.some((s) => s.id === p.id))].slice(0, 4)
 
+  const saleLive = blackFridayIsLive(store)
+
   return (
     <ProductClient
-      product={product}
+      product={withSaleOnProduct(product, saleLive)}
       store={store}
       basePath={basePath}
-      related={related}
+      related={related.map((p) => withSaleOnProduct(p, saleLive))}
       domain={domain}
       reviews={reviews.map((r) => ({
         id: r.id,

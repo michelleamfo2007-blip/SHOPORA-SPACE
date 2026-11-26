@@ -7,6 +7,7 @@ import { useCart } from "@/lib/cart"
 import { useFavorites } from "@/lib/favorites"
 import { ProductCard } from "@/components/storefront/ProductCard"
 import { StorefrontReviewForm } from "@/components/storefront/StorefrontReviewForm"
+import { blackFridayIsLive } from "@/lib/black-friday"
 
 function money(currency: string, amount: number) {
   return `${currency} ${amount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -79,8 +80,9 @@ export function ProductClient({ product, store, basePath, related, domain, revie
     ...(product.images || []),
     ...(product.variants?.map((v: any) => v.imageUrl).filter(Boolean) || [])
   ])) as string[]
-  // On phones the gallery is a swipe strip; start it on the photo for the chosen option.
-  const mobileImages = activeImageUrl ? [activeImageUrl, ...allImages.filter((img) => img !== activeImageUrl)] : allImages
+  const saleLive = blackFridayIsLive(store)
+  const saved = onSale ? compareAtPrice - price : 0
+  const percentOff = onSale && compareAtPrice > 0 ? Math.round((1 - price / compareAtPrice) * 100) : 0
 
   const ratingAvg = reviews.length ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0
   const [showReviewForm, setShowReviewForm] = useState(false)
@@ -148,7 +150,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
   const deliveryText = store.deliveryPolicy || "The delivery fee is paid to the rider when your order arrives. Message us for delivery times to your area."
 
   return (
-    <div className="mx-auto max-w-7xl px-5 pb-28 pt-6 md:px-8 md:pb-0 md:pt-10">
+    <div className="mx-auto max-w-7xl px-5 pb-28 pt-6 md:px-8 md:pt-10">
       <nav className="store-kicker mb-8 md:mb-12">
         <Link href={`${basePath}/`} className="hover:text-[var(--store-ink)]">Home</Link>
         <span className="mx-2">/</span>
@@ -161,22 +163,57 @@ export function ProductClient({ product, store, basePath, related, domain, revie
         )}
       </nav>
 
-      <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
-        <MobileGallery
-          key={variantKey}
-          images={mobileImages}
-          name={product.name}
-          badge={soldOut ? "Sold out" : onSale ? "Sale" : null}
-        />
-        <div className="hidden min-w-0 flex-col-reverse gap-4 self-start md:flex lg:flex-row">
+      <div className="grid gap-10">
+        <div>
+          <div className="relative -mx-5 bg-black md:mx-0">
+            {activeImageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={activeImageUrl}
+                alt={product.name}
+                className="mx-auto h-[min(48vh,520px)] w-auto max-w-full object-contain"
+              />
+            ) : (
+              <div className="flex h-[min(48vh,520px)] items-center justify-center font-display text-2xl italic text-white/40">
+                {product.name}
+              </div>
+            )}
+            {(onSale || saleLive || soldOut) && (
+              <div className="flex items-center justify-between gap-4 bg-[var(--store-gold)] px-4 py-3 text-[#f7f3ec] md:px-5">
+                <div className="min-w-0">
+                  <p className="truncate text-[11px] font-semibold uppercase tracking-[0.18em]">{store.name}</p>
+                  {onSale ? (
+                    <p className="mt-0.5 text-sm font-semibold md:text-base">Save {money(store.currency, saved)}</p>
+                  ) : soldOut ? (
+                    <p className="mt-0.5 text-sm font-semibold">Sold out</p>
+                  ) : (
+                    <p className="mt-0.5 text-sm font-semibold">Sale on now</p>
+                  )}
+                </div>
+                <div className="shrink-0 text-right">
+                  {saleLive && (
+                    <span className="inline-block bg-black px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em]">
+                      Black Friday
+                    </span>
+                  )}
+                  {percentOff > 0 && (
+                    <p className={`text-[11px] uppercase tracking-[0.16em] ${saleLive ? "mt-1" : ""}`}>
+                      {percentOff}% off
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           {allImages.length > 1 && (
-            <div className="scrollbar-none flex gap-3 overflow-x-auto lg:w-20 lg:shrink-0 lg:flex-col lg:overflow-visible">
+            <div className="mt-3 flex gap-2 overflow-x-auto">
               {allImages.map((img, idx) => (
                 <button
                   key={img}
                   onClick={() => setPickedImage({ key: variantKey, url: img })}
-                  className={`aspect-[3/4] w-16 shrink-0 overflow-hidden bg-[#efe8dc] transition lg:w-full ${
-                    activeImageUrl === img ? "ring-1 ring-[var(--store-gold)] ring-offset-2 ring-offset-[var(--store-paper)]" : "opacity-50 hover:opacity-100"
+                  className={`aspect-[3/4] w-14 shrink-0 overflow-hidden bg-[#efe8dc] md:w-16 ${
+                    activeImageUrl === img ? "outline outline-1 outline-offset-2 outline-black" : "opacity-60 hover:opacity-100"
                   }`}
                   aria-label={`Show image ${idx + 1}`}
                 >
@@ -186,22 +223,9 @@ export function ProductClient({ product, store, basePath, related, domain, revie
               ))}
             </div>
           )}
-          <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#efe8dc] ring-1 ring-[var(--store-line)]">
-            {activeImageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={activeImageUrl} alt={product.name} className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full items-center justify-center font-display text-2xl italic text-stone-400">{product.name}</div>
-            )}
-            {(soldOut || onSale) && (
-              <span className="absolute left-4 top-4 bg-[var(--store-paper)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--store-ink)]">
-                {soldOut ? "Sold out" : "Sale"}
-              </span>
-            )}
-          </div>
         </div>
 
-        <div className="min-w-0 md:sticky md:top-28 md:self-start">
+        <div className="mx-auto w-full max-w-2xl min-w-0">
           <div className="flex items-start justify-between gap-4">
             <h1 className="break-words font-display text-4xl leading-[0.95] tracking-tight md:text-6xl">{product.name}</h1>
             <button
@@ -294,7 +318,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
             </div>
           )}
 
-          <div className="mt-8 hidden items-center gap-5 md:flex">
+          <div className="mt-8 flex items-center gap-5">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setQuantity(Math.max(1, qty - 1))}
@@ -313,13 +337,6 @@ export function ProductClient({ product, store, basePath, related, domain, revie
                 +
               </button>
             </div>
-            <button
-              onClick={handleAddToCart}
-              disabled={soldOut}
-              className="store-btn h-13 flex-1 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {soldOut ? "Sold out" : "Add to bag"}
-            </button>
             <button
               onClick={() => toggleFavorite(product.id)}
               className="text-[var(--store-ink)]"
@@ -466,72 +483,16 @@ export function ProductClient({ product, store, basePath, related, domain, revie
         </section>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-[var(--store-line)] bg-[#f7f3ec] px-5 py-3 md:hidden">
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-xs text-stone-500">{product.name}</p>
-          <p className="text-sm text-stone-900">{money(store.currency, price)}</p>
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--store-line)] bg-[#f7f3ec] px-5 py-3 md:px-8">
+        <div className="mx-auto max-w-7xl">
+          <button
+            onClick={handleAddToCart}
+            disabled={soldOut}
+            className="store-btn h-12 w-full disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {soldOut ? "Sold out" : "Add to bag"}
+          </button>
         </div>
-        <button
-          onClick={() => toggleFavorite(product.id)}
-          className="flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--store-line)]"
-          aria-label={isFaved ? "Remove from favourites" : "Add to favourites"}
-        >
-          <Heart className={`h-5 w-5 ${isFaved ? "fill-stone-900" : ""}`} strokeWidth={1.5} />
-        </button>
-        <button
-          onClick={handleAddToCart}
-          disabled={soldOut}
-          className="store-btn h-12 px-7 disabled:opacity-40"
-        >
-          {soldOut ? "Sold out" : "Add to bag"}
-        </button>
-      </div>
-    </div>
-  )
-}
-
-/** Phone gallery: swipe between photos with dots underneath. */
-function MobileGallery({ images, name, badge }: { images: string[]; name: string; badge: string | null }) {
-  const [index, setIndex] = useState(0)
-
-  return (
-    <div className="-mx-5 md:hidden">
-      <div
-        className="scrollbar-none flex snap-x snap-mandatory overflow-x-auto"
-        onScroll={(e) => {
-          const el = e.currentTarget
-          setIndex(Math.round(el.scrollLeft / el.clientWidth))
-        }}
-      >
-        {images.length === 0 ? (
-          <div className="flex aspect-[4/5] w-full shrink-0 items-center justify-center bg-[#efebe4] font-display text-2xl italic text-stone-400">
-            {name}
-          </div>
-        ) : (
-          images.map((img, i) => (
-            <div key={img} className="relative aspect-[4/5] w-full shrink-0 snap-center bg-[#efebe4]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={img} alt={i === 0 ? name : ""} className="h-full w-full object-cover" loading={i === 0 ? "eager" : "lazy"} />
-            </div>
-          ))
-        )}
-      </div>
-      <div className="relative">
-        {badge && (
-          <span className="absolute bottom-[calc(100%+12px)] left-4 bg-[#faf8f5] px-3 py-1.5 text-[10px] uppercase tracking-[0.2em]">
-            {badge}
-          </span>
-        )}
-        {images.length > 1 && (
-          <div className="flex justify-center gap-1.5 pt-3">
-            {images.map((img, i) => (
-              <span
-                key={img}
-                className={`h-1.5 rounded-full transition-all ${i === index ? "w-5 bg-stone-900" : "w-1.5 bg-stone-300"}`}
-              />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   )

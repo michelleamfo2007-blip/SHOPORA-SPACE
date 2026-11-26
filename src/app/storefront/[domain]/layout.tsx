@@ -11,6 +11,7 @@ import { CartDrawer } from "@/components/storefront/CartDrawer"
 import { MobileMenu } from "@/components/storefront/MobileMenu"
 import { SocialIcons } from "@/components/storefront/SocialIcons"
 import { StoreAnalyticsTracker } from "@/components/storefront/StoreAnalyticsTracker"
+import { blackFridayIsLive } from "@/lib/black-friday"
 
 // Cormorant display font is loaded once in the root layout (--font-store-display).
 // Loading it again here breaks Turbopack / Vercel builds ("next/font/google queries have exactly one entry").
@@ -94,9 +95,11 @@ export default async function StorefrontLayout({
 
   return (
     <div className={`store-atelier ${fontClasses} flex min-h-screen w-full max-w-[100vw] flex-col overflow-x-clip`} style={themeStyle}>
-      {store.announcementText && (
+      {(store.announcementText || blackFridayIsLive(store)) && (
         <div className="bg-[var(--store-gold)] px-4 py-1.5 text-center text-[10px] tracking-[0.14em] text-[#f7f3ec]">
-          <p className="mx-auto line-clamp-1 max-w-5xl">{store.announcementText}</p>
+          <p className="mx-auto line-clamp-1 max-w-5xl">
+            {store.announcementText || "Black Friday sale on now"}
+          </p>
         </div>
       )}
 

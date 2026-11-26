@@ -166,6 +166,11 @@ model Store {
   /// Send new-order alerts to the store's WhatsApp number (needs the WhatsApp Business API set up)
   whatsappOrderAlerts Boolean @default(false)
 
+  /// Shopora must grant this before the seller can run a Black Friday sale
+  blackFridayAccess Boolean @default(false)
+  /// Seller switch: when both access and this are on, storefront uses blackFridayPrice
+  blackFridayOn     Boolean @default(false)
+
   status         StoreStatus @default(ACTIVE)
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -295,6 +300,8 @@ model Product {
   // Pricing & Inventory (Global)
   price       Float?
   compareAtPrice Float?
+  /// Sale price used only while the store's Black Friday switch is on (does not replace price)
+  blackFridayPrice Float?
   /// What the seller paid per item, for profit reports (variants inherit it unless they set their own)
   costPrice   Float?
   sku         String?
@@ -356,6 +363,8 @@ model ProductVariant {
   sku            String?
   price          Float
   compareAtPrice Float?
+  /// Sale price used only while the store's Black Friday switch is on (does not replace price)
+  blackFridayPrice Float?
   costPrice      Float?
   stockCount     Int      @default(0)
   imageUrl       String?
