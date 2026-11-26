@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { getStoreByHost } from "@/lib/tenant"
 import { db } from "@/lib/db"
 import { getStorefrontBasePath } from "@/lib/storefront"
+import { storeOffersShoporaDelivery } from "@/lib/shopora-delivery-config"
 import { CheckoutForm } from "./CheckoutForm"
 
 export default async function CheckoutPage({ params }: { params: Promise<{ domain: string }> }) {
@@ -25,7 +26,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ domai
         paymentSetting={paymentSetting} 
         deliveryPolicy={store.deliveryPolicy}
         basePath={basePath}
-        shoporaDeliveryEnabled={store.shoporaDeliveryEnabled}
+        shoporaDeliveryEnabled={storeOffersShoporaDelivery(store.shoporaDeliveryEnabled)}
       />
     </div>
   )

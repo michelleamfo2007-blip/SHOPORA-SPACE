@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { DeliveryPolicyForm } from "./DeliveryPolicyForm"
 import { ShoporaDeliveryForm } from "./ShoporaDeliveryForm"
 import { Truck } from "lucide-react"
+import { SHOPORA_DELIVERY_LIVE, SHOPORA_DELIVERY_PAUSED_MESSAGE } from "@/lib/shopora-delivery-config"
 export default async function ShippingPage({
   params
 }: {
@@ -26,16 +27,26 @@ export default async function ShippingPage({
             <Truck className="w-8 h-8 text-teal-500" />
             Delivery
           </h2>
-          <p className="text-slate-500 mt-1">Your own delivery notes, plus optional Shopora Delivery for Accra.</p>
+          <p className="text-slate-500 mt-1">
+            {SHOPORA_DELIVERY_LIVE
+              ? "Your own delivery notes, plus optional Shopora Delivery for Accra."
+              : "Tell customers how you deliver. Shopora Delivery is paused for now."}
+          </p>
         </div>
       </div>
 
-      <ShoporaDeliveryForm
-        storeId={storeId}
-        enabled={store.shoporaDeliveryEnabled}
-        pickupAddress={store.pickupAddress || ""}
-        pickupCity={store.pickupCity || "Accra"}
-      />
+      {SHOPORA_DELIVERY_LIVE ? (
+        <ShoporaDeliveryForm
+          storeId={storeId}
+          enabled={store.shoporaDeliveryEnabled}
+          pickupAddress={store.pickupAddress || ""}
+          pickupCity={store.pickupCity || "Accra"}
+        />
+      ) : (
+        <div className="rounded-xl border border-stone-200 bg-white p-6 text-sm text-stone-600">
+          {SHOPORA_DELIVERY_PAUSED_MESSAGE}
+        </div>
+      )}
 
       <DeliveryPolicyForm storeId={storeId} initialPolicy={store.deliveryPolicy || ""} />
     </div>

@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import { requireMobileStoreAccess } from "@/lib/mobile-auth"
 import { updateShoporaDeliverySettings } from "@/lib/shopora-delivery-settings"
+import { SHOPORA_DELIVERY_LIVE, SHOPORA_DELIVERY_PAUSED_MESSAGE, storeOffersShoporaDelivery } from "@/lib/shopora-delivery-config"
 
 export async function GET(req: Request, { params }: { params: Promise<{ storeId: string }> }) {
   const { storeId } = await params
@@ -16,7 +17,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ storeId:
 
   return Response.json({
     canEdit: access.role === "OWNER" || access.role === "ADMIN",
-    shoporaDeliveryEnabled: store.shoporaDeliveryEnabled,
+    shoporaDeliveryAvailable: SHOPORA_DELIVERY_LIVE,
+    shoporaDeliveryEnabled: storeOffersShoporaDelivery(store.shoporaDeliveryEnabled),
     pickupAddress: store.pickupAddress ?? "",
     pickupCity: store.pickupCity ?? "Accra",
     deliveryPolicy: store.deliveryPolicy ?? "",
@@ -35,6 +37,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ storeId
   const body = await req.json().catch(() => ({}))
 
   if (body.shoporaDelivery) {
+    if (!SHOPORA_DELIVERY_LIVE && body.shoporaDelivery.enabled === true) {
+      return Response.json({ error: SHOPORA_DELIVERY_PAUSED_MESSAGE }, { status: 400 })
+    }
     const result = await updateShoporaDeliverySettings(storeId, {
       enabled: body.shoporaDelivery.enabled === true,
       pickupAddress: String(body.shoporaDelivery.pickupAddress || ""),

@@ -10,7 +10,7 @@ export const TRIAL_PACKAGES = [
       "Your own store + the Shopora seller app",
       "Orders, stock, customers & reviews",
       "MoMo & bank payments straight to you",
-      "Shopora Delivery in Accra",
+      "Delivery notes on your store",
       "Standard support",
     ],
   },

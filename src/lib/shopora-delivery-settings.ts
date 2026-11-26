@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import { geocodeAddress, isAccraArea } from "@/lib/shopora-delivery"
+import { SHOPORA_DELIVERY_LIVE, SHOPORA_DELIVERY_PAUSED_MESSAGE } from "@/lib/shopora-delivery-config"
 
 /** Turn Shopora Delivery on/off and set the Accra pickup point. Callers must check store access + role first. */
 export async function updateShoporaDeliverySettings(
@@ -8,6 +9,9 @@ export async function updateShoporaDeliverySettings(
   input: { enabled: boolean; pickupAddress: string; pickupCity: string }
 ) {
   const enabled = input.enabled
+  if (enabled && !SHOPORA_DELIVERY_LIVE) {
+    return { error: SHOPORA_DELIVERY_PAUSED_MESSAGE }
+  }
   const pickupAddress = input.pickupAddress.trim()
   const pickupCity = input.pickupCity.trim() || "Accra"
 

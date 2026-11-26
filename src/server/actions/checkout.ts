@@ -9,6 +9,7 @@ import { DEFAULT_VARIANT_NAME } from "@/lib/product-variants"
 import { NewOrderEmail } from "@/emails/NewOrderEmail"
 import { OrderReceivedEmail } from "@/emails/OrderReceivedEmail"
 import { inAccraBounds, isAccraArea, quoteShoporaDelivery } from "@/lib/shopora-delivery"
+import { SHOPORA_DELIVERY_LIVE } from "@/lib/shopora-delivery-config"
 import { pushToStoreMembers } from "@/lib/push"
 import { sendOrderAlertOnWhatsApp } from "@/lib/whatsapp"
 
@@ -93,8 +94,8 @@ export async function processCheckoutAction(formData: FormData) {
   let riderPayout = 0
 
   if (deliveryMethod === "SHOPORA") {
-    if (!store.shoporaDeliveryEnabled || store.pickupLat == null || store.pickupLng == null) {
-      return { error: "Shopora Delivery is not available for this store right now." }
+    if (!SHOPORA_DELIVERY_LIVE || !store.shoporaDeliveryEnabled || store.pickupLat == null || store.pickupLng == null) {
+      return { error: "Shopora Delivery is not available right now. Choose store delivery instead." }
     }
     if (!(pin && inAccraBounds(pin)) && !isAccraArea(city, exactLocation)) {
       return { error: "Shopora Delivery is only available for Accra addresses right now." }

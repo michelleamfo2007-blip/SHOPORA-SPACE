@@ -3,6 +3,16 @@
  * Keep pricing/cut rates here so rider UI and terms can import without pulling `pg`.
  */
 
+/** Flip this on when Accra rider delivery is taking new jobs again. Existing SHOPORA orders still complete. */
+export const SHOPORA_DELIVERY_LIVE = false
+
+export function storeOffersShoporaDelivery(storeEnabled?: boolean | null) {
+  return SHOPORA_DELIVERY_LIVE && !!storeEnabled
+}
+
+export const SHOPORA_DELIVERY_PAUSED_MESSAGE =
+  "Shopora Delivery is paused for now. You can still write your own delivery notes for customers."
+
 export const SHOPORA_DELIVERY_CONFIG = {
   city: "Accra",
   currency: "GHS",

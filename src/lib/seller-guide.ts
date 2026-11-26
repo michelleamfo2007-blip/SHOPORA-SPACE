@@ -13,7 +13,7 @@ export const SELLER_GUIDE: GuideSection[] = [
   {
     title: "2. Choose the plan that fits",
     items: [
-      "Starter (GHS 100/month): up to 25 products, your store and the seller app, orders, stock, customers, MoMo and bank payments, Shopora Delivery in Accra.",
+      "Starter (GHS 100/month): up to 25 products, your store and the seller app, orders, stock, customers, MoMo and bank payments.",
       "Professional (GHS 200/month): up to 50 products, plus recording WhatsApp, Instagram and walk-in orders, WhatsApp payment reminders, the share kit, customer notes and tags, sales reports and a monthly goal.",
       "Business (GHS 300/month): unlimited products and every tool, including profit tracking, Excel downloads, bulk editing and staff accounts.",
     ],
@@ -55,7 +55,7 @@ export const SELLER_GUIDE: GuideSection[] = [
     title: "7. Set up delivery",
     items: [
       "Write your delivery policy: areas, fees and how long it takes.",
-      "In Accra, turn on Shopora Delivery so a Shopora rider collects from you and delivers to the customer's exact map pin.",
+      "Tell customers who delivers, which areas you cover, and how the fee is paid.",
       "Customers pay the delivery fee to the rider on arrival.",
     ],
   },

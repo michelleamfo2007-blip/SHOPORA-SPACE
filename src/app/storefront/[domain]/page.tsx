@@ -54,9 +54,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
   const subtext =
     store.heroSubtext ||
     store.description ||
-    (store.shoporaDeliveryEnabled
-      ? "Shop online, pay with Mobile Money or bank transfer, and get it delivered across Accra."
-      : "Shop online and pay with Mobile Money or bank transfer.")
+    "Shop online and pay with Mobile Money or bank transfer."
   const whatsappHref = store.whatsappNumber ? whatsappLink(store.whatsappNumber, `Hi ${store.name}, I'd like to place an order.`) : null
   const coverTiles = products
     .map((p) => ({

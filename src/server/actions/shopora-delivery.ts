@@ -11,6 +11,7 @@ import {
   type PlaceSuggestion,
 } from "@/lib/shopora-delivery"
 import { updateShoporaDeliverySettings } from "@/lib/shopora-delivery-settings"
+import { SHOPORA_DELIVERY_LIVE, SHOPORA_DELIVERY_PAUSED_MESSAGE } from "@/lib/shopora-delivery-config"
 
 export async function searchDeliveryPlacesAction(query: string): Promise<{
   suggestions: PlaceSuggestion[]
@@ -69,6 +70,9 @@ export async function quoteShoporaDeliveryAction(input: {
     },
   })
 
+  if (!SHOPORA_DELIVERY_LIVE) {
+    return { error: SHOPORA_DELIVERY_PAUSED_MESSAGE }
+  }
   if (!store?.shoporaDeliveryEnabled) {
     return { error: "This store has not turned on Shopora Delivery." }
   }
