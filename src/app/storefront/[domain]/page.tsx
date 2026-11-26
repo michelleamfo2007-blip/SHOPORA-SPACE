@@ -47,17 +47,21 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
   const shopProducts = products.map((p) => withSaleOnProduct(p, saleLive))
   const collections = categories.filter((cat) => cat.products.length > 0)
   const ribbon = [
-    `Welcome to ${store.name}`,
+    store.name,
     ...collections.map((cat) => cat.name),
     "Delivery fee paid on arrival",
     "Pay with Mobile Money or bank transfer",
     store.whatsappNumber ? "Order easily on WhatsApp" : "Every order personally confirmed",
   ]
   const headline = store.heroHeadline || store.name
-  const subtext =
-    store.heroSubtext ||
-    store.description ||
-    "Shop online and pay with Mobile Money or bank transfer."
+  const rawSubtext = (store.heroSubtext || store.description || "").trim()
+  const welcomeCopy = (text: string) => {
+    const t = text.toLowerCase().replace(/[.,!'’]/g, "").trim()
+    const n = store.name.toLowerCase()
+    return t === "welcome" || t === `welcome to ${n}` || t.startsWith(`welcome to ${n} `)
+  }
+  const subtext = rawSubtext && !welcomeCopy(rawSubtext) ? rawSubtext : null
+  const showKicker = headline.trim().toLowerCase() !== store.name.trim().toLowerCase()
   const whatsappHref = store.whatsappNumber ? whatsappLink(store.whatsappNumber, `Hi ${store.name}, I'd like to place an order.`) : null
   const coverTiles = shopProducts
     .map((p) => ({
@@ -87,8 +91,8 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
         <section className="relative">
           <div className="mx-auto grid max-w-7xl items-center gap-8 px-5 pb-10 pt-8 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:px-8 md:pb-20 md:pt-14">
             <div className="order-2 md:order-1">
-              <p className="store-kicker">Welcome</p>
-              <h1 className="mt-5 font-display text-5xl leading-[0.9] tracking-tight md:mt-6 md:text-7xl lg:text-[5.75rem]">{headline}</h1>
+              {showKicker && <p className="store-kicker">{store.name}</p>}
+              <h1 className={`${showKicker ? "mt-5" : ""} font-display text-5xl leading-[0.9] tracking-tight md:mt-6 md:text-7xl lg:text-[5.75rem]`}>{headline}</h1>
               <div className="store-rule mt-7 w-20" />
               {subtext && <p className="mt-6 max-w-md font-display text-xl italic leading-relaxed text-[var(--store-muted)] md:mt-7 md:text-2xl">{subtext}</p>}
               <div className="mt-8 md:mt-12">{actions}</div>
@@ -105,10 +109,10 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       ) : coverTiles.length > 0 ? (
         <section className="mx-auto grid max-w-7xl items-center gap-8 px-5 pb-10 pt-8 md:grid-cols-[0.9fr_1.2fr] md:gap-14 md:px-8 md:pb-20 md:pt-14">
           <div className="order-2 md:order-1">
-            <p className="store-kicker">{store.heroHeadline ? store.name : "Welcome"}</p>
-            <h1 className="mt-5 font-display text-5xl leading-[0.9] tracking-tight md:mt-6 md:text-7xl lg:text-[5.75rem]">{headline}</h1>
+            {showKicker && <p className="store-kicker">{store.name}</p>}
+            <h1 className={`${showKicker ? "mt-5" : ""} font-display text-5xl leading-[0.9] tracking-tight md:mt-6 md:text-7xl lg:text-[5.75rem]`}>{headline}</h1>
             <div className="store-rule mt-7 w-20" />
-            <p className="mt-6 max-w-md font-display text-xl italic leading-relaxed text-[var(--store-muted)] md:mt-7 md:text-2xl">{subtext}</p>
+            {subtext && <p className="mt-6 max-w-md font-display text-xl italic leading-relaxed text-[var(--store-muted)] md:mt-7 md:text-2xl">{subtext}</p>}
             <div className="mt-8 md:mt-12">{actions}</div>
           </div>
           <div
@@ -135,10 +139,10 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       ) : (
         <section className="mx-auto max-w-7xl px-5 pt-10 md:px-8 md:pt-24">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="store-kicker">Welcome</p>
-            <h1 className="mt-5 font-display text-5xl leading-[0.9] tracking-tight md:mt-6 md:text-8xl">{headline}</h1>
+            {showKicker && <p className="store-kicker">{store.name}</p>}
+            <h1 className={`${showKicker ? "mt-5" : ""} font-display text-5xl leading-[0.9] tracking-tight md:mt-6 md:text-8xl`}>{headline}</h1>
             <div className="store-rule mx-auto mt-7 w-20" />
-            <p className="mx-auto mt-6 max-w-lg font-display text-xl italic leading-relaxed text-[var(--store-muted)] md:mt-7 md:text-2xl">{subtext}</p>
+            {subtext && <p className="mx-auto mt-6 max-w-lg font-display text-xl italic leading-relaxed text-[var(--store-muted)] md:mt-7 md:text-2xl">{subtext}</p>}
             <div className="mt-8 flex justify-center md:mt-10">{actions}</div>
           </div>
         </section>

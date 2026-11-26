@@ -12,6 +12,34 @@ function money(currency: string, amount: number) {
   return `${currency} ${amount.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
+function variantTokens(variant: any): string[] {
+  const fromName = String(variant?.name || "")
+    .split(" / ")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean)
+  const fromOptions = (variant?.optionValues || []).map((ov: any) => String(ov.value || "").trim().toLowerCase()).filter(Boolean)
+  return [...new Set([...fromName, ...fromOptions])]
+}
+
+function variantHasValues(variant: any, values: string[]) {
+  const tokens = variantTokens(variant)
+  return values.every((value) => tokens.includes(value.trim().toLowerCase()))
+}
+
+function optionsFromVariant(variant: any, options: any[], fallback: Record<string, string> = {}) {
+  const next: Record<string, string> = { ...fallback }
+  for (const opt of options || []) {
+    const fromLink = variant?.optionValues?.find((ov: any) => ov.option?.name === opt.name)?.value
+    if (fromLink) {
+      next[opt.name] = fromLink
+      continue
+    }
+    const match = opt.values?.find((val: any) => variantTokens(variant).includes(String(val.value).trim().toLowerCase()))
+    if (match) next[opt.name] = match.value
+  }
+  return next
+}
+
 export type ProductReview = {
   id: string
   rating: number
@@ -57,14 +85,30 @@ export function ProductClient({ product, store, basePath, related, domain, revie
 
   const activeVariant = useMemo(() => {
     if (product.options && product.options.length > 0) {
-      const expectedName = product.options.map((opt: any) => selectedOptions[opt.name]).join(' / ')
-      return product.variants.find((v: any) => v.name === expectedName) || product.variants?.[0]
+      const wanted = product.options.map((opt: any) => selectedOptions[opt.name]).filter(Boolean)
+      const exact = product.variants.find((v: any) => variantHasValues(v, wanted))
+      if (exact) return exact
+      const colourOpt = product.options.find((opt: any) => ["color", "colour"].includes(String(opt.name).toLowerCase()))
+      const colour = colourOpt ? selectedOptions[colourOpt.name] : null
+      if (colour) {
+        const sameColour = product.variants.find((v: any) => variantHasValues(v, [colour]) && v.imageUrl)
+        if (sameColour) return sameColour
+        return product.variants.find((v: any) => variantHasValues(v, [colour])) || product.variants?.[0]
+      }
+      return product.variants?.[0]
     }
     return fallbackVariant
   }, [selectedOptions, fallbackVariant, product.options, product.variants])
 
   const variantKey = activeVariant?.id ?? "default"
-  const variantImage = activeVariant?.imageUrl || product.images?.[0] || null
+  const colourOption = product.options?.find((opt: any) => ["color", "colour"].includes(String(opt.name).toLowerCase()))
+  const selectedColour = colourOption ? selectedOptions[colourOption.name] : null
+  const colourImages = (
+    selectedColour
+      ? product.variants.filter((v: any) => variantHasValues(v, [selectedColour])).map((v: any) => v.imageUrl)
+      : product.variants?.map((v: any) => v.imageUrl)
+  ).filter(Boolean) as string[]
+  const variantImage = activeVariant?.imageUrl || colourImages[0] || product.images?.[0] || null
   const [pickedImage, setPickedImage] = useState<{ key: string; url: string } | null>(null)
   const activeImageUrl = pickedImage && pickedImage.key === variantKey ? pickedImage.url : variantImage
 
@@ -76,9 +120,25 @@ export function ProductClient({ product, store, basePath, related, domain, revie
   const variantLabel = activeVariant && activeVariant.name !== "Default" ? activeVariant.name : null
 
   const allImages = Array.from(new Set([
-    ...(product.images || []),
-    ...(product.variants?.map((v: any) => v.imageUrl).filter(Boolean) || [])
+    ...(colourImages.length ? colourImages : product.images || []),
+    ...(colourImages.length ? [] : product.variants?.map((v: any) => v.imageUrl).filter(Boolean) || []),
   ])) as string[]
+
+  function selectOption(optName: string, value: string) {
+    setPickedImage(null)
+    setSelectedOptions((prev) => {
+      const next = { ...prev, [optName]: value }
+      const wanted = (product.options || []).map((opt: any) => next[opt.name]).filter(Boolean)
+      const exact = product.variants.find((v: any) => variantHasValues(v, wanted))
+      if (exact) return optionsFromVariant(exact, product.options, next)
+      const any = product.variants.find((v: any) => variantHasValues(v, [value]))
+      if (any) return optionsFromVariant(any, product.options, next)
+      return next
+    })
+    if (typeof document !== "undefined") {
+      document.getElementById("product-photo")?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+  }
   const saleLive = blackFridayIsLive(store)
   const saved = onSale ? compareAtPrice - price : 0
   const percentOff = onSale && compareAtPrice > 0 ? Math.round((1 - price / compareAtPrice) * 100) : 0
@@ -164,7 +224,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
 
       <div className="grid gap-10">
         <div>
-          <div className="relative -mx-5 bg-black md:mx-0">
+          <div id="product-photo" className="relative -mx-5 scroll-mt-24 bg-black md:mx-0">
             {activeImageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -263,7 +323,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
                     <div className="flex flex-wrap gap-2">
                       {opt.values.map((val: any) => {
                         const isSelected = selectedOptions[opt.name] === val.value
-                        const select = () => setSelectedOptions((prev) => ({ ...prev, [opt.name]: val.value }))
+                        const select = () => selectOption(opt.name, val.value)
                         if (isColour) {
                           return (
                             <button

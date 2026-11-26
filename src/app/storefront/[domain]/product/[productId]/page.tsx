@@ -19,7 +19,9 @@ const getProduct = cache((storeId: string, productId: string) =>
       }
     },
     include: {
-      variants: true,
+      variants: {
+        include: { optionValues: { include: { option: { select: { name: true } } } } },
+      },
       categories: true,
       options: {
         include: {

@@ -118,16 +118,18 @@ export function ProductCard({ product, currency, basePath, storeName, blackFrida
       </div>
 
       {showSaleBar && (
-        <div className="flex items-center justify-between gap-2 bg-[var(--store-gold)] px-2.5 py-2 text-[#f7f3ec]">
-          <div className="min-w-0">
-            {storeName && <p className="truncate text-[9px] font-semibold uppercase tracking-[0.14em]">{storeName}</p>}
-            <p className="text-[11px] font-semibold leading-tight">Save {money(currency, saved)}</p>
-          </div>
-          <div className="shrink-0 text-right">
-            <span className="inline-block bg-black px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.12em]">
-              Black Friday
-            </span>
-            {percentOff > 0 && <p className="mt-0.5 text-[9px] uppercase tracking-[0.12em]">{percentOff}% off</p>}
+        <div className="bg-[var(--store-gold)] px-2.5 py-2 text-[#f7f3ec]">
+          {storeName && (
+            <p className="text-[9px] font-semibold uppercase leading-tight tracking-[0.08em]">{storeName}</p>
+          )}
+          <div className="mt-1 flex items-end justify-between gap-2">
+            <p className="text-[12px] font-semibold leading-none">Save {money(currency, saved)}</p>
+            <div className="shrink-0 text-right">
+              <span className="inline-block bg-black px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.08em]">
+                Black Friday
+              </span>
+              {percentOff > 0 && <p className="mt-0.5 text-[9px] uppercase tracking-[0.08em]">{percentOff}% off</p>}
+            </div>
           </div>
         </div>
       )}
