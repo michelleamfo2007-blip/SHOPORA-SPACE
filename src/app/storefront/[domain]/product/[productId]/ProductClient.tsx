@@ -318,31 +318,22 @@ export function ProductClient({ product, store, basePath, related, domain, revie
             </div>
           )}
 
-          <div className="mt-8 flex items-center gap-5">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setQuantity(Math.max(1, qty - 1))}
-                className="text-lg leading-none text-[var(--store-muted)] hover:text-[var(--store-ink)]"
-                aria-label="Decrease quantity"
-              >
-                −
-              </button>
-              <span className="min-w-5 text-center text-sm">{qty}</span>
-              <button
-                onClick={() => setQuantity(Math.min(Math.max(1, available), qty + 1))}
-                disabled={qty >= available}
-                className="text-lg leading-none text-[var(--store-muted)] hover:text-[var(--store-ink)] disabled:cursor-not-allowed disabled:opacity-30"
-                aria-label="Increase quantity"
-              >
-                +
-              </button>
-            </div>
+          <div className="mt-8 flex items-center gap-4">
             <button
-              onClick={() => toggleFavorite(product.id)}
-              className="text-[var(--store-ink)]"
-              aria-label={isFaved ? "Remove from favourites" : "Add to favourites"}
+              onClick={() => setQuantity(Math.max(1, qty - 1))}
+              className="text-lg leading-none text-[var(--store-muted)] hover:text-[var(--store-ink)]"
+              aria-label="Decrease quantity"
             >
-              <Heart className={`h-5 w-5 ${isFaved ? "fill-[var(--store-ink)]" : ""}`} strokeWidth={1.5} />
+              −
+            </button>
+            <span className="min-w-5 text-center text-sm">{qty}</span>
+            <button
+              onClick={() => setQuantity(Math.min(Math.max(1, available), qty + 1))}
+              disabled={qty >= available}
+              className="text-lg leading-none text-[var(--store-muted)] hover:text-[var(--store-ink)] disabled:cursor-not-allowed disabled:opacity-30"
+              aria-label="Increase quantity"
+            >
+              +
             </button>
           </div>
 
@@ -483,12 +474,19 @@ export function ProductClient({ product, store, basePath, related, domain, revie
         </section>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--store-line)] bg-[#f7f3ec] px-5 py-3 md:px-8">
-        <div className="mx-auto max-w-7xl">
+      <div className="fixed inset-x-0 bottom-0 z-40 bg-[#f7f3ec] px-5 py-4 md:px-8">
+        <div className="mx-auto flex max-w-7xl items-center gap-3">
+          <button
+            onClick={() => toggleFavorite(product.id)}
+            className="flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--store-ink)] text-[var(--store-ink)]"
+            aria-label={isFaved ? "Remove from favourites" : "Add to favourites"}
+          >
+            <Heart className={`h-5 w-5 ${isFaved ? "fill-[var(--store-ink)]" : ""}`} strokeWidth={1.5} />
+          </button>
           <button
             onClick={handleAddToCart}
             disabled={soldOut}
-            className="store-btn h-12 w-full disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-12 flex-1 items-center justify-center bg-[var(--store-ink)] text-[11px] uppercase tracking-[0.22em] text-[#f7f3ec] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {soldOut ? "Sold out" : "Add to bag"}
           </button>
