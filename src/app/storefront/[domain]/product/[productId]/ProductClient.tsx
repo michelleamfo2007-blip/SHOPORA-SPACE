@@ -224,7 +224,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
           )}
 
           <div className="mt-4 flex items-baseline gap-3">
-            <span className={`text-xl ${onSale ? "text-[var(--store-accent)]" : "text-stone-900"}`}>{money(store.currency, price)}</span>
+            <span className={`text-xl ${onSale ? "text-[var(--store-gold)]" : "text-[var(--store-ink)]"}`}>{money(store.currency, price)}</span>
             {onSale && <span className="text-sm text-stone-400 line-through">{money(store.currency, compareAtPrice)}</span>}
           </div>
 
@@ -312,13 +312,13 @@ export function ProductClient({ product, store, basePath, related, domain, revie
             <button
               onClick={handleAddToCart}
               disabled={soldOut}
-              className="h-13 flex-1 rounded-full bg-[var(--store-accent)] text-sm tracking-wide text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-600"
+              className="store-btn h-13 flex-1 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {soldOut ? "Sold out" : "Add to bag"}
             </button>
             <button
               onClick={() => toggleFavorite(product.id)}
-              className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-stone-300 transition-colors hover:border-stone-900"
+              className="flex h-13 w-13 shrink-0 items-center justify-center border border-[var(--store-line)] transition-colors hover:border-[var(--store-ink)]"
               aria-label={isFaved ? "Remove from favourites" : "Add to favourites"}
             >
               <Heart className={`h-5 w-5 ${isFaved ? "fill-stone-900" : ""}`} strokeWidth={1.5} />
@@ -331,14 +331,14 @@ export function ProductClient({ product, store, basePath, related, domain, revie
               onClick={(e) => { e.currentTarget.href = buildWhatsappHref(window.location.href) }}
               target="_blank"
               rel="noreferrer"
-              className="mt-3 flex h-13 w-full items-center justify-center rounded-full border border-stone-900 text-sm tracking-wide text-stone-900 transition-colors hover:bg-stone-900 hover:text-white"
+              className="store-btn-ghost mt-3 h-13 w-full"
             >
               {soldOut ? "Ask about restock on WhatsApp" : "Order on WhatsApp"}
             </a>
           )}
 
           <p className="mt-5 text-sm text-stone-500">
-            {stock > 5 && `In stock and ready to order (${stock} available).`}
+            {stock > 5 && "In stock."}
             {stock > 0 && stock <= 5 && `Only ${stock} left.`}
             {inBag > 0 && !soldOut && ` ${inBag} already in your bag.`}
             {soldOut && (whatsappHref ? "Sold out for now. Message the seller to ask about restock." : "Sold out for now.")}
@@ -462,14 +462,14 @@ export function ProductClient({ product, store, basePath, related, domain, revie
         </section>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-stone-200 bg-[#faf8f5]/95 px-5 py-3 backdrop-blur md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-[var(--store-line)] bg-[var(--store-paper)]/95 px-5 py-3 md:hidden">
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs text-stone-500">{product.name}</p>
           <p className="text-sm text-stone-900">{money(store.currency, price)}</p>
         </div>
         <button
           onClick={() => toggleFavorite(product.id)}
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-stone-300"
+          className="flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--store-line)]"
           aria-label={isFaved ? "Remove from favourites" : "Add to favourites"}
         >
           <Heart className={`h-5 w-5 ${isFaved ? "fill-stone-900" : ""}`} strokeWidth={1.5} />
@@ -477,7 +477,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
         <button
           onClick={handleAddToCart}
           disabled={soldOut}
-          className="h-12 rounded-full bg-[var(--store-accent)] px-7 text-sm tracking-wide text-white disabled:bg-stone-300 disabled:text-stone-600"
+          className="store-btn h-12 px-7 disabled:opacity-40"
         >
           {soldOut ? "Sold out" : "Add to bag"}
         </button>

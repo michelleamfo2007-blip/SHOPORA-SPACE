@@ -29,8 +29,9 @@ export default async function CategoriesPage({ params }: { params: Promise<{ dom
   return (
     <div className="mx-auto max-w-7xl px-5 md:px-8">
       <div className="pb-12 pt-12 text-center md:pt-20">
-        <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">{store.name}</p>
+        <p className="store-kicker">{store.name}</p>
         <h1 className="mt-4 font-display text-5xl md:text-7xl">Collections</h1>
+        <div className="store-rule mx-auto mt-6 w-16" />
       </div>
 
       {categories.length > 0 ? (
@@ -38,7 +39,7 @@ export default async function CategoriesPage({ params }: { params: Promise<{ dom
           {categories.map((cat) => {
             const cover = cat.products[0]?.variants[0]?.imageUrl || cat.products[0]?.images[0];
             return (
-              <Link key={cat.id} href={`${basePath}/categories/${cat.slug}`} className="group relative aspect-[4/5] overflow-hidden bg-[#efebe4]">
+              <Link key={cat.id} href={`${basePath}/categories/${cat.slug}`} className="group relative aspect-[4/5] overflow-hidden bg-[#efe8dc] ring-1 ring-[var(--store-line)]">
                 {cover ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={cover} alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]" />
@@ -58,7 +59,7 @@ export default async function CategoriesPage({ params }: { params: Promise<{ dom
           })}
         </div>
       ) : (
-        <div className="border border-dashed border-stone-300 px-6 py-20 text-center">
+        <div className="border border-[var(--store-line)] px-6 py-20 text-center">
           <p className="font-display text-3xl">Collections are coming soon</p>
           <Link href={`${basePath}/products`} className="mt-4 inline-block text-sm text-stone-600 underline underline-offset-4 hover:text-stone-900">
             Shop all products

@@ -37,15 +37,15 @@ export function MobileMenu({ storeName, basePath, hasCategories, whatsappHref }:
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="-ml-2 flex h-10 w-10 items-center justify-center text-stone-900"
+        className="-ml-2 flex h-10 w-10 items-center justify-center text-[var(--store-ink)]"
         aria-label="Open menu"
       >
         <Menu className="h-5 w-5" strokeWidth={1.5} />
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-[#faf8f5]">
-          <div className="flex h-16 items-center justify-between border-b border-stone-200 px-5">
+        <div className="fixed inset-0 z-50 flex flex-col bg-[var(--store-paper)]">
+          <div className="flex h-16 items-center justify-between border-b border-[var(--store-line)] px-5">
             <span className="font-display text-2xl">{storeName}</span>
             <button
               type="button"
@@ -62,20 +62,15 @@ export function MobileMenu({ storeName, basePath, hasCategories, whatsappHref }:
                 key={link.href}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className="border-b border-stone-200 py-4 font-display text-3xl text-stone-900"
+                className="border-b border-[var(--store-line)] py-4 font-display text-3xl text-[var(--store-ink)]"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
           {whatsappHref && (
-            <div className="border-t border-stone-200 p-5">
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noreferrer"
-                className="flex h-12 w-full items-center justify-center rounded-full bg-stone-900 text-sm font-medium tracking-wide text-white"
-              >
+            <div className="border-t border-[var(--store-line)] p-5">
+              <a href={whatsappHref} target="_blank" rel="noreferrer" className="store-btn w-full">
                 Chat with us on WhatsApp
               </a>
             </div>

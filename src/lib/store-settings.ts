@@ -1,5 +1,6 @@
 import { db } from "@/lib/db"
 import { DEFAULT_BRAND_COLOR } from "@/lib/store-brand"
+import { slugFromNameIfUncustomised } from "@/lib/store-onboarding"
 
 export const STORE_SETTING_FIELDS = [
   "name",
@@ -50,8 +51,22 @@ export async function updateStoreSettings(storeId: string, input: StoreSettingsI
   if ("currency" in data && (typeof data.currency !== "string" || !CURRENCIES.includes(data.currency))) delete data.currency
   if ("primaryColor" in data && !/^#[0-9a-f]{6}$/i.test(String(data.primaryColor ?? ""))) data.primaryColor = DEFAULT_BRAND_COLOR
 
+  const current = await db.store.findUnique({ where: { id: storeId }, select: { id: true, name: true, slug: true } })
+  if (!current) throw new Error("Store not found")
+
+  const nextName = typeof data.name === "string" ? data.name : null
+  const nextSlug = nextName ? await slugFromNameIfUncustomised(current, nextName) : null
+  if (nextSlug) {
+    data.slug = nextSlug
+    await db.domain.upsert({
+      where: { domainName: current.slug },
+      create: { storeId, domainName: current.slug, isVerified: true },
+      update: { storeId, isVerified: true },
+    })
+  }
+
   await db.store.update({ where: { id: storeId }, data })
-  return { success: true as const }
+  return { success: true as const, slug: nextSlug ?? current.slug }
 }
 
 export function storeSettingsFromFormData(formData: FormData): StoreSettingsInput {

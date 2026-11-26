@@ -40,8 +40,9 @@ export default async function ProductsPage({
   return (
     <div>
       <div className="mx-auto max-w-7xl px-5 pb-8 pt-12 text-center md:px-8 md:pt-20">
-        <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">{store.name}</p>
-        <h1 className="mt-4 font-display text-5xl md:text-7xl">Shop all</h1>
+        <p className="store-kicker">{store.name}</p>
+        <h1 className="mt-4 font-display text-5xl md:text-7xl">The collection</h1>
+        <div className="store-rule mx-auto mt-6 w-16" />
       </div>
       <ProductsClient
         products={products.map((p) => ({ ...p, categorySlugs: p.categories.map((c) => c.slug) }))}

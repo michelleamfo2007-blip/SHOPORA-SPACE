@@ -40,18 +40,18 @@ export default async function CheckoutSuccessPage({
 
   return (
     <div className="mx-auto max-w-xl px-5 py-20 text-center md:py-28">
-      <div className="mx-auto mb-8 flex h-14 w-14 items-center justify-center rounded-full border border-stone-900">
+      <div className="mx-auto mb-8 flex h-14 w-14 items-center justify-center border border-[var(--store-ink)]">
         <Check className="h-6 w-6" strokeWidth={1.25} />
       </div>
-      <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Thank you</p>
+      <p className="store-kicker">Thank you</p>
       <h1 className="mt-4 font-display text-5xl md:text-6xl">Your order is in</h1>
       <p className="mx-auto mt-5 max-w-md leading-relaxed text-stone-600">
         {store.name} will check your payment and confirm your order shortly. Keep your order reference in case you need to ask about it.
       </p>
 
       {resolvedSearchParams.orderId && (
-        <div className="mx-auto mt-10 max-w-xs bg-[#f3efe8] px-6 py-5">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-stone-500">Order reference</p>
+        <div className="mx-auto mt-10 max-w-xs border border-[var(--store-line)] px-6 py-5">
+          <p className="store-kicker">Order reference</p>
           <p className="mt-1 font-display text-2xl tracking-wide">{resolvedSearchParams.orderId}</p>
         </div>
       )}
@@ -60,18 +60,14 @@ export default async function CheckoutSuccessPage({
         {trackingToken && (
           <Link
             href={`/track/${trackingToken}`}
-            className="inline-flex h-12 items-center rounded-full bg-[var(--store-accent)] px-8 text-sm tracking-wide text-white hover:opacity-90"
+            className="store-btn"
           >
             Track delivery
           </Link>
         )}
         <Link
           href={`${basePath}/products`}
-          className={`inline-flex h-12 items-center rounded-full px-8 text-sm tracking-wide ${
-            trackingToken
-              ? "border border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white"
-              : "bg-[var(--store-accent)] text-white hover:opacity-90"
-          }`}
+          className={trackingToken ? "store-btn-ghost" : "store-btn"}
         >
           Continue shopping
         </Link>
@@ -80,7 +76,7 @@ export default async function CheckoutSuccessPage({
             href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(`Hi ${store.name}, I just placed order ${resolvedSearchParams.orderId ?? ""}.`)}`}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex h-12 items-center rounded-full border border-stone-900 px-8 text-sm tracking-wide text-stone-900 hover:bg-stone-900 hover:text-white"
+            className="store-btn-ghost"
           >
             Message the store
           </a>

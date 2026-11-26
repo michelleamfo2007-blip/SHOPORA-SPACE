@@ -29,11 +29,18 @@ export const getStoreByHost = cache(async (host: string | null) => {
   // If it's a recognized subdomain, look up by slug
   const slug = subdomain || host;
 
-  return db.store.findUnique({
+  const store = await db.store.findUnique({
     where: { slug },
     include: {
       subscription: true,
     }
   });
+  if (store) return store
+
+  const alias = await db.domain.findUnique({
+    where: { domainName: slug },
+    include: { store: { include: { subscription: true } } },
+  })
+  return alias?.store ?? null
 });
 

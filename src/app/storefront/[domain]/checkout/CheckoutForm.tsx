@@ -33,12 +33,12 @@ const COUNTRIES = [
 ]
 
 const inputClass =
-  "h-12 w-full border border-stone-300 bg-white px-4 text-sm text-stone-900 transition-colors placeholder:text-stone-400 focus:border-stone-900 focus:outline-none"
+  "h-12 w-full border border-[var(--store-line)] bg-white/70 px-4 text-sm text-[var(--store-ink)] transition-colors placeholder:text-stone-400 focus:border-[var(--store-ink)] focus:outline-none"
 
 function Field({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
   return (
     <div className="grid gap-2">
-      <label htmlFor={id} className="text-[11px] uppercase tracking-[0.18em] text-stone-500">{label}</label>
+      <label htmlFor={id} className="store-kicker">{label}</label>
       {children}
     </div>
   )
@@ -84,7 +84,7 @@ function CopyButton({ value, label = "Copy" }: { value: string; label?: string }
           // Clipboard blocked; the number is still visible to copy by hand.
         }
       }}
-      className="ml-3 shrink-0 rounded-full border border-stone-300 px-3 py-1 text-[11px] uppercase tracking-[0.15em] text-stone-700 transition-colors hover:border-stone-900"
+      className="ml-3 shrink-0 border border-[var(--store-line)] px-3 py-1 text-[11px] uppercase tracking-[0.15em] text-[var(--store-muted)] transition-colors hover:border-[var(--store-ink)]"
     >
       {copied ? "Copied" : label}
     </button>
@@ -193,12 +193,9 @@ export function CheckoutForm({
 
   if (items.length === 0) {
     return (
-      <div className="border border-dashed border-stone-300 px-6 py-20 text-center">
+      <div className="border border-[var(--store-line)] px-6 py-20 text-center">
         <p className="font-display text-3xl">Your bag is empty</p>
-        <Link
-          href={`${basePath}/products`}
-          className="mt-6 inline-flex h-12 items-center rounded-full bg-[var(--store-accent)] px-8 text-sm tracking-wide text-white hover:opacity-90"
-        >
+        <Link href={`${basePath}/products`} className="store-btn mt-6">
           Continue shopping
         </Link>
       </div>
@@ -301,7 +298,7 @@ export function CheckoutForm({
           {shoporaDeliveryEnabled && (
             <div className="grid gap-3">
               <p className="text-[11px] uppercase tracking-[0.18em] text-stone-500">Delivery option</p>
-              <label className={`flex cursor-pointer gap-3 border p-4 ${deliveryMethod === "SHOPORA" ? "border-stone-900 bg-[#faf8f5]" : "border-stone-300"}`}>
+              <label className={`flex cursor-pointer gap-3 border p-4 ${deliveryMethod === "SHOPORA" ? "border-[var(--store-ink)] bg-white/50" : "border-[var(--store-line)]"}`}>
                 <input
                   type="radio"
                   name="deliveryMethodChoice"
@@ -316,7 +313,7 @@ export function CheckoutForm({
                   </span>
                 </span>
               </label>
-              <label className={`flex cursor-pointer gap-3 border p-4 ${deliveryMethod === "VENDOR" ? "border-stone-900 bg-[#faf8f5]" : "border-stone-300"}`}>
+              <label className={`flex cursor-pointer gap-3 border p-4 ${deliveryMethod === "VENDOR" ? "border-[var(--store-ink)] bg-white/50" : "border-[var(--store-line)]"}`}>
                 <input
                   type="radio"
                   name="deliveryMethodChoice"
@@ -471,7 +468,7 @@ export function CheckoutForm({
         <button
           type="submit"
           disabled={isSubmitting || (deliveryMethod === "SHOPORA" && !!shoporaDeliveryEnabled && !activeQuote)}
-          className="h-13 w-full rounded-full bg-[var(--store-accent)] text-sm tracking-wide text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+          className="store-btn h-13 w-full disabled:opacity-60"
         >
           {isSubmitting ? "Placing your order..." : `Place order · ${money(currency, productTotal)}`}
         </button>

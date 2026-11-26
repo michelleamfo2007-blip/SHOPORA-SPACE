@@ -137,6 +137,72 @@
   font-family: var(--font-store-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Quiet atelier storefront: paper, ink, hairline gold. */
+.store-atelier {
+  --store-paper: #f7f3ec;
+  --store-ink: #1c1917;
+  --store-muted: #6f675e;
+  --store-line: rgba(138, 106, 61, 0.28);
+  --store-gold: #8a6a3d;
+  background-color: var(--store-paper);
+  color: var(--store-ink);
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(200, 161, 101, 0.08), transparent 42%),
+    linear-gradient(180deg, #fbf8f2 0%, #f7f3ec 28%, #f3eee5 100%);
+}
+
+.store-atelier .store-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--store-line), transparent);
+}
+
+.store-atelier .store-btn {
+  display: inline-flex;
+  height: 3rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.75rem;
+  border: 1px solid var(--store-ink);
+  background: var(--store-ink);
+  color: #f7f3ec;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transition: background-color 200ms, color 200ms, border-color 200ms;
+}
+.store-atelier .store-btn:hover {
+  background: var(--store-gold);
+  border-color: var(--store-gold);
+  color: #fbf8f2;
+}
+
+.store-atelier .store-btn-ghost {
+  display: inline-flex;
+  height: 3rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.75rem;
+  border: 1px solid var(--store-line);
+  background: transparent;
+  color: var(--store-ink);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transition: border-color 200ms, background-color 200ms, color 200ms;
+}
+.store-atelier .store-btn-ghost:hover {
+  border-color: var(--store-ink);
+  background: var(--store-ink);
+  color: #f7f3ec;
+}
+
+.store-atelier .store-kicker {
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--store-gold);
+}
+
 @utility scrollbar-none {
   scrollbar-width: none;
   &::-webkit-scrollbar {

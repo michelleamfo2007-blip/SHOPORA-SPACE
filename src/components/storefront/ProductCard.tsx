@@ -64,7 +64,7 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
 
   return (
     <Link href={productHref} className="group block">
-      <div className="relative aspect-[3/4] overflow-hidden bg-[#efebe4]">
+      <div className="relative aspect-[3/4] overflow-hidden bg-[#efe8dc] ring-1 ring-[var(--store-line)]">
         {imageUrl ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -93,27 +93,27 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
         )}
 
         {(soldOut || onSale) && (
-          <span className="absolute left-3 top-3 bg-[#faf8f5] px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-stone-900">
+          <span className="absolute left-3 top-3 border border-[var(--store-line)] bg-[var(--store-paper)] px-2.5 py-1 text-[10px] uppercase tracking-[0.22em] text-[var(--store-ink)]">
             {soldOut ? "Sold out" : "Sale"}
           </span>
         )}
 
         <button
           onClick={handleToggleFavorite}
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#faf8f5]/90 text-stone-800 opacity-100 transition-opacity lg:opacity-0 lg:group-hover:opacity-100"
+          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center border border-[var(--store-line)] bg-[var(--store-paper)]/90 text-[var(--store-ink)] opacity-100 transition-opacity lg:opacity-0 lg:group-hover:opacity-100"
           aria-label={isFaved ? "Remove from favourites" : "Add to favourites"}
         >
           <Heart className={`h-4 w-4 ${isFaved ? "fill-stone-900" : ""}`} strokeWidth={1.5} />
         </button>
 
         {soldOut ? null : hasChoices ? (
-          <span className="absolute inset-x-3 bottom-3 hidden translate-y-2 bg-[#faf8f5] py-3 text-center text-[11px] uppercase tracking-[0.2em] text-stone-900 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:block">
+          <span className="absolute inset-x-3 bottom-3 hidden translate-y-2 border border-[var(--store-line)] bg-[var(--store-paper)] py-3 text-center text-[11px] uppercase tracking-[0.22em] text-[var(--store-ink)] opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 lg:block">
             Choose options
           </span>
         ) : (
           <button
             onClick={handleAddToCart}
-            className="absolute inset-x-3 bottom-3 hidden translate-y-2 bg-[#faf8f5] py-3 text-[11px] uppercase tracking-[0.2em] text-stone-900 opacity-0 transition duration-300 hover:bg-stone-900 hover:text-white group-hover:translate-y-0 group-hover:opacity-100 lg:block"
+            className="absolute inset-x-3 bottom-3 hidden translate-y-2 border border-[var(--store-ink)] bg-[var(--store-paper)] py-3 text-[11px] uppercase tracking-[0.22em] text-[var(--store-ink)] opacity-0 transition duration-300 hover:bg-[var(--store-ink)] hover:text-[#f7f3ec] group-hover:translate-y-0 group-hover:opacity-100 lg:block"
           >
             Add to bag
           </button>
@@ -122,7 +122,7 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
         {!hasChoices && !soldOut && (
           <button
             onClick={handleAddToCart}
-            className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#faf8f5] text-stone-900 shadow-sm lg:hidden"
+            className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center border border-[var(--store-line)] bg-[var(--store-paper)] text-[var(--store-ink)] lg:hidden"
             aria-label="Add to bag"
           >
             <Plus className="h-4 w-4" strokeWidth={1.75} />
@@ -130,10 +130,10 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
         )}
       </div>
 
-      <div className="pt-4">
-        <h3 className="line-clamp-1 text-sm text-stone-800">{product.name}</h3>
-        <div className="mt-1.5 flex items-baseline gap-2 text-sm">
-          <span className={onSale ? "text-[var(--store-accent)]" : "text-stone-900"}>{money(currency, price)}</span>
+      <div className="pt-5">
+        <h3 className="line-clamp-1 font-display text-lg leading-tight text-[var(--store-ink)]">{product.name}</h3>
+        <div className="mt-1.5 flex items-baseline gap-2 text-[13px] tracking-wide">
+          <span className={onSale ? "text-[var(--store-gold)]" : "text-[var(--store-muted)]"}>{money(currency, price)}</span>
           {onSale && <span className="text-xs text-stone-400 line-through">{money(currency, compareAtPrice!)}</span>}
         </div>
       </div>

@@ -91,6 +91,9 @@ export function SettingsForm({ store, whatsappAlertsAvailable }: { store: any; w
             placeholder="e.g. My Awesome Store"
             required 
           />
+          <p className="text-xs text-muted-foreground">
+            Your store is at {store.slug}.shopora.space. If this still matches the name, changing the name updates the address. Old links keep working.
+          </p>
         </div>
 
         <div className="grid gap-2">

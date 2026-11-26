@@ -17,6 +17,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ domai
 
   return (
     <div className="mx-auto max-w-6xl px-5 pb-20 pt-12 md:px-8 md:pt-16">
+      <p className="store-kicker mb-3">Complete your order</p>
       <h1 className="mb-10 font-display text-5xl md:mb-14 md:text-6xl">Checkout</h1>
       <CheckoutForm 
         storeId={store.id} 

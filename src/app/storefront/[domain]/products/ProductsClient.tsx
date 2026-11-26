@@ -83,13 +83,13 @@ export function ProductsClient({
   }
 
   const chip = (active: boolean) =>
-    `inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-4 text-[13px] transition-colors ${
-      active ? "border-stone-900 bg-stone-900 text-white" : "border-stone-300 text-stone-700 hover:border-stone-900"
+    `inline-flex h-9 shrink-0 items-center gap-1.5 border px-4 text-[11px] uppercase tracking-[0.18em] transition-colors ${
+      active ? "border-[var(--store-ink)] bg-[var(--store-ink)] text-[#f7f3ec]" : "border-[var(--store-line)] text-[var(--store-muted)] hover:border-[var(--store-ink)] hover:text-[var(--store-ink)]"
     }`;
 
   return (
     <div className="mx-auto max-w-7xl px-5 md:px-8">
-      <div className="sticky top-16 z-30 -mx-5 mb-6 border-b border-stone-200 bg-[#faf8f5]/95 px-5 py-3 backdrop-blur md:top-20 md:mx-0 md:px-0">
+      <div className="sticky top-16 z-30 -mx-5 mb-6 border-b border-[var(--store-line)] bg-[var(--store-paper)]/95 px-5 py-3 md:top-[5.25rem] md:mx-0 md:px-0">
         <div className="flex items-center justify-between gap-4">
           <label className="relative flex flex-1 items-center md:max-w-sm">
             <Search className="pointer-events-none absolute left-0 h-4 w-4 text-stone-500" strokeWidth={1.5} />
@@ -157,7 +157,7 @@ export function ProductsClient({
           ))}
         </div>
       ) : (
-        <div className="border border-dashed border-stone-300 px-6 py-20 text-center">
+        <div className="border border-[var(--store-line)] px-6 py-20 text-center">
           <p className="font-display text-3xl">
             {products.length === 0 ? "New pieces are on their way" : "Nothing matches your search"}
           </p>

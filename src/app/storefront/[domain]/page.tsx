@@ -69,19 +69,11 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
 
   const actions = (
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-      <Link
-        href={`${basePath}/products`}
-        className="inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-[var(--store-accent)] px-7 text-sm tracking-wide text-white transition-opacity hover:opacity-90"
-      >
-        Shop the collection <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
+      <Link href={`${basePath}/products`} className="store-btn gap-2">
+        Shop the collection <ArrowRight className="h-4 w-4" strokeWidth={1.25} />
       </Link>
       {whatsappHref && (
-        <a
-          href={whatsappHref}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-full border border-stone-900 px-7 text-sm tracking-wide text-stone-900 transition-colors hover:bg-stone-900 hover:text-white"
-        >
+        <a href={whatsappHref} target="_blank" rel="noreferrer" className="store-btn-ghost">
           Order on WhatsApp
         </a>
       )}
@@ -93,9 +85,10 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       {store.heroImage ? (
         <section className="mx-auto grid max-w-7xl items-center gap-6 px-5 pb-4 pt-6 md:grid-cols-2 md:gap-16 md:px-8 md:py-16">
           <div className="order-2 md:order-1">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Welcome to</p>
-            <h1 className="mt-3 font-display text-4xl leading-[0.95] tracking-tight md:mt-4 md:text-7xl lg:text-8xl">{headline}</h1>
-            {subtext && <p className="mt-4 max-w-md text-base leading-relaxed text-stone-600 md:mt-6">{subtext}</p>}
+            <p className="store-kicker">Welcome to</p>
+            <h1 className="mt-4 font-display text-4xl leading-[0.92] tracking-tight md:mt-5 md:text-7xl lg:text-[5.5rem]">{headline}</h1>
+            <div className="store-rule mt-6 w-16" />
+            {subtext && <p className="mt-5 max-w-md text-base leading-relaxed text-[var(--store-muted)] md:mt-6">{subtext}</p>}
             <div className="mt-6 md:mt-10">{actions}</div>
           </div>
           <div className="order-1 md:order-2">
@@ -107,9 +100,10 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       ) : coverTiles.length > 0 ? (
         <section className="mx-auto grid max-w-7xl items-center gap-8 px-5 pb-4 pt-6 md:grid-cols-[1fr_1.2fr] md:gap-14 md:px-8 md:py-16">
           <div className="order-2 md:order-1">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">{store.heroHeadline ? store.name : "Welcome to"}</p>
-            <h1 className="mt-3 font-display text-5xl leading-[0.95] tracking-tight md:mt-4 md:text-7xl lg:text-8xl">{headline}</h1>
-            <p className="mt-4 max-w-md text-base leading-relaxed text-stone-600 md:mt-6">{subtext}</p>
+            <p className="store-kicker">{store.heroHeadline ? store.name : "Welcome to"}</p>
+            <h1 className="mt-4 font-display text-5xl leading-[0.92] tracking-tight md:mt-5 md:text-7xl lg:text-[5.5rem]">{headline}</h1>
+            <div className="store-rule mt-6 w-16" />
+            <p className="mt-5 max-w-md text-base leading-relaxed text-[var(--store-muted)] md:mt-6">{subtext}</p>
             <div className="mt-6 md:mt-10">{actions}</div>
           </div>
           <div
@@ -121,7 +115,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
               <Link
                 key={tile.id}
                 href={`${basePath}/product/${tile.id}`}
-                className={`group relative overflow-hidden bg-[#efebe4] ${coverTiles.length === 3 && i === 0 ? "row-span-2" : ""}`}
+                className={`group relative overflow-hidden bg-[#efe8dc] ring-1 ring-[var(--store-line)] ${coverTiles.length === 3 && i === 0 ? "row-span-2" : ""}`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -136,22 +130,23 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       ) : (
         <section className="mx-auto max-w-7xl px-5 pt-10 md:px-8 md:pt-24">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Welcome to</p>
-            <h1 className="mt-4 font-display text-5xl leading-[0.95] tracking-tight md:mt-5 md:text-8xl">{headline}</h1>
-            <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-stone-600 md:mt-6">{subtext}</p>
+            <p className="store-kicker">Welcome to</p>
+            <h1 className="mt-4 font-display text-5xl leading-[0.92] tracking-tight md:mt-5 md:text-8xl">{headline}</h1>
+            <div className="store-rule mx-auto mt-6 w-16" />
+            <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-[var(--store-muted)] md:mt-6">{subtext}</p>
             <div className="mt-8 flex justify-center md:mt-10">{actions}</div>
           </div>
         </section>
       )}
 
-      <section className="mt-10 overflow-hidden border-y border-stone-200 py-5 md:mt-16 md:py-7" aria-label={`About ${store.name}`}>
+      <section className="mt-10 overflow-hidden border-y border-[var(--store-line)] py-5 md:mt-16 md:py-7" aria-label={`About ${store.name}`}>
         <div className="flex w-max animate-marquee motion-reduce:animate-none">
           {[0, 1].map((copy) => (
             <div key={copy} className="flex shrink-0 items-center" aria-hidden={copy === 1}>
               {ribbon.map((text, i) => (
-                <span key={i} className="flex items-center whitespace-nowrap font-display text-2xl italic text-stone-700 md:text-3xl">
+                <span key={i} className="flex items-center whitespace-nowrap font-display text-2xl italic text-[var(--store-ink)] md:text-3xl">
                   <span className="px-6 md:px-10">{text}</span>
-                  <span className="text-base not-italic text-[var(--store-accent)]">✦</span>
+                  <span className="text-base not-italic text-[var(--store-gold)]">·</span>
                 </span>
               ))}
             </div>
@@ -163,7 +158,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
         <section className="mx-auto max-w-7xl px-5 pt-12 md:px-8 md:pt-28">
           <div className="mb-10 flex items-end justify-between">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Browse</p>
+              <p className="store-kicker">Browse</p>
               <h2 className="mt-3 font-display text-4xl md:text-5xl">Collections</h2>
             </div>
           </div>
@@ -174,7 +169,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
                 <Link
                   key={cat.id}
                   href={`${basePath}/categories/${cat.slug}`}
-                  className="group relative aspect-[4/5] w-[70vw] shrink-0 snap-start overflow-hidden bg-[#efebe4] md:w-auto"
+                  className="group relative aspect-[4/5] w-[70vw] shrink-0 snap-start overflow-hidden bg-[#efe8dc] ring-1 ring-[var(--store-line)] md:w-auto"
                 >
                   {cover && (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -195,7 +190,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       <section id="shop" className="mx-auto max-w-7xl px-5 pt-12 md:px-8 md:pt-20">
         <div className="mb-10 flex items-end justify-between gap-6">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Just in</p>
+            <p className="store-kicker">Just in</p>
             <h2 className="mt-3 font-display text-4xl md:text-5xl">New arrivals</h2>
           </div>
           {products.length > 0 && (
@@ -214,21 +209,21 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
               ))}
             </div>
             <div className="mt-12 text-center sm:hidden">
-              <Link href={`${basePath}/products`} className="inline-flex h-12 items-center rounded-full border border-stone-900 px-8 text-sm tracking-wide">
+              <Link href={`${basePath}/products`} className="store-btn-ghost">
                 View all products
               </Link>
             </div>
           </>
         ) : (
-          <div className="border border-dashed border-stone-300 px-6 py-20 text-center">
+          <div className="border border-[var(--store-line)] px-6 py-20 text-center">
             <p className="font-display text-3xl">New pieces are on their way</p>
-            <p className="mt-3 text-sm text-stone-500">Check back soon to see what {store.name} has in store.</p>
+            <p className="mt-3 text-sm text-[var(--store-muted)]">Check back soon to see what {store.name} has in store.</p>
           </div>
         )}
       </section>
 
-      <section className="mt-16 border-y border-stone-200 md:mt-28">
-        <div className="mx-auto grid max-w-7xl grid-cols-3 divide-x divide-stone-200 md:px-8">
+      <section className="mt-16 border-y border-[var(--store-line)] md:mt-28">
+        <div className="mx-auto grid max-w-7xl grid-cols-3 divide-x divide-[var(--store-line)] md:px-8">
           {[
             { icon: Truck, title: "Delivered to your door", short: "Delivery to your door", text: "The delivery fee is paid to the rider on arrival." },
             { icon: Smartphone, title: "Pay with ease", short: "MoMo or bank transfer", text: "Mobile Money or bank transfer at checkout." },
@@ -237,11 +232,11 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
               : { icon: BadgeCheck, title: "Personally confirmed", short: "Checked by the seller", text: "Every order is checked by the seller before it ships." },
           ].map((item) => (
             <div key={item.title} className="flex flex-col items-center gap-2 px-2 py-5 text-center md:flex-row md:items-start md:gap-4 md:px-8 md:py-6 md:text-left md:first:pl-0 md:last:pr-0">
-              <item.icon className="h-5 w-5 shrink-0 text-stone-700 md:mt-0.5" strokeWidth={1.25} />
-              <p className="text-xs leading-snug text-stone-700 md:hidden">{item.short}</p>
+              <item.icon className="h-5 w-5 shrink-0 text-[var(--store-gold)] md:mt-0.5" strokeWidth={1.25} />
+              <p className="text-xs leading-snug text-[var(--store-muted)] md:hidden">{item.short}</p>
               <div className="hidden md:block">
-                <p className="text-sm text-stone-900">{item.title}</p>
-                <p className="mt-1 text-sm text-stone-500">{item.text}</p>
+                <p className="text-sm text-[var(--store-ink)]">{item.title}</p>
+                <p className="mt-1 text-sm text-[var(--store-muted)]">{item.text}</p>
               </div>
             </div>
           ))}
@@ -250,12 +245,12 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
 
       {store.aboutText && (
         <section className="mx-auto max-w-7xl px-5 pt-20 md:px-8 md:pt-28">
-          <div className="grid gap-8 border-t border-stone-200 pt-12 md:grid-cols-[1fr_2fr] md:gap-16 md:pt-16">
+          <div className="grid gap-8 border-t border-[var(--store-line)] pt-12 md:grid-cols-[1fr_2fr] md:gap-16 md:pt-16">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">About</p>
+              <p className="store-kicker">About</p>
               <h2 className="mt-3 font-display text-4xl md:text-5xl">Our story</h2>
             </div>
-            <p className="font-display text-2xl leading-snug text-stone-700 md:text-3xl">{store.aboutText}</p>
+            <p className="font-display text-2xl leading-snug text-[var(--store-muted)] md:text-3xl">{store.aboutText}</p>
           </div>
         </section>
       )}
@@ -263,13 +258,13 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       {reviews.length > 0 && (
         <section className="mx-auto max-w-7xl px-5 pt-20 md:px-8 md:pt-28">
           <div className="mb-10 text-center">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Reviews</p>
+            <p className="store-kicker">Reviews</p>
             <h2 className="mt-3 font-display text-4xl md:text-5xl">Kind words</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {reviews.map((review) => (
-              <figure key={review.id} className="flex flex-col bg-[#f3efe8] p-8">
-                <div className="flex gap-0.5 text-[var(--store-accent)]" aria-label={`${review.rating} out of 5 stars`}>
+              <figure key={review.id} className="flex flex-col border border-[var(--store-line)] bg-white/40 p-8">
+                <div className="flex gap-0.5 text-[var(--store-gold)]" aria-label={`${review.rating} out of 5 stars`}>
                   {Array.from({ length: 5 }).map((_, i) => (
                     <svg key={i} className={`h-3.5 w-3.5 ${i < review.rating ? "fill-current" : "fill-stone-300"}`} viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -288,15 +283,11 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
 
       {whatsappHref && (
         <section className="mx-auto max-w-7xl px-5 pt-20 md:px-8 md:pt-28">
-          <div className="bg-stone-900 px-6 py-16 text-center text-white md:py-20">
-            <h2 className="font-display text-4xl md:text-5xl">Need help choosing?</h2>
+          <div className="border border-[var(--store-ink)] bg-[var(--store-ink)] px-6 py-16 text-center text-[#f7f3ec] md:py-20">
+            <p className="store-kicker !text-[#c8a165]">Private appointment</p>
+            <h2 className="mt-4 font-display text-4xl md:text-5xl">Need help choosing?</h2>
             <p className="mx-auto mt-4 max-w-md text-sm text-white/70">Send us a message and we&apos;ll help you find the right piece, check sizes, or arrange delivery.</p>
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-8 inline-flex h-12 items-center rounded-full bg-white px-8 text-sm tracking-wide text-stone-900 transition-opacity hover:opacity-90"
-            >
+            <a href={whatsappHref} target="_blank" rel="noreferrer" className="store-btn mt-8 !border-[#f7f3ec] !bg-[#f7f3ec] !text-[var(--store-ink)] hover:!bg-[#c8a165] hover:!border-[#c8a165] hover:!text-[#1c1917]">
               Chat on WhatsApp
             </a>
           </div>

@@ -39,12 +39,12 @@ export function CartDrawer({ currency, basePath }: CartDrawerProps) {
   const bagButton = (
     <button
       onClick={cart.openDrawer}
-      className="relative -mr-2 flex h-10 w-10 items-center justify-center text-stone-900"
+      className="relative -mr-2 flex h-10 w-10 items-center justify-center text-[var(--store-ink)]"
       aria-label={`Open bag, ${totalItems} items`}
     >
       <ShoppingBag className="h-5 w-5" strokeWidth={1.5} />
       {totalItems > 0 && (
-        <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--store-accent)] px-1 text-[10px] font-semibold text-white">
+        <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center bg-[var(--store-ink)] px-1 text-[10px] font-medium text-[#f7f3ec]">
           {totalItems > 99 ? "99+" : totalItems}
         </span>
       )}
@@ -65,14 +65,14 @@ export function CartDrawer({ currency, basePath }: CartDrawerProps) {
       />
 
       <aside
-        className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-[#faf8f5] transition-[transform,visibility] duration-300 ease-out ${
+        className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-[var(--store-paper)] transition-[transform,visibility] duration-300 ease-out ${
           isOpen ? "visible translate-x-0 shadow-2xl" : "invisible translate-x-full"
         }`}
         aria-hidden={!isOpen}
         inert={!isOpen}
       >
-        <div className="flex h-16 items-center justify-between border-b border-stone-200 px-6">
-          <h2 className="font-display text-2xl text-stone-900">
+        <div className="flex h-16 items-center justify-between border-b border-[var(--store-line)] px-6">
+          <h2 className="font-display text-2xl text-[var(--store-ink)]">
             Your bag {totalItems > 0 && <span className="font-store text-sm text-stone-500">({totalItems})</span>}
           </h2>
           <button
@@ -95,7 +95,7 @@ export function CartDrawer({ currency, basePath }: CartDrawerProps) {
                   cart.closeDrawer();
                   router.push(`${basePath}/products`);
                 }}
-                className="mt-8 h-12 rounded-full bg-stone-900 px-8 text-sm font-medium tracking-wide text-white transition-colors hover:bg-stone-700"
+                className="store-btn mt-8"
               >
                 Start shopping
               </button>
@@ -142,7 +142,7 @@ export function CartDrawer({ currency, basePath }: CartDrawerProps) {
                         </button>
                       </div>
                       {typeof item.maxQuantity === "number" && item.quantity >= item.maxQuantity && (
-                        <span className="text-[11px] text-stone-500">Only {item.maxQuantity} available</span>
+                        <span className="text-[11px] text-[var(--store-muted)]">That’s all we have in stock</span>
                       )}
                       <button
                         type="button"
@@ -160,18 +160,18 @@ export function CartDrawer({ currency, basePath }: CartDrawerProps) {
         </div>
 
         {cart.items.length > 0 && (
-          <div className="border-t border-stone-200 px-6 py-6">
+          <div className="border-t border-[var(--store-line)] px-6 py-6">
             <div className="flex justify-between text-sm">
-              <p className="uppercase tracking-[0.15em] text-stone-500">Subtotal</p>
-              <p className="font-medium text-stone-900">{money(currency, totalPrice)}</p>
+              <p className="store-kicker">Subtotal</p>
+              <p className="font-medium text-[var(--store-ink)]">{money(currency, totalPrice)}</p>
             </div>
-            <p className="mt-2 text-xs text-stone-500">Delivery fee is paid to the rider on arrival.</p>
+            <p className="mt-2 text-xs text-[var(--store-muted)]">Delivery fee is paid to the rider on arrival.</p>
             <button
               onClick={() => {
                 cart.closeDrawer();
                 router.push(`${basePath}/checkout`);
               }}
-              className="mt-5 h-13 w-full rounded-full bg-[var(--store-accent)] text-sm font-medium tracking-wide text-white transition-opacity hover:opacity-90"
+              className="store-btn mt-5 h-13 w-full"
             >
               Checkout
             </button>

@@ -28,7 +28,19 @@ export async function checkStoreSlug(raw: string, ignoreStoreId?: string) {
 
   const existing = await db.store.findUnique({ where: { slug }, select: { id: true } })
   if (existing && existing.id !== ignoreStoreId) return { slug, error: "Store URL is already taken" }
+  const alias = await db.domain.findUnique({ where: { domainName: slug }, select: { storeId: true } })
+  if (alias && alias.storeId !== ignoreStoreId) return { slug, error: "Store URL is already taken" }
   return { slug, error: null }
+}
+
+/** If the name still matches the current web address, change the address with the name. */
+export async function slugFromNameIfUncustomised(store: { id: string; name: string; slug: string }, nextName: string) {
+  if (store.slug.startsWith("draft-")) return null
+  if (sanitizeStoreSlug(store.name) !== store.slug) return null
+  const wanted = sanitizeStoreSlug(nextName)
+  if (!wanted || wanted === store.slug) return null
+  const { slug, error } = await checkStoreSlug(wanted, store.id)
+  return error ? null : slug
 }
 
 export async function findOrCreatePlan(planName: string, interval: string) {
