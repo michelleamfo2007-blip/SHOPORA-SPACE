@@ -462,7 +462,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
         </section>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-[var(--store-line)] bg-[var(--store-paper)]/95 px-5 py-3 md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-[var(--store-line)] bg-[#f7f3ec] px-5 py-3 md:hidden">
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs text-stone-500">{product.name}</p>
           <p className="text-sm text-stone-900">{money(store.currency, price)}</p>

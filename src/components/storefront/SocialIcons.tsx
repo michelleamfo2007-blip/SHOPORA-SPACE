@@ -6,7 +6,7 @@ type SocialStore = {
   contactEmail?: string | null
 }
 
-const iconClass = "flex h-9 w-9 items-center justify-center rounded-full border border-stone-300 text-stone-700 transition-colors hover:border-stone-900 hover:text-stone-900"
+const iconClass = "flex h-9 w-9 items-center justify-center border border-[#c8a165]/40 text-[#f7f3ec] transition-colors hover:border-[#c8a165] hover:text-[#c8a165]"
 
 export function SocialIcons({ store }: { store: SocialStore }) {
   const links: { href: string; label: string; path: string; stroke?: boolean }[] = []

@@ -248,13 +248,13 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       </section>
 
       {store.aboutText && (
-        <section className="mx-auto max-w-7xl px-5 pt-20 md:px-8 md:pt-28">
-          <div className="grid gap-8 border-t border-[var(--store-line)] pt-12 md:grid-cols-[1fr_2fr] md:gap-16 md:pt-16">
+        <section className="mt-20 bg-[#1c1917] text-[#f7f3ec] md:mt-28">
+          <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 md:grid-cols-[1fr_2fr] md:gap-20 md:px-8 md:py-24">
             <div>
-              <p className="store-kicker">About</p>
-              <h2 className="mt-3 font-display text-4xl md:text-5xl">Our story</h2>
+              <p className="store-kicker !text-[#c8a165]">The house</p>
+              <h2 className="mt-4 font-display text-4xl md:text-6xl">Our story</h2>
             </div>
-            <p className="font-display text-2xl leading-snug text-[var(--store-muted)] md:text-3xl">{store.aboutText}</p>
+            <p className="font-display text-2xl italic leading-snug text-white/75 md:text-3xl">{store.aboutText}</p>
           </div>
         </section>
       )}

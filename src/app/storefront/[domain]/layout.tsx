@@ -100,8 +100,8 @@ export default async function StorefrontLayout({
         </div>
       )}
 
-      {/* No backdrop-filter here: it would trap the fixed menu and bag panels inside the header. */}
-      <header className="sticky top-0 z-40 border-b border-[var(--store-line)] bg-[var(--store-paper)]/92">
+      {/* Solid paper so product photos never show through. No backdrop-filter: it would trap the bag panel. */}
+      <header className="sticky top-0 z-40 border-b border-[var(--store-line)] bg-[#f7f3ec]">
         <div className="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-5 md:h-[5.25rem] md:px-8">
           <div className="flex items-center">
             <MobileMenu storeName={store.name} basePath={basePath} hasCategories={hasCategories} whatsappHref={whatsappHref} />
@@ -135,41 +135,41 @@ export default async function StorefrontLayout({
 
       <main className="flex-1">{children}</main>
 
-      <footer className="mt-24 border-t border-[var(--store-line)]">
+      <footer className="mt-24 border-t-2 border-[#c8a165]/50 bg-[#1c1917] text-[#f7f3ec]">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 md:grid-cols-[1.5fr_1fr_1fr] md:px-8 md:py-20">
           <div>
-            <p className="store-kicker">Established on Shopora</p>
-            <p className="mt-3 font-display text-4xl">{store.name}</p>
-            {store.description && <p className="mt-4 max-w-sm text-sm leading-relaxed text-[var(--store-muted)]">{store.description}</p>}
+            <p className="store-kicker !text-[#c8a165]">The house of</p>
+            <p className="mt-3 font-display text-4xl italic">{store.name}</p>
+            {store.description && <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/60">{store.description}</p>}
             <div className="mt-8">
               <SocialIcons store={store} />
             </div>
           </div>
 
           <div>
-            <p className="store-kicker">Shop</p>
-            <ul className="mt-5 space-y-3 text-sm text-[var(--store-muted)]">
-              <li><Link href={`${basePath}/products`} className="hover:text-[var(--store-ink)]">The collection</Link></li>
-              {hasCategories && <li><Link href={`${basePath}/categories`} className="hover:text-[var(--store-ink)]">Collections</Link></li>}
-              {whatsappHref && <li><a href={whatsappHref} target="_blank" rel="noreferrer" className="hover:text-[var(--store-ink)]">Order on WhatsApp</a></li>}
+            <p className="store-kicker !text-[#c8a165]">Shop</p>
+            <ul className="mt-5 space-y-3 text-sm text-white/65">
+              <li><Link href={`${basePath}/products`} className="hover:text-[#c8a165]">The collection</Link></li>
+              {hasCategories && <li><Link href={`${basePath}/categories`} className="hover:text-[#c8a165]">Collections</Link></li>}
+              {whatsappHref && <li><a href={whatsappHref} target="_blank" rel="noreferrer" className="hover:text-[#c8a165]">Order on WhatsApp</a></li>}
             </ul>
           </div>
 
           <div>
-            <p className="store-kicker">Atelier</p>
-            <ul className="mt-5 space-y-3 text-sm text-[var(--store-muted)]">
-              <li><Link href={`${basePath}/pages/shipping`} className="hover:text-[var(--store-ink)]">Delivery</Link></li>
-              <li><Link href={`${basePath}/pages/refunds`} className="hover:text-[var(--store-ink)]">Returns</Link></li>
-              <li><Link href={`${basePath}/pages/faq`} className="hover:text-[var(--store-ink)]">FAQs</Link></li>
-              <li><Link href={`${basePath}/pages/privacy`} className="hover:text-[var(--store-ink)]">Privacy</Link></li>
+            <p className="store-kicker !text-[#c8a165]">Atelier</p>
+            <ul className="mt-5 space-y-3 text-sm text-white/65">
+              <li><Link href={`${basePath}/pages/shipping`} className="hover:text-[#c8a165]">Delivery</Link></li>
+              <li><Link href={`${basePath}/pages/refunds`} className="hover:text-[#c8a165]">Returns</Link></li>
+              <li><Link href={`${basePath}/pages/faq`} className="hover:text-[#c8a165]">FAQs</Link></li>
+              <li><Link href={`${basePath}/pages/privacy`} className="hover:text-[#c8a165]">Privacy</Link></li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-[var(--store-line)]">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 text-[11px] uppercase tracking-[0.18em] text-[var(--store-muted)] md:px-8">
+        <div className="border-t border-[#c8a165]/30">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 text-[11px] uppercase tracking-[0.18em] text-white/45 md:px-8">
             <p>© {new Date().getFullYear()} {store.name}</p>
-            <a href="https://shopora.space" target="_blank" rel="noreferrer" className="hover:text-[var(--store-ink)]">
+            <a href="https://shopora.space" target="_blank" rel="noreferrer" className="hover:text-[#c8a165]">
               Powered by Shopora
             </a>
           </div>
