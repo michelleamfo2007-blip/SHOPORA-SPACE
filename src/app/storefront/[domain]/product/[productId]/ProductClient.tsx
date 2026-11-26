@@ -178,7 +178,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
                 {product.name}
               </div>
             )}
-            {(onSale || saleLive || soldOut) && (
+            {saleLive && onSale && (
               <div className="flex items-center justify-between gap-4 bg-[var(--store-gold)] px-4 py-3 text-[#f7f3ec] md:px-5">
                 <div className="min-w-0">
                   <p className="truncate text-[11px] font-semibold uppercase tracking-[0.18em]">{store.name}</p>

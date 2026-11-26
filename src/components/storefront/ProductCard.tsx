@@ -41,7 +41,7 @@ export function ProductCard({ product, currency, basePath, storeName, blackFrida
   const percentOff = onSale && compareAtPrice > 0 ? Math.round((1 - price / compareAtPrice) * 100) : 0
   const hasChoices = (product.variants?.length ?? 0) > 1
   const soldOut = !hasChoices && typeof variant?.stockCount === "number" && variant.stockCount <= 0
-  const showSaleBar = onSale || Boolean(blackFriday && onSale)
+  const showSaleBar = Boolean(blackFriday && onSale)
 
   const [ready, setReady] = useState(false)
   useEffect(() => setReady(true), [])
@@ -100,9 +100,9 @@ export function ProductCard({ product, currency, basePath, storeName, blackFrida
           </div>
         )}
 
-        {soldOut && (
+        {(soldOut || (onSale && !showSaleBar)) && (
           <span className="absolute left-3 top-3 bg-[var(--store-paper)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--store-ink)]">
-            Sold out
+            {soldOut ? "Sold out" : "Sale"}
           </span>
         )}
 
@@ -138,14 +138,10 @@ export function ProductCard({ product, currency, basePath, storeName, blackFrida
             <p className="text-[11px] font-semibold leading-tight">Save {money(currency, saved)}</p>
           </div>
           <div className="shrink-0 text-right">
-            {blackFriday && (
-              <span className="inline-block bg-black px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.12em]">
-                Black Friday
-              </span>
-            )}
-            {percentOff > 0 && (
-              <p className={`text-[9px] uppercase tracking-[0.12em] ${blackFriday ? "mt-0.5" : ""}`}>{percentOff}% off</p>
-            )}
+            <span className="inline-block bg-black px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.12em]">
+              Black Friday
+            </span>
+            {percentOff > 0 && <p className="mt-0.5 text-[9px] uppercase tracking-[0.12em]">{percentOff}% off</p>}
           </div>
         </div>
       )}
@@ -154,7 +150,7 @@ export function ProductCard({ product, currency, basePath, storeName, blackFrida
         <h3 className="line-clamp-2 font-display text-lg italic leading-snug text-[var(--store-ink)] md:text-xl">{product.name}</h3>
         <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[13px] tracking-wide">
           <span className={onSale ? "text-[var(--store-gold)]" : "text-[var(--store-muted)]"}>{money(currency, price)}</span>
-          {onSale && percentOff > 0 && (
+          {showSaleBar && percentOff > 0 && (
             <span className="bg-[var(--store-gold)]/15 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--store-gold)]">-{percentOff}%</span>
           )}
           {onSale && <span className="text-xs text-stone-400 line-through">{money(currency, compareAtPrice!)}</span>}
