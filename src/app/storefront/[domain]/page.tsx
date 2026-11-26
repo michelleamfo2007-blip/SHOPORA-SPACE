@@ -83,28 +83,32 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
   return (
     <div>
       {store.heroImage ? (
-        <section className="mx-auto grid max-w-7xl items-center gap-6 px-5 pb-4 pt-6 md:grid-cols-2 md:gap-16 md:px-8 md:py-16">
-          <div className="order-2 md:order-1">
-            <p className="store-kicker">Welcome to</p>
-            <h1 className="mt-4 font-display text-4xl leading-[0.92] tracking-tight md:mt-5 md:text-7xl lg:text-[5.5rem]">{headline}</h1>
-            <div className="store-rule mt-6 w-16" />
-            {subtext && <p className="mt-5 max-w-md text-base leading-relaxed text-[var(--store-muted)] md:mt-6">{subtext}</p>}
-            <div className="mt-6 md:mt-10">{actions}</div>
-          </div>
-          <div className="order-1 md:order-2">
-            {/* Banners are often posters with text in them, so they are shown whole rather than cropped. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={store.heroImage} alt={headline} className="mx-auto h-auto max-h-[40vh] w-auto max-w-full object-contain md:max-h-[75vh] md:w-full" />
+        <section className="relative">
+          <div className="mx-auto grid max-w-7xl items-center gap-8 px-5 pb-10 pt-8 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:px-8 md:pb-20 md:pt-14">
+            <div className="order-2 md:order-1">
+              <p className="store-kicker">The house of</p>
+              <h1 className="mt-5 font-display text-5xl leading-[0.9] tracking-tight md:mt-6 md:text-7xl lg:text-[5.75rem]">{headline}</h1>
+              <div className="store-rule mt-7 w-20" />
+              {subtext && <p className="mt-6 max-w-md font-display text-xl italic leading-relaxed text-[var(--store-muted)] md:mt-7 md:text-2xl">{subtext}</p>}
+              <div className="mt-8 md:mt-12">{actions}</div>
+            </div>
+            <div className="order-1 md:order-2">
+              <div className="border border-[var(--store-line)] bg-[#efe8dc] p-2 md:p-3">
+                {/* Banners are often posters with text in them, so they are shown whole rather than cropped. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={store.heroImage} alt={headline} className="mx-auto h-auto max-h-[46vh] w-auto max-w-full object-contain md:max-h-[78vh] md:w-full" />
+              </div>
+            </div>
           </div>
         </section>
       ) : coverTiles.length > 0 ? (
-        <section className="mx-auto grid max-w-7xl items-center gap-8 px-5 pb-4 pt-6 md:grid-cols-[1fr_1.2fr] md:gap-14 md:px-8 md:py-16">
+        <section className="mx-auto grid max-w-7xl items-center gap-8 px-5 pb-10 pt-8 md:grid-cols-[0.9fr_1.2fr] md:gap-14 md:px-8 md:pb-20 md:pt-14">
           <div className="order-2 md:order-1">
-            <p className="store-kicker">{store.heroHeadline ? store.name : "Welcome to"}</p>
-            <h1 className="mt-4 font-display text-5xl leading-[0.92] tracking-tight md:mt-5 md:text-7xl lg:text-[5.5rem]">{headline}</h1>
-            <div className="store-rule mt-6 w-16" />
-            <p className="mt-5 max-w-md text-base leading-relaxed text-[var(--store-muted)] md:mt-6">{subtext}</p>
-            <div className="mt-6 md:mt-10">{actions}</div>
+            <p className="store-kicker">{store.heroHeadline ? store.name : "The house of"}</p>
+            <h1 className="mt-5 font-display text-5xl leading-[0.9] tracking-tight md:mt-6 md:text-7xl lg:text-[5.75rem]">{headline}</h1>
+            <div className="store-rule mt-7 w-20" />
+            <p className="mt-6 max-w-md font-display text-xl italic leading-relaxed text-[var(--store-muted)] md:mt-7 md:text-2xl">{subtext}</p>
+            <div className="mt-8 md:mt-12">{actions}</div>
           </div>
           <div
             className={`order-1 grid h-[78vw] max-h-[660px] gap-2.5 md:order-2 md:h-[min(72vh,660px)] md:gap-4 ${
@@ -130,10 +134,10 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       ) : (
         <section className="mx-auto max-w-7xl px-5 pt-10 md:px-8 md:pt-24">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="store-kicker">Welcome to</p>
-            <h1 className="mt-4 font-display text-5xl leading-[0.92] tracking-tight md:mt-5 md:text-8xl">{headline}</h1>
-            <div className="store-rule mx-auto mt-6 w-16" />
-            <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-[var(--store-muted)] md:mt-6">{subtext}</p>
+            <p className="store-kicker">The house of</p>
+            <h1 className="mt-5 font-display text-5xl leading-[0.9] tracking-tight md:mt-6 md:text-8xl">{headline}</h1>
+            <div className="store-rule mx-auto mt-7 w-20" />
+            <p className="mx-auto mt-6 max-w-lg font-display text-xl italic leading-relaxed text-[var(--store-muted)] md:mt-7 md:text-2xl">{subtext}</p>
             <div className="mt-8 flex justify-center md:mt-10">{actions}</div>
           </div>
         </section>
@@ -190,8 +194,8 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       <section id="shop" className="mx-auto max-w-7xl px-5 pt-12 md:px-8 md:pt-20">
         <div className="mb-10 flex items-end justify-between gap-6">
           <div>
-            <p className="store-kicker">Just in</p>
-            <h2 className="mt-3 font-display text-4xl md:text-5xl">New arrivals</h2>
+              <p className="store-kicker">The collection</p>
+              <h2 className="mt-3 font-display text-4xl md:text-5xl">New arrivals</h2>
           </div>
           {products.length > 0 && (
             <Link href={`${basePath}/products`} className="group hidden items-center gap-2 text-sm text-stone-900 sm:flex">

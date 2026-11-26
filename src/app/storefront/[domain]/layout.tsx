@@ -117,9 +117,9 @@ export default async function StorefrontLayout({
           <Link href={`${basePath}/`} className="flex min-w-0 items-center gap-3 justify-self-center md:gap-4">
             {store.logoUrl && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={store.logoUrl} alt="" className="h-8 w-8 shrink-0 object-cover md:h-11 md:w-11" />
+              <img src={store.logoUrl} alt="" className="h-9 w-9 shrink-0 object-cover ring-1 ring-[var(--store-line)] md:h-12 md:w-12" />
             )}
-            <span className="max-w-[40vw] truncate font-display text-[1.35rem] leading-none tracking-tight md:max-w-none md:text-[2rem]">
+            <span className="max-w-[40vw] truncate font-display text-[1.45rem] italic leading-none tracking-tight md:max-w-none md:text-[2.15rem]">
               {store.name}
             </span>
           </Link>

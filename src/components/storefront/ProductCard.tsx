@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Heart, Plus } from "lucide-react"
 import { useCart } from "@/lib/cart"
@@ -37,7 +38,9 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
   const hasChoices = (product.variants?.length ?? 0) > 1
   const soldOut = !hasChoices && typeof variant?.stockCount === "number" && variant.stockCount <= 0
 
-  const isFaved = isFavorite(product.id)
+  const [ready, setReady] = useState(false)
+  useEffect(() => setReady(true), [])
+  const isFaved = ready && isFavorite(product.id)
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -131,7 +134,7 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
       </div>
 
       <div className="pt-5">
-        <h3 className="line-clamp-1 font-display text-lg leading-tight text-[var(--store-ink)]">{product.name}</h3>
+        <h3 className="line-clamp-1 font-display text-xl italic leading-tight text-[var(--store-ink)]">{product.name}</h3>
         <div className="mt-1.5 flex items-baseline gap-2 text-[13px] tracking-wide">
           <span className={onSale ? "text-[var(--store-gold)]" : "text-[var(--store-muted)]"}>{money(currency, price)}</span>
           {onSale && <span className="text-xs text-stone-400 line-through">{money(currency, compareAtPrice!)}</span>}

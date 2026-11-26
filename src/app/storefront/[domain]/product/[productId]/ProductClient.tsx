@@ -149,10 +149,10 @@ export function ProductClient({ product, store, basePath, related, domain, revie
 
   return (
     <div className="mx-auto max-w-7xl px-5 pb-28 pt-6 md:px-8 md:pb-0 md:pt-10">
-      <nav className="mb-6 text-[11px] uppercase tracking-[0.2em] text-stone-500 md:mb-10">
-        <Link href={`${basePath}/`} className="hover:text-stone-900">Home</Link>
+      <nav className="store-kicker mb-8 md:mb-12">
+        <Link href={`${basePath}/`} className="hover:text-[var(--store-ink)]">Home</Link>
         <span className="mx-2">/</span>
-        <Link href={`${basePath}/products`} className="hover:text-stone-900">Shop</Link>
+        <Link href={`${basePath}/products`} className="hover:text-[var(--store-ink)]">The collection</Link>
         {product.categories?.[0] && (
           <>
             <span className="mx-2">/</span>
@@ -175,8 +175,8 @@ export function ProductClient({ product, store, basePath, related, domain, revie
                 <button
                   key={img}
                   onClick={() => setPickedImage({ key: variantKey, url: img })}
-                  className={`aspect-[3/4] w-16 shrink-0 overflow-hidden bg-[#efebe4] transition lg:w-full ${
-                    activeImageUrl === img ? "ring-1 ring-stone-900 ring-offset-2 ring-offset-[#faf8f5]" : "opacity-60 hover:opacity-100"
+                  className={`aspect-[3/4] w-16 shrink-0 overflow-hidden bg-[#efe8dc] transition lg:w-full ${
+                    activeImageUrl === img ? "ring-1 ring-[var(--store-gold)] ring-offset-2 ring-offset-[var(--store-paper)]" : "opacity-50 hover:opacity-100"
                   }`}
                   aria-label={`Show image ${idx + 1}`}
                 >
@@ -186,7 +186,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
               ))}
             </div>
           )}
-          <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#efebe4]">
+          <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#efe8dc] ring-1 ring-[var(--store-line)]">
             {activeImageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={activeImageUrl} alt={product.name} className="h-full w-full object-cover" />
@@ -194,7 +194,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
               <div className="flex h-full items-center justify-center font-display text-2xl italic text-stone-400">{product.name}</div>
             )}
             {(soldOut || onSale) && (
-              <span className="absolute left-4 top-4 bg-[#faf8f5] px-3 py-1.5 text-[10px] uppercase tracking-[0.2em]">
+              <span className="absolute left-4 top-4 border border-[var(--store-line)] bg-[var(--store-paper)] px-3 py-1.5 text-[10px] uppercase tracking-[0.22em]">
                 {soldOut ? "Sold out" : "Sale"}
               </span>
             )}
@@ -203,10 +203,10 @@ export function ProductClient({ product, store, basePath, related, domain, revie
 
         <div className="min-w-0 md:sticky md:top-28 md:self-start">
           <div className="flex items-start justify-between gap-4">
-            <h1 className="break-words font-display text-4xl leading-tight tracking-tight md:text-5xl">{product.name}</h1>
+            <h1 className="break-words font-display text-4xl leading-[0.95] tracking-tight md:text-6xl">{product.name}</h1>
             <button
               onClick={handleShare}
-              className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-stone-300 text-stone-800 transition-colors hover:border-stone-900"
+              className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center border border-[var(--store-line)] text-[var(--store-ink)] transition-colors hover:border-[var(--store-ink)]"
               aria-label="Share this product"
             >
               <Share2 className="h-4 w-4" strokeWidth={1.5} />
@@ -224,7 +224,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
           )}
 
           <div className="mt-4 flex items-baseline gap-3">
-            <span className={`text-xl ${onSale ? "text-[var(--store-gold)]" : "text-[var(--store-ink)]"}`}>{money(store.currency, price)}</span>
+            <span className={`font-display text-2xl ${onSale ? "text-[var(--store-gold)]" : "text-[var(--store-ink)]"}`}>{money(store.currency, price)}</span>
             {onSale && <span className="text-sm text-stone-400 line-through">{money(store.currency, compareAtPrice)}</span>}
           </div>
 

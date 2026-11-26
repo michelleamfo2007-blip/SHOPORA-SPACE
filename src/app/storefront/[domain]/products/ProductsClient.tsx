@@ -83,8 +83,8 @@ export function ProductsClient({
   }
 
   const chip = (active: boolean) =>
-    `inline-flex h-9 shrink-0 items-center gap-1.5 border px-4 text-[11px] uppercase tracking-[0.18em] transition-colors ${
-      active ? "border-[var(--store-ink)] bg-[var(--store-ink)] text-[#f7f3ec]" : "border-[var(--store-line)] text-[var(--store-muted)] hover:border-[var(--store-ink)] hover:text-[var(--store-ink)]"
+    `inline-flex h-8 shrink-0 items-center gap-1.5 border-b px-1 text-[11px] uppercase tracking-[0.22em] transition-colors ${
+      active ? "border-[var(--store-ink)] text-[var(--store-ink)]" : "border-transparent text-[var(--store-muted)] hover:text-[var(--store-ink)]"
     }`;
 
   return (
