@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import Link from "next/link"
-import { Heart, Minus, Plus, Share2, Star } from "lucide-react"
+import { Heart, Plus, Share2, Star } from "lucide-react"
 import { useCart } from "@/lib/cart"
 import { useFavorites } from "@/lib/favorites"
 import { ProductCard } from "@/components/storefront/ProductCard"
@@ -229,13 +229,13 @@ export function ProductClient({ product, store, basePath, related, domain, revie
           </div>
 
           {product.options && product.options.length > 0 ? (
-            <div className="mt-8 flex flex-col gap-6 border-t border-stone-200 pt-8">
+            <div className="mt-8 flex flex-col gap-6 border-t border-[var(--store-line)] pt-8">
               {product.options.map((opt: any) => {
                 const isColour = ["color", "colour"].includes(opt.name.toLowerCase())
                 return (
                   <div key={opt.id}>
-                    <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-stone-500">
-                      {opt.name}: <span className="text-stone-900">{selectedOptions[opt.name]}</span>
+                    <p className="store-kicker mb-3">
+                      {opt.name}: <span className="text-[var(--store-ink)]">{selectedOptions[opt.name]}</span>
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {opt.values.map((val: any) => {
@@ -248,7 +248,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
                               onClick={select}
                               title={val.value}
                               aria-label={val.value}
-                              className={`h-9 w-9 rounded-full border border-stone-300 transition ${isSelected ? "ring-1 ring-stone-900 ring-offset-2 ring-offset-[#faf8f5]" : ""}`}
+                              className={`h-9 w-9 rounded-full border border-[var(--store-line)] transition ${isSelected ? "ring-1 ring-[var(--store-ink)] ring-offset-2 ring-offset-[var(--store-paper)]" : ""}`}
                               style={{ backgroundColor: val.value.toLowerCase().replace(/ /g, "") }}
                             />
                           )
@@ -258,7 +258,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
                             key={val.id}
                             onClick={select}
                             className={`min-w-12 border px-4 py-2.5 text-sm transition-colors ${
-                              isSelected ? "border-stone-900 bg-stone-900 text-white" : "border-stone-300 text-stone-800 hover:border-stone-900"
+                              isSelected ? "border-[var(--store-ink)] bg-[var(--store-ink)] text-[#f7f3ec]" : "border-[var(--store-line)] text-[var(--store-ink)] hover:border-[var(--store-ink)]"
                             }`}
                           >
                             {val.value}
@@ -271,9 +271,9 @@ export function ProductClient({ product, store, basePath, related, domain, revie
               })}
             </div>
           ) : product.variants.length > 1 && (
-            <div className="mt-8 border-t border-stone-200 pt-8">
-              <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-stone-500">
-                Option: <span className="text-stone-900">{variantLabel}</span>
+            <div className="mt-8 border-t border-[var(--store-line)] pt-8">
+              <p className="store-kicker mb-3">
+                Option: <span className="text-[var(--store-ink)]">{variantLabel}</span>
               </p>
               <div className="flex flex-wrap gap-2">
                 {product.variants.map((variant: any) => {
@@ -283,7 +283,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
                       key={variant.id}
                       onClick={() => setFallbackVariant(variant)}
                       className={`min-w-12 border px-4 py-2.5 text-sm transition-colors ${
-                        isSelected ? "border-stone-900 bg-stone-900 text-white" : "border-stone-300 text-stone-800 hover:border-stone-900"
+                        isSelected ? "border-[var(--store-ink)] bg-[var(--store-ink)] text-[#f7f3ec]" : "border-[var(--store-line)] text-[var(--store-ink)] hover:border-[var(--store-ink)]"
                       }`}
                     >
                       {variant.name}
@@ -294,19 +294,23 @@ export function ProductClient({ product, store, basePath, related, domain, revie
             </div>
           )}
 
-          <div className="mt-8 hidden gap-3 md:flex">
-            <div className="flex h-13 items-center border border-stone-300">
-              <button onClick={() => setQuantity(Math.max(1, qty - 1))} className="flex h-full w-11 items-center justify-center text-stone-600 hover:text-stone-900" aria-label="Decrease quantity">
-                <Minus className="h-3.5 w-3.5" />
+          <div className="mt-8 hidden items-center gap-5 md:flex">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setQuantity(Math.max(1, qty - 1))}
+                className="text-lg leading-none text-[var(--store-muted)] hover:text-[var(--store-ink)]"
+                aria-label="Decrease quantity"
+              >
+                −
               </button>
-              <span className="w-8 text-center text-sm">{qty}</span>
+              <span className="min-w-5 text-center text-sm">{qty}</span>
               <button
                 onClick={() => setQuantity(Math.min(Math.max(1, available), qty + 1))}
                 disabled={qty >= available}
-                className="flex h-full w-11 items-center justify-center text-stone-600 hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-30"
+                className="text-lg leading-none text-[var(--store-muted)] hover:text-[var(--store-ink)] disabled:cursor-not-allowed disabled:opacity-30"
                 aria-label="Increase quantity"
               >
-                <Plus className="h-3.5 w-3.5" />
+                +
               </button>
             </div>
             <button
@@ -318,10 +322,10 @@ export function ProductClient({ product, store, basePath, related, domain, revie
             </button>
             <button
               onClick={() => toggleFavorite(product.id)}
-              className="flex h-13 w-13 shrink-0 items-center justify-center border border-[var(--store-line)] transition-colors hover:border-[var(--store-ink)]"
+              className="text-[var(--store-ink)]"
               aria-label={isFaved ? "Remove from favourites" : "Add to favourites"}
             >
-              <Heart className={`h-5 w-5 ${isFaved ? "fill-stone-900" : ""}`} strokeWidth={1.5} />
+              <Heart className={`h-5 w-5 ${isFaved ? "fill-[var(--store-ink)]" : ""}`} strokeWidth={1.5} />
             </button>
           </div>
 
@@ -357,7 +361,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
             </a>
           )}
 
-          <div className="mt-8 divide-y divide-stone-200 border-y border-stone-200">
+          <div className="mt-8 divide-y divide-[var(--store-line)] border-y border-[var(--store-line)]">
             <details open className="group py-5">
               <summary className="flex cursor-pointer list-none items-center justify-between text-[11px] uppercase tracking-[0.2em] text-stone-900">
                 Description <Plus className="h-3.5 w-3.5 transition-transform group-open:rotate-45" />
@@ -390,7 +394,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
         </div>
       </div>
 
-      <section id="reviews" className="mt-20 scroll-mt-28 border-t border-stone-200 pt-16 md:mt-28">
+      <section id="reviews" className="mt-20 scroll-mt-28 border-t border-[var(--store-line)] pt-16 md:mt-28">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-[11px] uppercase tracking-[0.25em] text-stone-500">Reviews</p>
@@ -407,7 +411,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
           {!showReviewForm && (
             <button
               onClick={() => setShowReviewForm(true)}
-              className="h-12 rounded-full border border-stone-900 px-7 text-sm tracking-wide text-stone-900 transition-colors hover:bg-stone-900 hover:text-white"
+              className="store-btn-ghost"
             >
               Write a review
             </button>
@@ -423,7 +427,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
         {reviews.length > 0 && (
           <div className="mt-10 grid gap-6 md:grid-cols-2">
             {reviews.map((review) => (
-              <figure key={review.id} className="border-t border-stone-200 pt-6">
+              <figure key={review.id} className="border-t border-[var(--store-line)] pt-6">
                 <Stars rating={review.rating} />
                 {review.comment && (
                   <blockquote className="mt-4 font-display text-xl italic leading-snug text-stone-800">
@@ -441,7 +445,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
       </section>
 
       {product.videoUrl && (
-        <section className="mt-20 border-t border-stone-200 pt-16 md:mt-28">
+        <section className="mt-20 border-t border-[var(--store-line)] pt-16 md:mt-28">
           <h2 className="mb-8 text-center font-display text-4xl">See it in motion</h2>
           <div className="mx-auto max-w-3xl overflow-hidden bg-stone-950">
             <video src={product.videoUrl} controls className="aspect-video h-auto w-full object-contain" preload="metadata">
@@ -452,7 +456,7 @@ export function ProductClient({ product, store, basePath, related, domain, revie
       )}
 
       {related.length > 0 && (
-        <section className="mt-20 border-t border-stone-200 pt-16 md:mt-28">
+        <section className="mt-20 border-t border-[var(--store-line)] pt-16 md:mt-28">
           <h2 className="mb-10 font-display text-4xl md:text-5xl">You may also like</h2>
           <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:gap-x-6 lg:grid-cols-4">
             {related.map((item) => (

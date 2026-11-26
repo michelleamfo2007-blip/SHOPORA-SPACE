@@ -138,8 +138,7 @@ export default async function StorefrontLayout({
       <footer className="mt-24 border-t-2 border-[var(--store-gold)] bg-[#1c1917] text-[#f7f3ec]">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 md:grid-cols-[1.5fr_1fr_1fr] md:px-8 md:py-20">
           <div>
-            <p className="store-kicker">The house of</p>
-            <p className="mt-3 font-display text-4xl italic">{store.name}</p>
+            <p className="font-display text-4xl italic">{store.name}</p>
             {store.description && <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/60">{store.description}</p>}
             <div className="mt-8">
               <SocialIcons store={store} />
@@ -156,7 +155,7 @@ export default async function StorefrontLayout({
           </div>
 
           <div>
-            <p className="store-kicker">Atelier</p>
+            <p className="store-kicker">Help</p>
             <ul className="mt-5 space-y-3 text-sm text-white/65">
               <li><Link href={`${basePath}/pages/shipping`} className="hover:text-[var(--store-gold)]">Delivery</Link></li>
               <li><Link href={`${basePath}/pages/refunds`} className="hover:text-[var(--store-gold)]">Returns</Link></li>

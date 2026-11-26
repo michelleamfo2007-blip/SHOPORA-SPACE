@@ -250,7 +250,7 @@ export function CheckoutForm({
       <form action={handleSubmit} className="order-2 grid gap-10 lg:order-1">
         <section className="grid gap-5">
           <div className="flex items-baseline justify-between gap-4">
-            <h2 className="font-display text-3xl">1. Contact</h2>
+            <h2 className="font-display text-3xl italic">Your details</h2>
             {restored && (
               <button type="button" onClick={forgetDetails} className="text-xs text-stone-500 underline underline-offset-4 hover:text-stone-900">
                 Not you? Clear details
@@ -288,7 +288,7 @@ export function CheckoutForm({
         </section>
 
         <section className="grid gap-5">
-          <h2 className="font-display text-3xl">2. Delivery</h2>
+          <h2 className="font-display text-3xl italic">Delivery</h2>
           {deliveryPolicy && (
             <p className="border-l-2 border-[var(--store-accent)] bg-[#f3efe8] px-4 py-3 text-sm leading-relaxed text-stone-700">
               {deliveryPolicy}
@@ -297,8 +297,8 @@ export function CheckoutForm({
 
           {shoporaDeliveryEnabled && (
             <div className="grid gap-3">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-stone-500">Delivery option</p>
-              <label className={`flex cursor-pointer gap-3 border p-4 ${deliveryMethod === "SHOPORA" ? "border-[var(--store-ink)] bg-white/50" : "border-[var(--store-line)]"}`}>
+              <p className="store-kicker">Delivery option</p>
+              <label className={`flex cursor-pointer gap-3 border p-4 ${deliveryMethod === "SHOPORA" ? "border-[var(--store-ink)] bg-white/40" : "border-[var(--store-line)]"}`}>
                 <input
                   type="radio"
                   name="deliveryMethodChoice"
@@ -313,7 +313,7 @@ export function CheckoutForm({
                   </span>
                 </span>
               </label>
-              <label className={`flex cursor-pointer gap-3 border p-4 ${deliveryMethod === "VENDOR" ? "border-[var(--store-ink)] bg-white/50" : "border-[var(--store-line)]"}`}>
+              <label className={`flex cursor-pointer gap-3 border p-4 ${deliveryMethod === "VENDOR" ? "border-[var(--store-ink)] bg-white/40" : "border-[var(--store-line)]"}`}>
                 <input
                   type="radio"
                   name="deliveryMethodChoice"
@@ -414,7 +414,7 @@ export function CheckoutForm({
           </div>
 
           {shoporaDeliveryEnabled && deliveryMethod === "SHOPORA" && (
-            <div className="border border-stone-300 bg-[#faf8f5] px-4 py-4 text-sm text-stone-700">
+            <div className="border border-[var(--store-line)] bg-white/40 px-4 py-4 text-sm text-[var(--store-ink)]">
               {quoting && <p>Getting live delivery rate…</p>}
               {!quoting && activeQuote && (
                 <p>
@@ -443,7 +443,7 @@ export function CheckoutForm({
         </section>
 
         <section className="grid gap-5">
-          <h2 className="font-display text-3xl">3. Payment</h2>
+          <h2 className="font-display text-3xl italic">Payment</h2>
           <p className="text-sm leading-relaxed text-stone-600">
             Send the product total using the payment details on this page, then enter your transaction ID or reference below.
             {deliveryMethod === "SHOPORA" && " Delivery is paid to the rider when they arrive."}
@@ -487,34 +487,34 @@ export function CheckoutForm({
 
       <aside className="order-1 lg:order-2">
         <div className="grid gap-6 lg:sticky lg:top-28">
-          <div className="bg-[#f3efe8] p-6 md:p-8">
-            <h2 className="mb-6 text-[11px] uppercase tracking-[0.2em] text-stone-500">Order summary</h2>
-            <ul className="divide-y divide-stone-300/60">
+          <div className="border border-[var(--store-line)] bg-white/30 p-6 md:p-8">
+            <h2 className="store-kicker mb-6">Your bag</h2>
+            <ul className="divide-y divide-[var(--store-line)]">
               {items.map((item) => (
                 <li key={item.variantId} className="flex items-center gap-4 py-4 first:pt-0">
-                  <div className="relative h-20 w-16 shrink-0 overflow-hidden bg-[#efebe4]">
+                  <div className="relative h-20 w-16 shrink-0 overflow-hidden bg-[#efe8dc] ring-1 ring-[var(--store-line)]">
                     {item.imageUrl && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={item.imageUrl} alt="" className="h-full w-full object-cover" />
                     )}
-                    <span className="absolute -right-0 -top-0 flex h-5 min-w-5 items-center justify-center bg-stone-900 px-1 text-[10px] text-white">
+                    <span className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center bg-[var(--store-gold)] px-1 text-[10px] text-[#f7f3ec]">
                       {item.quantity}
                     </span>
                   </div>
-                  <span className="min-w-0 flex-1 text-sm text-stone-800">{item.name}</span>
-                  <span className="text-sm text-stone-900">{money(currency, item.price * item.quantity)}</span>
+                  <span className="min-w-0 flex-1 font-display text-lg italic leading-tight text-[var(--store-ink)]">{item.name}</span>
+                  <span className="text-sm text-[var(--store-gold)]">{money(currency, item.price * item.quantity)}</span>
                 </li>
               ))}
             </ul>
             {activeQuote && (
               <div className="mt-4 flex items-baseline justify-between text-sm">
-                <span className="text-stone-600">Shopora Delivery (pay rider)</span>
-                <span className="text-stone-900">{money(activeQuote.currency, activeQuote.fee)}</span>
+                <span className="text-[var(--store-muted)]">Shopora Delivery (pay rider)</span>
+                <span className="text-[var(--store-ink)]">{money(activeQuote.currency, activeQuote.fee)}</span>
               </div>
             )}
-            <div className="mt-6 flex items-baseline justify-between border-t border-stone-300/60 pt-6">
-              <span className="text-sm text-stone-600">Pay store now</span>
-              <span className="font-display text-3xl">{money(currency, productTotal)}</span>
+            <div className="mt-6 flex items-baseline justify-between border-t border-[var(--store-line)] pt-6">
+              <span className="text-sm text-[var(--store-muted)]">Pay store now</span>
+              <span className="font-display text-3xl italic">{money(currency, productTotal)}</span>
             </div>
             <p className="mt-3 text-xs leading-relaxed text-stone-500">
               {deliveryMethod === "SHOPORA"
@@ -523,8 +523,8 @@ export function CheckoutForm({
             </p>
           </div>
 
-          <div className="border border-stone-300 p-6 md:p-8">
-            <h2 className="text-[11px] uppercase tracking-[0.2em] text-stone-500">How to pay</h2>
+          <div className="border border-[var(--store-line)] p-6 md:p-8">
+            <h2 className="store-kicker">How to pay</h2>
             <p className="mt-3 flex flex-wrap items-center text-sm text-stone-700">
               <span>
                 Send exactly <strong className="font-medium text-stone-900">{money(currency, productTotal)}</strong> to:
@@ -537,7 +537,7 @@ export function CheckoutForm({
               <div className="mt-5 grid gap-5">
                 {paymentSetting.mobileMoneyNumber && (
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-stone-500">Mobile Money</p>
+                    <p className="store-kicker">Mobile Money</p>
                     <div className="mt-1 flex items-center">
                       <p className="text-xl tracking-wide text-stone-900">{paymentSetting.mobileMoneyNumber}</p>
                       <CopyButton value={paymentSetting.mobileMoneyNumber.replace(/[^\d+]/g, "") || paymentSetting.mobileMoneyNumber} />
@@ -545,7 +545,7 @@ export function CheckoutForm({
                     {paymentSetting.accountName && <p className="text-sm text-stone-600">{paymentSetting.accountName}</p>}
                     <a
                       href="tel:*170%23"
-                      className="mt-3 inline-flex h-10 items-center rounded-full border border-stone-900 px-5 text-sm text-stone-900 md:hidden"
+                      className="store-btn-ghost mt-3 h-10 px-5 md:hidden"
                     >
                       Dial *170# (MTN MoMo)
                     </a>
@@ -553,7 +553,7 @@ export function CheckoutForm({
                 )}
                 {paymentSetting.bankName && (
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-stone-500">Bank transfer</p>
+                    <p className="store-kicker">Bank transfer</p>
                     <p className="mt-1 text-sm text-stone-700">{paymentSetting.bankName}</p>
                     <div className="flex items-center">
                       <p className="text-xl tracking-wide text-stone-900">{paymentSetting.accountNumber}</p>
@@ -563,7 +563,7 @@ export function CheckoutForm({
                   </div>
                 )}
                 {paymentSetting.instructions && (
-                  <p className="border-t border-stone-200 pt-4 text-sm leading-relaxed text-stone-600">{paymentSetting.instructions}</p>
+                  <p className="border-t border-[var(--store-line)] pt-4 text-sm leading-relaxed text-[var(--store-muted)]">{paymentSetting.instructions}</p>
                 )}
               </div>
             )}

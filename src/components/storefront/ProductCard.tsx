@@ -103,7 +103,9 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
 
         <button
           onClick={handleToggleFavorite}
-          className="absolute right-2.5 top-2.5 text-white drop-shadow-md transition-opacity lg:opacity-0 lg:group-hover:opacity-100"
+          className={`absolute right-2.5 top-2.5 text-white drop-shadow-md transition-opacity ${
+            isFaved ? "opacity-100" : "opacity-0 lg:group-hover:opacity-100"
+          }`}
           aria-label={isFaved ? "Remove from favourites" : "Add to favourites"}
         >
           <Heart className={`h-4 w-4 ${isFaved ? "fill-white" : ""}`} strokeWidth={1.5} />
@@ -125,7 +127,7 @@ export function ProductCard({ product, currency, basePath }: ProductCardProps) {
       </div>
 
       <div className="pt-5">
-        <h3 className="line-clamp-1 font-display text-xl italic leading-tight text-[var(--store-ink)]">{product.name}</h3>
+        <h3 className="line-clamp-2 font-display text-lg italic leading-snug text-[var(--store-ink)] md:text-xl">{product.name}</h3>
         <div className="mt-1.5 flex items-baseline gap-2 text-[13px] tracking-wide">
           <span className={onSale ? "text-[var(--store-gold)]" : "text-[var(--store-muted)]"}>{money(currency, price)}</span>
           {onSale && <span className="text-xs text-stone-400 line-through">{money(currency, compareAtPrice!)}</span>}

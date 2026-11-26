@@ -86,7 +86,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
         <section className="relative">
           <div className="mx-auto grid max-w-7xl items-center gap-8 px-5 pb-10 pt-8 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:px-8 md:pb-20 md:pt-14">
             <div className="order-2 md:order-1">
-              <p className="store-kicker">The house of</p>
+              <p className="store-kicker">Welcome</p>
               <h1 className="mt-5 font-display text-5xl leading-[0.9] tracking-tight md:mt-6 md:text-7xl lg:text-[5.75rem]">{headline}</h1>
               <div className="store-rule mt-7 w-20" />
               {subtext && <p className="mt-6 max-w-md font-display text-xl italic leading-relaxed text-[var(--store-muted)] md:mt-7 md:text-2xl">{subtext}</p>}
@@ -104,7 +104,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       ) : coverTiles.length > 0 ? (
         <section className="mx-auto grid max-w-7xl items-center gap-8 px-5 pb-10 pt-8 md:grid-cols-[0.9fr_1.2fr] md:gap-14 md:px-8 md:pb-20 md:pt-14">
           <div className="order-2 md:order-1">
-            <p className="store-kicker">{store.heroHeadline ? store.name : "The house of"}</p>
+            <p className="store-kicker">{store.heroHeadline ? store.name : "Welcome"}</p>
             <h1 className="mt-5 font-display text-5xl leading-[0.9] tracking-tight md:mt-6 md:text-7xl lg:text-[5.75rem]">{headline}</h1>
             <div className="store-rule mt-7 w-20" />
             <p className="mt-6 max-w-md font-display text-xl italic leading-relaxed text-[var(--store-muted)] md:mt-7 md:text-2xl">{subtext}</p>
@@ -134,7 +134,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       ) : (
         <section className="mx-auto max-w-7xl px-5 pt-10 md:px-8 md:pt-24">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="store-kicker">The house of</p>
+            <p className="store-kicker">Welcome</p>
             <h1 className="mt-5 font-display text-5xl leading-[0.9] tracking-tight md:mt-6 md:text-8xl">{headline}</h1>
             <div className="store-rule mx-auto mt-7 w-20" />
             <p className="mx-auto mt-6 max-w-lg font-display text-xl italic leading-relaxed text-[var(--store-muted)] md:mt-7 md:text-2xl">{subtext}</p>
@@ -251,7 +251,7 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
         <section className="store-ink-band mt-20 bg-[#1c1917] text-[#f7f3ec] md:mt-28">
           <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 md:grid-cols-[1fr_2fr] md:gap-20 md:px-8 md:py-24">
             <div>
-              <p className="store-kicker">The house</p>
+              <p className="store-kicker">About us</p>
               <h2 className="mt-4 font-display text-4xl md:text-6xl">Our story</h2>
             </div>
             <p className="font-display text-2xl italic leading-snug text-white/75 md:text-3xl">{store.aboutText}</p>
@@ -288,8 +288,8 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
       {whatsappHref && (
         <section className="mx-auto max-w-7xl px-5 pt-20 md:px-8 md:pt-28">
           <div className="store-ink-band border border-[var(--store-ink)] bg-[var(--store-ink)] px-6 py-16 text-center text-[#f7f3ec] md:py-20">
-            <p className="store-kicker">Private appointment</p>
-            <h2 className="mt-4 font-display text-4xl md:text-5xl">Need help choosing?</h2>
+            <p className="store-kicker">WhatsApp</p>
+            <h2 className="mt-4 font-display text-4xl md:text-5xl">Need a hand?</h2>
             <p className="mx-auto mt-4 max-w-md text-sm text-white/70">Send us a message and we&apos;ll help you find the right piece, check sizes, or arrange delivery.</p>
             <a href={whatsappHref} target="_blank" rel="noreferrer" className="store-btn mt-8 !border-[#f7f3ec] !bg-[#f7f3ec] !text-[var(--store-ink)] hover:!bg-[var(--store-gold)] hover:!border-[var(--store-gold)] hover:!text-[#f7f3ec]">
               Chat on WhatsApp
