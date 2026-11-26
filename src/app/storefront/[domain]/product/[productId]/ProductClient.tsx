@@ -5,7 +5,6 @@ import Link from "next/link"
 import { Heart, Plus, Share2, Star } from "lucide-react"
 import { useCart } from "@/lib/cart"
 import { useFavorites } from "@/lib/favorites"
-import { ProductCard } from "@/components/storefront/ProductCard"
 import { StorefrontReviewForm } from "@/components/storefront/StorefrontReviewForm"
 import { blackFridayIsLive } from "@/lib/black-friday"
 
@@ -464,19 +463,26 @@ export function ProductClient({ product, store, basePath, related, domain, revie
       )}
 
       {related.length > 0 && (
-        <section className="mt-20 border-t border-[var(--store-line)] pt-16 md:mt-28">
-          <h2 className="mb-10 font-display text-4xl md:text-5xl">You may also like</h2>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:gap-x-6 lg:grid-cols-4">
-            {related.map((item) => (
-              <ProductCard
-                key={item.id}
-                product={item}
-                currency={store.currency}
-                basePath={basePath}
-                storeName={store.name}
-                blackFriday={saleLive}
-              />
-            ))}
+        <section className="mt-16 border-t border-[var(--store-line)] pt-10 md:mt-20">
+          <h2 className="mb-5 text-[13px] font-medium tracking-tight text-[var(--store-ink)]">You might also like</h2>
+          <div className="flex gap-3 overflow-x-auto pb-1">
+            {related.map((item) => {
+              const image = item.variants?.[0]?.imageUrl || item.images?.[0]
+              const price = item.variants?.[0]?.price ?? item.price ?? 0
+              return (
+                <Link key={item.id} href={`${basePath}/product/${item.id}`} className="w-[104px] shrink-0 md:w-[120px]">
+                  <div className="aspect-[3/4] overflow-hidden bg-[#efe8dc]">
+                    {image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={image} alt={item.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="h-full w-full" />
+                    )}
+                  </div>
+                  <p className="mt-2 text-[13px] text-[var(--store-ink)]">{money(store.currency, price)}</p>
+                </Link>
+              )
+            })}
           </div>
         </section>
       )}

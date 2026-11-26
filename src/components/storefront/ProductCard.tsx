@@ -117,13 +117,13 @@ export function ProductCard({ product, currency, basePath, storeName, blackFrida
         </button>
 
         {!showSaleBar && !soldOut && (hasChoices ? (
-          <span className="absolute inset-x-3 bottom-3 bg-[var(--store-paper)] py-2 text-center text-[10px] font-medium uppercase tracking-[0.16em] text-[var(--store-ink)] lg:opacity-0 lg:transition lg:duration-300 lg:group-hover:opacity-100">
+          <span className="absolute inset-x-3 bottom-3 bg-[var(--store-paper)] py-2 text-center text-[10px] font-medium uppercase tracking-[0.16em] text-[var(--store-ink)]">
             Choose options
           </span>
         ) : (
           <button
             onClick={handleAddToCart}
-            className="absolute inset-x-3 bottom-3 bg-[var(--store-paper)] py-2 text-center text-[10px] font-medium uppercase tracking-[0.16em] text-[var(--store-ink)] lg:opacity-0 lg:transition lg:duration-300 lg:group-hover:opacity-100"
+            className="absolute inset-x-3 bottom-3 bg-[var(--store-paper)] py-2 text-center text-[10px] font-medium uppercase tracking-[0.16em] text-[var(--store-ink)]"
             aria-label="Add to bag"
           >
             Add to bag
