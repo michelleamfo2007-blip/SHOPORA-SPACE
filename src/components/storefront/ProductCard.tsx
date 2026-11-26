@@ -115,20 +115,6 @@ export function ProductCard({ product, currency, basePath, storeName, blackFrida
         >
           <Heart className={`h-4 w-4 ${isFaved ? "fill-white" : ""}`} strokeWidth={1.5} />
         </button>
-
-        {!showSaleBar && !soldOut && (hasChoices ? (
-          <span className="absolute inset-x-3 bottom-3 bg-[var(--store-paper)] py-2 text-center text-[10px] font-medium uppercase tracking-[0.16em] text-[var(--store-ink)]">
-            Choose options
-          </span>
-        ) : (
-          <button
-            onClick={handleAddToCart}
-            className="absolute inset-x-3 bottom-3 bg-[var(--store-paper)] py-2 text-center text-[10px] font-medium uppercase tracking-[0.16em] text-[var(--store-ink)]"
-            aria-label="Add to bag"
-          >
-            Add to bag
-          </button>
-        ))}
       </div>
 
       {showSaleBar && (
@@ -155,7 +141,7 @@ export function ProductCard({ product, currency, basePath, storeName, blackFrida
           )}
           {onSale && <span className="text-xs text-stone-400 line-through">{money(currency, compareAtPrice!)}</span>}
         </div>
-        {showSaleBar && !soldOut && (
+        {!soldOut && (
           hasChoices ? (
             <span className="mt-3 flex h-10 items-center justify-center bg-[var(--store-ink)] text-[10px] font-medium uppercase tracking-[0.16em] text-[#f7f3ec]">
               Choose options
