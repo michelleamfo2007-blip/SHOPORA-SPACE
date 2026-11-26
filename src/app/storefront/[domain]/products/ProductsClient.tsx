@@ -24,6 +24,8 @@ type Props = {
   initialQuery?: string;
   initialCategory?: string;
   autoFocusSearch?: boolean;
+  storeName?: string;
+  blackFriday?: boolean;
 };
 
 function priceOf(p: Product) {
@@ -47,6 +49,8 @@ export function ProductsClient({
   initialQuery = "",
   initialCategory = "",
   autoFocusSearch,
+  storeName,
+  blackFriday,
 }: Props) {
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [sortOption, setSortOption] = useState("newest");
@@ -153,7 +157,14 @@ export function ProductsClient({
       {sortedProducts.length > 0 ? (
         <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4">
           {sortedProducts.map((product) => (
-            <ProductCard key={product.id} product={product} currency={currency} basePath={basePath} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              currency={currency}
+              basePath={basePath}
+              storeName={storeName}
+              blackFriday={blackFriday}
+            />
           ))}
         </div>
       ) : (

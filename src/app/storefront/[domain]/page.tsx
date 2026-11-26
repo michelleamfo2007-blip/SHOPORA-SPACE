@@ -210,7 +210,14 @@ export default async function StorefrontHomePage({ params }: { params: Promise<{
           <>
             <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4">
               {shopProducts.map((product) => (
-                <ProductCard key={product.id} product={product} currency={store.currency} basePath={basePath} />
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  currency={store.currency}
+                  basePath={basePath}
+                  storeName={store.name}
+                  blackFriday={saleLive}
+                />
               ))}
             </div>
             <div className="mt-12 text-center sm:hidden">

@@ -468,7 +468,14 @@ export function ProductClient({ product, store, basePath, related, domain, revie
           <h2 className="mb-10 font-display text-4xl md:text-5xl">You may also like</h2>
           <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:gap-x-6 lg:grid-cols-4">
             {related.map((item) => (
-              <ProductCard key={item.id} product={item} currency={store.currency} basePath={basePath} />
+              <ProductCard
+                key={item.id}
+                product={item}
+                currency={store.currency}
+                basePath={basePath}
+                storeName={store.name}
+                blackFriday={saleLive}
+              />
             ))}
           </div>
         </section>

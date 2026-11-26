@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { StoreStatus } from "@prisma/client"
+import { sendBlackFridayGrantEmail } from "@/lib/black-friday-email"
 
 export async function toggleStoreStatusAction(storeId: string, currentStatus: StoreStatus) {
   const session = await getServerSession(authOptions)
@@ -37,12 +38,36 @@ export async function setStoreBlackFridayAccessAction(storeId: string, grant: bo
   const user = await db.user.findUnique({ where: { id: session.user.id }, select: { platformRole: true } })
   if (user?.platformRole !== "SUPER_ADMIN") return { error: "Unauthorized" }
 
-  await db.store.update({
+  const store = await db.store.update({
     where: { id: storeId },
     data: grant
       ? { blackFridayAccess: true }
       : { blackFridayAccess: false, blackFridayOn: false },
+    select: {
+      id: true,
+      name: true,
+      members: {
+        where: { role: "OWNER" },
+        select: { user: { select: { email: true, name: true } } },
+      },
+    },
   })
+
+  if (grant) {
+    for (const member of store.members) {
+      if (!member.user.email) continue
+      try {
+        await sendBlackFridayGrantEmail({
+          to: member.user.email,
+          ownerName: member.user.name,
+          storeName: store.name,
+          storeId: store.id,
+        })
+      } catch (err) {
+        console.error("Failed to send Black Friday grant email", err)
+      }
+    }
+  }
 
   revalidatePath("/super-admin/sellers")
   revalidatePath("/", "layout")

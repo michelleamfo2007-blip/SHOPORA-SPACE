@@ -55,6 +55,8 @@ export default async function CategoryProductsPage({
         categories={[]}
         currency={store.currency}
         basePath={basePath}
+        storeName={store.name}
+        blackFriday={blackFridayIsLive(store)}
       />
     </div>
   );

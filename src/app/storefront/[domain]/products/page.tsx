@@ -50,6 +50,8 @@ export default async function ProductsPage({
         categories={categories}
         currency={store.currency}
         basePath={basePath}
+        storeName={store.name}
+        blackFriday={blackFridayIsLive(store)}
         initialQuery={q ?? ""}
         initialCategory={category ?? ""}
         autoFocusSearch={search === "1"}
