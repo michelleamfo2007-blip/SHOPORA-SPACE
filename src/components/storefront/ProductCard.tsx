@@ -118,18 +118,20 @@ export function ProductCard({ product, currency, basePath, storeName, blackFrida
       </div>
 
       {showSaleBar && (
-        <div className="bg-[var(--store-gold)] px-2.5 py-2 text-[#f7f3ec]">
+        <div className="bg-[var(--store-gold)] px-3 py-2.5 text-[#f7f3ec]">
           {storeName && (
-            <p className="text-[9px] font-semibold uppercase leading-tight tracking-[0.08em]">{storeName}</p>
+            <p className="text-[10px] font-semibold uppercase leading-tight tracking-[0.16em]">{storeName}</p>
           )}
-          <div className="mt-1 flex items-end justify-between gap-2">
-            <p className="text-[12px] font-semibold leading-none">Save {money(currency, saved)}</p>
-            <div className="shrink-0 text-right">
-              <span className="inline-block bg-black px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.08em]">
-                Black Friday
-              </span>
-              {percentOff > 0 && <p className="mt-0.5 text-[9px] uppercase tracking-[0.08em]">{percentOff}% off</p>}
-            </div>
+          <p className="mt-1.5 whitespace-nowrap text-[13px] font-semibold leading-none">
+            Save {money(currency, saved)}
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="bg-[#f7f3ec] px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-[var(--store-gold)]">
+              Black Friday
+            </span>
+            {percentOff > 0 && (
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em]">{percentOff}% off</span>
+            )}
           </div>
         </div>
       )}
@@ -138,9 +140,6 @@ export function ProductCard({ product, currency, basePath, storeName, blackFrida
         <h3 className="line-clamp-2 font-display text-lg italic leading-snug text-[var(--store-ink)] md:text-xl">{product.name}</h3>
         <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[13px] tracking-wide">
           <span className={onSale ? "text-[var(--store-gold)]" : "text-[var(--store-muted)]"}>{money(currency, price)}</span>
-          {showSaleBar && percentOff > 0 && (
-            <span className="bg-[var(--store-gold)]/15 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--store-gold)]">-{percentOff}%</span>
-          )}
           {onSale && <span className="text-xs text-stone-400 line-through">{money(currency, compareAtPrice!)}</span>}
         </div>
         {!soldOut && (
