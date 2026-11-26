@@ -27,7 +27,7 @@ export function PolicyPage({
         <div className="store-rule mx-auto mt-6 w-16" />
       </div>
 
-      <div className="divide-y divide-[var(--store-line)] border-y border-[var(--store-line)]">{children}</div>
+      <div className="[&>details]:border-t [&>details]:border-[var(--store-line)] [&>details:last-of-type]:border-b">{children}</div>
 
       {contact && (whatsapp || contact.contactEmail) && (
         <div className="mt-14 border border-[var(--store-line)] px-6 py-10 text-center">
@@ -77,7 +77,9 @@ export function PolicyText({ text }: { text: string }) {
   return (
     <>
       {intro.length > 0 && (
-        <p className="py-8 text-[15px] leading-relaxed text-[var(--store-muted)]">{intro.join("\n\n")}</p>
+        <p className="mx-auto mb-12 max-w-2xl text-center font-display text-2xl italic leading-snug text-[var(--store-ink)] md:mb-16 md:text-3xl">
+          {intro.join("\n\n")}
+        </p>
       )}
       {sections.map((section) => (
         <DropdownSection key={section.title} title={section.title}>
